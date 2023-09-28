@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -222,26 +223,21 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
 
     @Override
     public Map<String, Map<String, Map<String, List<Map<String, Object>>>>> getdwgc(String proname) throws IOException {
-
         /**
-         * {
-         * 路面工程={单位工程合格率={LJ-1={zds=118.0, hgl=88.98, hgds=105.0}}},
-         * 交安工程={单位工程合格率={LJ-1={zds=6910.0, hgl=96.96, hgds=6700.0}}},
-         * 路基工程={单位工程合格率={LJ-1={zds=1156.0, hgl=90.31, hgds=1044.0}}},
-         * 桥梁工程={单位工程合格率={LJ-1={zds=1422.0, hgl=96.34, hgds=1370.0}}},
-         * 隧道工程={单位工程合格率={LJ-1={zds=818.0, hgl=94.38, hgds=772.0}}}
-         * }
-         *
-         * {
-         * 路面工程={单位工程指标完成率=[{fbgcname=路基工程, zs=150.0, proname=陕西高速, jcs=109, htdname=LJ-1}]},
-         * 路基工程={单位工程指标完成率=[{fbgcname=路基工程, zs=150.0, proname=陕西高速, jcs=109, htdname=LJ-1}]}
-         *  }
+         * {路面工程=
+         * {单位工程合格率=
+         * {LJ-1=[{zds=118.0, hgl=88.98, hgds=105.0}]},
+         * 单位工程指标完成率={
+         * LJ-1=[{fbgcname=路基工程, zs=150.0, proname=陕西高速, jcs=109, htdname=LJ-1}]}},
+         * 交安工程={单位工程合格率={LJ-1=[{zds=3455.0, hgl=96.96, hgds=3350.0}]}},
+         * 路基工程={单位工程合格率={LJ-2=[{zds=0.0, hgl=0, hgds=0.0}], LJ-1=[{zds=578.0, hgl=90.31, hgds=522.0}]},
+         * 单位工程指标完成率={LJ-1=[{fbgcname=路基工程, zs=150.0, proname=陕西高速, jcs=109, htdname=LJ-1}]}},
+         * 桥梁工程={单位工程合格率={LJ-1=[{zds=711.0, hgl=96.34, hgds=685.0}]}},
+         * 隧道工程={单位工程合格率={LJ-1=[{zds=409.0, hgl=94.38, hgds=386.0}]}}}
          */
 
         //合格率
-
         Map<String, Map<String, Map<String, List<Map<String, Object>>>>> getdwgchgl = getdwgchgl(proname);
-
         //完成率
         Map<String, Map<String, Map<String, List<Map<String, Object>>>>> getdwgcwcl = getdwgcwcl(proname);
 
@@ -254,7 +250,7 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
             }));
             return v1;
         }));
-
+        System.out.println(getdwgchgl);
         return getdwgchgl;
     }
 
@@ -310,11 +306,30 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
 
         result.putAll(rehgl);
         result.putAll(rewcl);
+        System.out.println(result);
+        /**
+         * {建设项目实测指标完成率={
+         * 路面工程=[{wcl=0, jhs=0, wcs=0, fbgc=路面工程, zblx=△}, {wcl=0, jhs=0, wcs=0, fbgc=路面工程, zblx=*}, {wcl=1175.00, jhs=20, wcs=235, fbgc=路面工程, zblx=其余指标}, {wcl=1175.00, jhs=20, wcs=235, fbgc=路面工程, zblx=合计指标}],
+         * 隧道工程=[{wcl=0, jhs=0, wcs=0, fbgc=隧道工程, zblx=△}, {wcl=0, jhs=0, wcs=0, fbgc=隧道工程, zblx=*}, {wcl=0, jhs=0, wcs=0, fbgc=隧道工程, zblx=其余指标}, {wcl=0, jhs=0, wcs=0, fbgc=隧道工程, zblx=合计指标}],
+         * 交安工程=[{wcl=0, jhs=0, wcs=0, fbgc=交安工程, zblx=△}, {wcl=0, jhs=0, wcs=0, fbgc=交安工程, zblx=*}, {wcl=0, jhs=0, wcs=0, fbgc=交安工程, zblx=其余指标}, {wcl=0, jhs=0, wcs=0, fbgc=交安工程, zblx=合计指标}],
+         * 桥梁工程=[{wcl=0, jhs=0, wcs=0, fbgc=桥梁工程, zblx=*}, {wcl=0, jhs=0, wcs=0, fbgc=桥梁工程, zblx=其余指标}, {wcl=0, jhs=0, wcs=0, fbgc=桥梁工程, zblx=合计指标}],
+         * 路基工程=[{wcl=0, jhs=0, wcs=0, fbgc=路基工程, zblx=△}, {wcl=52.50, jhs=40, wcs=21, fbgc=路基工程, zblx=*}, {wcl=67.50, jhs=40, wcs=27, fbgc=路基工程, zblx=其余指标}, {wcl=32.00, jhs=150, wcs=48, fbgc=路基工程, zblx=合计指标}]},
+         *
+         * 建设项目合格率={
+         * 路面工程=[{fbgc=路面工程, zds=8.0, zblx=△, hgl=100.00, hgds=8.0}, {fbgc=路面工程, zds=4.0, zblx=*, hgl=100.00, hgds=4.0}, {fbgc=路面工程, zds=102.0, zblx=其余指标, hgl=87.25, hgds=89.0}, {fbgc=路面工程, zds=114.0, zblx=合计指标, hgl=88.60, hgds=101.0}],
+         * 隧道工程=[{fbgc=隧道工程, zds=225.0, zblx=△, hgl=94.22, hgds=212.0}, {fbgc=隧道工程, zds=40.0, zblx=*, hgl=100.00, hgds=40.0}, {fbgc=隧道工程, zds=144.0, zblx=其余指标, hgl=93.06, hgds=134.0}, {fbgc=隧道工程, zds=409.0, zblx=合计指标, hgl=94.38, hgds=386.0}],
+         * 交安工程=[{fbgc=交安工程, zds=1866.0, zblx=△, hgl=97.48, hgds=1819.0}, {fbgc=交安工程, zds=18.0, zblx=*, hgl=50.00, hgds=9.0}, {fbgc=交安工程, zds=1571.0, zblx=其余指标, hgl=96.88, hgds=1522.0}, {fbgc=交安工程, zds=3455.0, zblx=合计指标, hgl=96.96, hgds=3350.0}],
+         * 路基工程=[{fbgc=路基工程, zds=119.0, zblx=△, hgl=83.19, hgds=99.0}, {fbgc=路基工程, zds=269.0, zblx=*, hgl=100.00, hgds=269.0}, {fbgc=路基工程, zds=190.0, zblx=其余指标, hgl=81.05, hgds=154.0}, {fbgc=路基工程, zds=578.0, zblx=合计指标, hgl=90.31, hgds=522.0}],
+         * 桥梁工程=[{fbgc=桥梁工程, zds=418.0, zblx=*, hgl=98.80, hgds=413.0}, {fbgc=桥梁工程, zds=293.0, zblx=其余指标, hgl=92.83, hgds=272.0}, {fbgc=桥梁工程, zds=711.0, zblx=合计指标, hgl=96.34, hgds=685.0}]}}
+         */
+
+
         return result;
 
     }
 
     private List<Map<String,Object>> getjsxmzhwcldata(String proname) {
+        DecimalFormat df = new DecimalFormat("0.00");
         QueryWrapper<JjgPlaninfo> wrapper=new QueryWrapper<>();
         wrapper.eq("proname",proname);
         List<JjgPlaninfo> list = jjgLookProjectPlanService.list(wrapper);
@@ -454,6 +469,7 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
                 }
             }
         });
+        //BigDecimal a = new BigDecimal();
         int ljall = 0;
         List<Map<String,Object>> re = new ArrayList<>();
         if (lj1 !=null && !lj1.isEmpty()){
@@ -469,13 +485,22 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
             map.put("zblx","△");
             map.put("jhs",i);
             map.put("wcs",num1+num2+num3+num4+num5);
+            map.put("wcl",i!=0 ? df.format((double) (num1+num2+num3+num4+num5)/i*100) : 0);
+            re.add(map);
+        }else {
+            Map map = new HashMap<>();
+            map.put("fbgc","路基工程");
+            map.put("zblx","△");
+            map.put("jhs",0);
+            map.put("wcs",0);
+            map.put("wcl",0);
             re.add(map);
         }
         if (lj2 !=null && !lj2.isEmpty()){
-
             int num1 = jjgFbgcLjgcHdgqdService.selectnumname(proname);
             int num2 = jjgFbgcLjgcXqgqdService.selectnumname(proname);
             int num3 = jjgFbgcLjgcZdgqdService.selectnumname(proname);
+            int zs = num1+num2+num3;
             ljall+=(num1+num2+num3);
             int i = sumList(lj2);
             Map map = new HashMap<>();
@@ -483,6 +508,16 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
             map.put("zblx","*");
             map.put("jhs",i);
             map.put("wcs",num1+num2+num3);
+            map.put("wcl",i != 0 ? df.format((double) zs/i*100) : 0);
+
+            re.add(map);
+        }else {
+            Map map = new HashMap<>();
+            map.put("fbgc","路基工程");
+            map.put("zblx","*");
+            map.put("jhs",0);
+            map.put("wcs",0);
+            map.put("wcl",0);
             re.add(map);
         }
         if (lj3 !=null && !lj3.isEmpty()){
@@ -498,6 +533,16 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
             map.put("zblx","其余指标");
             map.put("jhs",i);
             map.put("wcs",num2+num7+num8+num9+num11);
+            map.put("wcl",i!=0 ? df.format((double)(num2+num7+num8+num9+num11)/i*100) : 0);
+
+            re.add(map);
+        }else {
+            Map map = new HashMap<>();
+            map.put("fbgc","路基工程");
+            map.put("zblx","其余指标");
+            map.put("jhs",0);
+            map.put("wcs",0);
+            map.put("wcl", 0);
             re.add(map);
         }
         Map map = new HashMap<>();
@@ -505,6 +550,8 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
         map.put("zblx","合计指标");
         map.put("jhs",sumList(lj1)+sumList(lj2)+sumList(lj3));
         map.put("wcs",ljall);
+        map.put("wcl",(sumList(lj1)+sumList(lj2)+sumList(lj3))!=0 ? df.format((double) ljall/(sumList(lj1)+sumList(lj2)+sumList(lj3))*100) : 0);
+
         re.add(map);
 
         int lmall = 0;
@@ -521,6 +568,16 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
             map1.put("zblx","△");
             map1.put("jhs",i);
             map1.put("wcs",num1+num2+num3+num4+num5);
+            map1.put("wcl",i!=0 ? df.format((double)(num1+num2+num3+num4+num5)/i*100) : 0);
+
+            re.add(map1);
+        }else {
+            Map map1 = new HashMap<>();
+            map1.put("fbgc","路面工程");
+            map1.put("zblx","△");
+            map1.put("jhs",0);
+            map1.put("wcs",0);
+            map1.put("wcl",0);
             re.add(map1);
         }
         if (lm2 !=null && !lm2.isEmpty()){
@@ -532,8 +589,18 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
             map1.put("zblx","*");
             map1.put("jhs",i);
             map1.put("wcs",num3);
+            map1.put("wcl",i!=0 ? df.format((double)num3/i*100) : 0);
+
             re.add(map1);
 
+        }else {
+            Map map1 = new HashMap<>();
+            map1.put("fbgc","路面工程");
+            map1.put("zblx","*");
+            map1.put("jhs",0);
+            map1.put("wcs",0);
+            map1.put("wcl",0);
+            re.add(map1);
         }
         if (lm3 !=null && !lm3.isEmpty()){
             int num4 = jjgFbgcLmgcLmgzsdsgpsfService.selectnumname(proname);
@@ -541,12 +608,23 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
             int num6 = jjgFbgcLmgcLmssxsService.selectnumname(proname);
             int num10 = jjgFbgcLmgcTlmxlbgcService.selectnumname(proname);
             lmall+=(num4+num5+num6+num10);
+            int zs = num4+num5+num6+num10;
             int i = sumList(lm3);
             Map map1 = new HashMap<>();
             map1.put("fbgc","路面工程");
             map1.put("zblx","其余指标");
             map1.put("jhs",i);
             map1.put("wcs",num4+num5+num6+num10);
+            map1.put("wcl",i!=0 ? df.format((double)zs/i*100) : 0);
+            System.out.println(map1);
+            re.add(map1);
+        }else {
+            Map map1 = new HashMap<>();
+            map1.put("fbgc","路面工程");
+            map1.put("zblx","其余指标");
+            map1.put("jhs",0);
+            map1.put("wcs",0);
+            map1.put("wcl",0);
             re.add(map1);
         }
         Map mapm = new HashMap<>();
@@ -554,6 +632,8 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
         mapm.put("zblx","合计指标");
         mapm.put("jhs",sumList(lm1)+sumList(lm2)+sumList(lm3));
         mapm.put("wcs",lmall);
+        mapm.put("wcl",(sumList(lm1)+sumList(lm2)+sumList(lm3))!=0 ? df.format((double)lmall/(sumList(lm1)+sumList(lm2)+sumList(lm3))*100) : 0);
+
         re.add(mapm);
 
         int jaall = 0;
@@ -567,6 +647,16 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
             map1.put("zblx","△");
             map1.put("jhs",i);
             map1.put("wcs",num1+num5);
+            map1.put("wcl",i!=0 ? df.format((double)(num5+num1)/i*100) : 0);
+
+            re.add(map1);
+        }else {
+            Map map1 = new HashMap<>();
+            map1.put("fbgc","交安工程");
+            map1.put("zblx","△");
+            map1.put("jhs",0);
+            map1.put("wcs",0);
+            map1.put("wcl",0);
             re.add(map1);
         }
         if (ja2 !=null && !ja2.isEmpty()){
@@ -579,6 +669,16 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
             map1.put("zblx","*");
             map1.put("jhs",i);
             map1.put("wcs",num3+num4);
+            map1.put("wcl",i!=0 ? df.format((double)(num4+num3)/i*100) : 0);
+
+            re.add(map1);
+        }else {
+            Map map1 = new HashMap<>();
+            map1.put("fbgc","交安工程");
+            map1.put("zblx","*");
+            map1.put("jhs",0);
+            map1.put("wcs",0);
+            map1.put("wcl",0);
             re.add(map1);
         }
         if (ja3 !=null && !ja3.isEmpty()){
@@ -590,6 +690,16 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
             map1.put("zblx","其余指标");
             map1.put("jhs",i);
             map1.put("wcs",num2);
+            map1.put("wcl",i!=0 ? df.format((double)num2/i*100) : 0);
+
+            re.add(map1);
+        }else {
+            Map map1 = new HashMap<>();
+            map1.put("fbgc","交安工程");
+            map1.put("zblx","其余指标");
+            map1.put("jhs",0);
+            map1.put("wcs",0);
+            map1.put("wcl",0);
             re.add(map1);
         }
         Map mapj = new HashMap<>();
@@ -597,6 +707,8 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
         mapj.put("zblx","合计指标");
         mapj.put("jhs",sumList(ja1)+sumList(ja2)+sumList(ja3));
         mapj.put("wcs",jaall);
+        mapj.put("wcl",(sumList(ja1)+sumList(ja2)+sumList(ja3))!=0 ? df.format((double)jaall/(sumList(ja1)+sumList(ja2)+sumList(ja3))*100) : 0);
+
         re.add(mapj);
 
         int qlall = 0;
@@ -611,8 +723,18 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
             map1.put("zblx","*");
             map1.put("jhs",i);
             map1.put("wcs",num1+num4+num5);
+            map1.put("wcl",i!=0 ? df.format((double)(num1+num4+num5)/i*100) : 0);
+
             re.add(map1);
 
+        }else {
+            Map map1 = new HashMap<>();
+            map1.put("fbgc","桥梁工程");
+            map1.put("zblx","*");
+            map1.put("jhs",0);
+            map1.put("wcs",0);
+            map1.put("wcl",0);
+            re.add(map1);
         }
         if (ql2 !=null && !ql2.isEmpty()){
             int num2 = jjgFbgcQlgcXbJgccService.selectnumname(proname);
@@ -629,13 +751,26 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
             map1.put("zblx","其余指标");
             map1.put("jhs",i);
             map1.put("wcs",num2+num3+num6+num7+num8+num9+num10);
+            map1.put("wcl",i!=0 ? df.format((double)(num2+num3+num6+num7+num8+num9+num10)/i*100) : 0);
+
             re.add(map1);
+        }else {
+            Map map1 = new HashMap<>();
+            map1.put("fbgc","桥梁工程");
+            map1.put("zblx","其余指标");
+            map1.put("jhs",0);
+            map1.put("wcs",0);
+            map1.put("wcl", 0);
+            re.add(map1);
+
         }
         Map mapq = new HashMap<>();
         mapq.put("fbgc","桥梁工程");
         mapq.put("zblx","合计指标");
         mapq.put("jhs",sumList(ql1)+sumList(ql2));
         mapq.put("wcs",qlall);
+        mapq.put("wcl",(sumList(ql1)+sumList(ql2))!=0 ? df.format((double)qlall/(sumList(ql1)+sumList(ql2))*100) : 0);
+
         re.add(mapq);
 
         int sdall = 0;
@@ -650,8 +785,18 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
             map1.put("zblx","△");
             map1.put("jhs",i);
             map1.put("wcs",num3+num9+num10);
+            map1.put("wcl",i!=0 ? df.format((double)(num3+num9+num10)/i*100) : 0);
+
             re.add(map1);
 
+        }else {
+            Map map1 = new HashMap<>();
+            map1.put("fbgc","隧道工程");
+            map1.put("zblx","△");
+            map1.put("jhs",0);
+            map1.put("wcs",0);
+            map1.put("wcl",0);
+            re.add(map1);
         }
         if (sd2 !=null && !sd2.isEmpty()){
             int num12 = jjgFbgcSdgcCqtqdService.selectnumname(proname);
@@ -662,8 +807,18 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
             map1.put("zblx","*");
             map1.put("jhs",i);
             map1.put("wcs",num12);
+            map1.put("wcl",i!=0 ? df.format((double)num12/i*100) : 0);
+
             re.add(map1);
 
+        }else {
+            Map map1 = new HashMap<>();
+            map1.put("fbgc","隧道工程");
+            map1.put("zblx","*");
+            map1.put("jhs",0);
+            map1.put("wcs",0);
+            map1.put("wcl",0);
+            re.add(map1);
         }
         if (sd3 !=null && !sd3.isEmpty()){
             int num1 = jjgFbgcSdgcDmpzdService.selectnumname(proname);
@@ -681,6 +836,16 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
             map1.put("zblx","其余指标");
             map1.put("jhs",i);
             map1.put("wcs",num1+num2+num4+num5+num6+num7+num8+num11);
+            map1.put("wcl",i!=0 ? df.format((double)(num1+num2+num4+num5+num6+num7+num8+num11)/i*100) : 0);
+
+            re.add(map1);
+        }else {
+            Map map1 = new HashMap<>();
+            map1.put("fbgc","隧道工程");
+            map1.put("zblx","其余指标");
+            map1.put("jhs",0);
+            map1.put("wcs",0);
+            map1.put("wcl",0);
             re.add(map1);
         }
         Map maps = new HashMap<>();
@@ -688,6 +853,8 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
         maps.put("zblx","合计指标");
         maps.put("jhs",sumList(sd1)+sumList(sd2)+sumList(sd3));
         maps.put("wcs",sdall);
+        maps.put("wcl",(sumList(sd1)+sumList(sd2)+sumList(sd3))!=0 ? df.format((double)sdall/(sumList(sd1)+sumList(sd2)+sumList(sd3))*100) : 0);
+
         re.add(maps);
 
         return re;
@@ -745,20 +912,6 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
         result.put("桥梁工程",getql);
         result.put("隧道工程",getsd);
         result.put("交安工程",getja);
-        /**
-         * {
-         * 路面工程=
-         * [{fbgc=路面工程, zds=12.0, zblx=△, hgl=100.00, hgds=12.0}, {fbgc=路面工程, zds=4.0, zblx=*, hgl=100.00, hgds=4.0}, {fbgc=路面工程, zds=102.0, zblx=其余指标, hgl=87.25, hgds=89.0}, {fbgc=路面工程, zds=118.0, zblx=合计指标, hgl=88.98, hgds=105.0}],
-         * 隧道工程=
-         * [{fbgc=隧道工程, zds=225.0, zblx=△, hgl=94.22, hgds=212.0}, {fbgc=隧道工程, zds=40.0, zblx=*, hgl=100.00, hgds=40.0}, {fbgc=隧道工程, zds=144.0, zblx=其余指标, hgl=93.06, hgds=134.0}, {fbgc=隧道工程, zds=409.0, zblx=合计指标, hgl=94.38, hgds=386.0}],
-         * 交安工程=
-         * [{fbgc=交安工程, zds=1866.0, zblx=△, hgl=97.48, hgds=1819.0}, {fbgc=交安工程, zds=18.0, zblx=*, hgl=50.00, hgds=9.0}, {fbgc=交安工程, zds=1571.0, zblx=其余指标, hgl=96.88, hgds=1522.0}, {fbgc=交安工程, zds=3455.0, zblx=合计指标, hgl=96.96, hgds=3350.0}],
-         * 路基工程=
-         * [{fbgc=路基工程, zds=119.0, zblx=△, hgl=83.19, hgds=99.0}, {fbgc=路基工程, zds=269.0, zblx=*, hgl=100.00, hgds=269.0}, {fbgc=路基工程, zds=190.0, zblx=其余指标, hgl=81.05, hgds=154.0}, {fbgc=路基工程, zds=578.0, zblx=合计指标, hgl=90.31, hgds=522.0}],
-         * 桥梁工程=
-         * [{fbgc=桥梁工程, zds=418.0, zblx=*, hgl=98.80, hgds=413.0}, {fbgc=桥梁工程, zds=293.0, zblx=其余指标, hgl=92.83, hgds=272.0}, {fbgc=桥梁工程, zds=711.0, zblx=合计指标, hgl=96.34, hgds=685.0}]}
-         */
-        System.out.println(result);
         return result;
 
     }
@@ -2341,6 +2494,7 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
         List<String> ja = new ArrayList<>();
         DecimalFormat df = new DecimalFormat("0.00");
         Map<String,Map<String,Map<String,List<Map<String, Object>>>>> result = new HashMap<>();
+        //Map<String,Map<String,Map<String,Map<String, Object>>>> result = new HashMap<>();
         for (JjgHtd jjgHtd : gethtd) {
             String htd = jjgHtd.getName();
             String lx = jjgHtd.getLx();
@@ -2365,12 +2519,15 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
             Map<String,Map<String,Map<String,Object>>> lj1= new HashMap<>();
             Map<String,Map<String,Map<String,Map<String,Object>>>> ljresult = new HashMap<>();*/
 
-            List<Map<String, Object>> ljlistmap = new ArrayList<>();
+            //Map<String,Map<String, Object>> ljmap = new HashMap<>();
             Map<String,List<Map<String, Object>>> ljmap = new HashMap<>();
+            //Map<String,Map<String,Map<String, Object>>> lj1= new HashMap<>();
             Map<String,Map<String,List<Map<String, Object>>>> lj1= new HashMap<>();
+            //Map<String,Map<String,Map<String,Map<String, Object>>>> ljresult = new HashMap<>();
             Map<String,Map<String,Map<String,List<Map<String, Object>>>>> ljresult = new HashMap<>();
-            double zds = 0,hgds = 0;
+            //double zds = 0,hgds = 0;
             for (String s : lj) {
+                double zds = 0,hgds = 0;
                 CommonInfoVo commonInfoVo = new CommonInfoVo();
                 commonInfoVo.setProname(proname);
                 commonInfoVo.setHtd(s);
@@ -2496,8 +2653,9 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
                 map1.put("zds",zds);
                 map1.put("hgds",hgds);
                 map1.put("hgl",zds!=0 ? df.format(hgds/zds*100) : 0);
-                ljlistmap.add(map1);
-                ljmap.put(s,ljlistmap);
+                List<Map<String, Object>> temp = new ArrayList<>();
+                temp.add(map1);
+                ljmap.put(s,temp);
             }
             lj1.put("单位工程合格率",ljmap);
             ljresult.put("路基工程",lj1);
@@ -2505,14 +2663,13 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
             result.putAll(ljresult);
         }
 
-
         if (lm !=null && !lm.isEmpty()){
-            List<Map<String, Object>> lmlistmap = new ArrayList<>();
             Map<String,List<Map<String, Object>>> lmmap = new HashMap<>();
             Map<String,Map<String,List<Map<String, Object>>>> lm1= new HashMap<>();
             Map<String,Map<String,Map<String,List<Map<String, Object>>>>> lmresult = new HashMap<>();
-            double zds = 0,hgds = 0;
+
             for (String s : lm) {
+                double zds = 0,hgds = 0;
                 CommonInfoVo commonInfoVo = new CommonInfoVo();
                 commonInfoVo.setProname(proname);
                 commonInfoVo.setHtd(s);
@@ -2630,8 +2787,10 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
                 map1.put("zds",zds);
                 map1.put("hgds",hgds);
                 map1.put("hgl",zds!=0 ? df.format(hgds/zds*100) : 0);
-                lmlistmap.add(map1);
-                lmmap.put(s,lmlistmap);
+                List<Map<String, Object>> temp = new ArrayList<>();
+                temp.add(map1);
+                lmmap.put(s,temp);
+                //lmmap.put(s,map1);
             }
             lm1.put("单位工程合格率",lmmap);
             lmresult.put("路面工程",lm1);
@@ -2640,21 +2799,17 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
 
 
         if (ja != null && !ja.isEmpty()){
-            //Map<String,Map<String,Object>> jamap = new HashMap<>();
-            //Map<String,Map<String,Map<String,Object>>> jaresult = new HashMap<>();
-            //Map<String,Map<String,Map<String,Map<String,Object>>>> ja1 = new HashMap<>();
 
-            /*Map<String,Map<String,Object>> jamap = new HashMap<>();
-            Map<String,Map<String,Map<String,Object>>> ja1= new HashMap<>();
-            Map<String,Map<String,Map<String,Map<String,Object>>>> jaresult = new HashMap<>();*/
-
-            List<Map<String, Object>> jalistmap = new ArrayList<>();
+            //Map<String,Map<String, Object>> jamap = new HashMap<>();
             Map<String,List<Map<String, Object>>> jamap = new HashMap<>();
+            //Map<String,Map<String,Map<String, Object>>> ja1= new HashMap<>();
             Map<String,Map<String,List<Map<String, Object>>>> ja1= new HashMap<>();
+            //Map<String,Map<String,Map<String,Map<String, Object>>>> jaresult = new HashMap<>();
             Map<String,Map<String,Map<String,List<Map<String, Object>>>>> jaresult = new HashMap<>();
 
-            double zds = 0,hgds = 0;
-            for (String s : lj) {
+
+            for (String s : ja) {
+                double zds = 0,hgds = 0;
                 CommonInfoVo commonInfoVo = new CommonInfoVo();
                 commonInfoVo.setProname(proname);
                 commonInfoVo.setHtd(s);
@@ -2712,8 +2867,11 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
                 map1.put("zds",zds);
                 map1.put("hgds",hgds);
                 map1.put("hgl",zds!=0 ? df.format(hgds/zds*100) : 0);
-                jalistmap.add(map1);
-                jamap.put(s,jalistmap);
+                List<Map<String, Object>> temp = new ArrayList<>();
+                temp.add(map1);
+                jamap.put(s,temp);
+                //jalistmap.add(map1);
+                //jamap.put(s,map1);
             }
             ja1.put("单位工程合格率",jamap);
             jaresult.put("交安工程",ja1);
@@ -2721,18 +2879,15 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
 
         }
 
-
         if (ql != null && !ql.isEmpty()){
-            /*Map<String,Map<String,Object>> qlmap = new HashMap<>();
-            Map<String,Map<String,Map<String,Object>>> ql1= new HashMap<>();
-            Map<String,Map<String,Map<String,Map<String,Object>>>> qlresult = new HashMap<>();*/
-            List<Map<String, Object>> qllistmap = new ArrayList<>();
+
             Map<String,List<Map<String, Object>>> qlmap = new HashMap<>();
             Map<String,Map<String,List<Map<String, Object>>>> ql1= new HashMap<>();
             Map<String,Map<String,Map<String,List<Map<String, Object>>>>> qlresult = new HashMap<>();
 
-            double zds = 0,hgds = 0;
-            for (String s : lj) {
+
+            for (String s : ql) {
+                double zds = 0,hgds = 0;
                 CommonInfoVo commonInfoVo = new CommonInfoVo();
                 commonInfoVo.setProname(proname);
                 commonInfoVo.setHtd(s);
@@ -2843,8 +2998,9 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
                 map1.put("zds",zds);
                 map1.put("hgds",hgds);
                 map1.put("hgl",zds!=0 ? df.format(hgds/zds*100) : 0);
-                qllistmap.add(map1);
-                qlmap.put(s,qllistmap);
+                List<Map<String, Object>> temp = new ArrayList<>();
+                temp.add(map1);
+                qlmap.put(s,temp);
             }
             ql1.put("单位工程合格率",qlmap);
             qlresult.put("桥梁工程",ql1);
@@ -2853,16 +3009,13 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
         }
 
         if (sd != null && !sd.isEmpty()){
-            /*Map<String,Map<String,Object>> sdmap = new HashMap<>();
-            Map<String,Map<String,Map<String,Object>>> sd1= new HashMap<>();
-            Map<String,Map<String,Map<String,Map<String,Object>>>> sdresult = new HashMap<>();*/
-            List<Map<String, Object>> sdlistmap = new ArrayList<>();
             Map<String,List<Map<String, Object>>> sdmap = new HashMap<>();
             Map<String,Map<String,List<Map<String, Object>>>> sd1= new HashMap<>();
             Map<String,Map<String,Map<String,List<Map<String, Object>>>>> sdresult = new HashMap<>();
 
-            double zds = 0,hgds = 0;
-            for (String s : lj) {
+
+            for (String s : sd) {
+                double zds = 0,hgds = 0;
                 CommonInfoVo commonInfoVo = new CommonInfoVo();
                 commonInfoVo.setProname(proname);
                 commonInfoVo.setHtd(s);
@@ -2991,8 +3144,10 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
                 map1.put("zds",zds);
                 map1.put("hgds",hgds);
                 map1.put("hgl",zds!=0 ? df.format(hgds/zds*100) : 0);
-                sdlistmap.add(map1);
-                sdmap.put(s,sdlistmap);
+
+                List<Map<String, Object>> temp = new ArrayList<>();
+                temp.add(map1);
+                sdmap.put(s,temp);
             }
             sd1.put("单位工程合格率",sdmap);
             sdresult.put("隧道工程",sd1);

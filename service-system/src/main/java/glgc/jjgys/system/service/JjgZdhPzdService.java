@@ -28,4 +28,7 @@ public interface JjgZdhPzdService extends IService<JjgZdhPzd> {
     void exportpzd(HttpServletResponse response, String cdsl) throws IOException;
 
     void importpzd(MultipartFile file, CommonInfoVo commonInfoVo) throws IOException;
+
+    int selectnum(String proname, String htd);
+
 }

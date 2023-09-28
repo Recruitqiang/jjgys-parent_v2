@@ -28,4 +28,6 @@ public interface JjgZdhMcxsService extends IService<JjgZdhMcxs> {
     void exportmcxs(HttpServletResponse response, String cdsl) throws IOException;
 
     void importmcxs(MultipartFile file, CommonInfoVo commonInfoVo) throws IOException;
+
+    int selectnum(String proname, String htd);
 }

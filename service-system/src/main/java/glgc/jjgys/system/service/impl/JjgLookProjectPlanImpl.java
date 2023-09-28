@@ -123,6 +123,86 @@ public class JjgLookProjectPlanImpl extends ServiceImpl<JjgLookProjectPlanMapper
     @Autowired
     private JjgLookProjectPlanMapper jjgLookProjectPlanMapper;
 
+    @Autowired
+    private JjgZdhCzService jjgZdhCzService;
+
+    @Autowired
+    private JjgZdhPzdService jjgZdhPzdService;
+
+    @Autowired
+    private JjgZdhMcxsService jjgZdhMcxsService;
+
+    @Autowired
+    private JjgZdhGzsdService jjgZdhGzsdService;
+
+    @Autowired
+    private JjgFbgcQlgcSbTqdService jjgFbgcQlgcSbTqdService;
+
+    @Autowired
+    private JjgFbgcQlgcSbJgccService jjgFbgcQlgcSbJgccService;
+
+    @Autowired
+    private JjgFbgcQlgcSbBhchdService jjgFbgcQlgcSbBhchdService;
+
+    @Autowired
+    private JjgFbgcQlgcXbTqdService jjgFbgcQlgcXbTqdService;
+
+    @Autowired
+    private JjgFbgcQlgcXbJgccService jjgFbgcQlgcXbJgccService;
+
+    @Autowired
+    private JjgFbgcQlgcXbBhchdService jjgFbgcQlgcXbBhchdService;
+
+    @Autowired
+    private JjgFbgcQlgcXbSzdService jjgFbgcQlgcXbSzdService;
+
+    @Autowired
+    private JjgFbgcQlgcQmpzdService jjgFbgcQlgcQmpzdService;
+
+    @Autowired
+    private JjgFbgcQlgcQmhpService jjgFbgcQlgcQmhpService;
+
+    @Autowired
+    private JjgFbgcQlgcQmgzsdService jjgFbgcQlgcQmgzsdService;
+
+    @Autowired
+    private JjgFbgcSdgcCqhdService jjgFbgcSdgcCqhdService;
+
+    @Autowired
+    private JjgFbgcSdgcCqtqdService jjgFbgcSdgcCqtqdService;
+
+    @Autowired
+    private JjgFbgcSdgcDmpzdService jjgFbgcSdgcDmpzdService;
+
+    @Autowired
+    private JjgFbgcSdgcGssdlqlmhdzxfService jjgFbgcSdgcGssdlqlmhdzxfService;
+
+    @Autowired
+    private JjgFbgcSdgcHntlmqdService jjgFbgcSdgcHntlmqdService;
+
+    @Autowired
+    private JjgFbgcSdgcLmgzsdsgpsfService jjgFbgcSdgcLmgzsdsgpsfService;
+
+    @Autowired
+    private JjgFbgcSdgcLmssxsService jjgFbgcSdgcLmssxsService;
+
+    @Autowired
+    private JjgFbgcSdgcSdhntlmhdzxfService jjgFbgcSdgcSdhntlmhdzxfService;
+
+    @Autowired
+    private JjgFbgcSdgcSdhpService jjgFbgcSdgcSdhpService;
+
+    @Autowired
+    private JjgFbgcSdgcSdlqlmysdService jjgFbgcSdgcSdlqlmysdService;
+
+    @Autowired
+    private JjgFbgcSdgcTlmxlbgcService jjgFbgcSdgcTlmxlbgcService;
+
+    @Autowired
+    private JjgFbgcSdgcZtkdService jjgFbgcSdgcZtkdService;
+
+
+
 
 
 
@@ -154,32 +234,24 @@ public class JjgLookProjectPlanImpl extends ServiceImpl<JjgLookProjectPlanMapper
                 map.put("jcs",selectnum);
                 map.put("jdl",num!=0?df.format(selectnum/num):0);
                 resultmap.add(map);
-            }else if (zb.contains("路基土石方压实度沙砾")){
-                int selectnum = jjgFbgcLjgcLjtsfysdSlService.selectnum(proname, htd);
+            }else if (zb.contains("路基土石方压实度")){
+                int selectnum1 = jjgFbgcLjgcLjtsfysdSlService.selectnum(proname, htd);
+                int selectnum2 = jjgFbgcLjgcLjtsfysdHtService.selectnum(proname, htd);
+                int selectnum = selectnum1+selectnum2;
                 Double num = Double.valueOf(map.get("num").toString());
                 map.put("jcs",selectnum);
                 map.put("jdl",num!=0?df.format(selectnum/num):0);
                 resultmap.add(map);
-            }else if (zb.contains("路基土石方压实度灰土")){
-                int selectnum = jjgFbgcLjgcLjtsfysdHtService.selectnum(proname, htd);
-                Double num = Double.valueOf(map.get("num").toString());
-                map.put("jcs",selectnum);
-                map.put("jdl",num!=0?df.format(selectnum/num):0);
-                resultmap.add(map);
-            }else if (zb.contains("压实度沉降")){
+            } else if (zb.contains("压实度沉降")){
                 int selectnum = jjgFbgcLjgcLjcjService.selectnum(proname, htd);
                 Double num = Double.valueOf(map.get("num").toString());
                 map.put("jcs",selectnum);
                 map.put("jdl",num!=0?df.format(selectnum/num):0);
                 resultmap.add(map);
-            }else if (zb.contains("路基弯沉贝克曼梁法")){
-                int selectnum = jjgFbgcLjgcLjwcService.selectnum(proname, htd);
-                Double num = Double.valueOf(map.get("num").toString());
-                map.put("jcs",selectnum);
-                map.put("jdl",num!=0?df.format(selectnum/num):0);
-                resultmap.add(map);
-            }else if (zb.contains("路基弯沉落锤法")){
-                int selectnum = jjgFbgcLjgcLjwcLcfService.selectnum(proname, htd);
+            }else if (zb.contains("路基弯沉")){
+                int selectnum1 = jjgFbgcLjgcLjwcService.selectnum(proname, htd);
+                int selectnum2 = jjgFbgcLjgcLjwcLcfService.selectnum(proname, htd);
+                int selectnum = selectnum1+selectnum2;
                 Double num = Double.valueOf(map.get("num").toString());
                 map.put("jcs",selectnum);
                 map.put("jdl",num!=0?df.format(selectnum/num):0);
@@ -256,32 +328,22 @@ public class JjgLookProjectPlanImpl extends ServiceImpl<JjgLookProjectPlanMapper
                 map.put("jcs",selectnum);
                 map.put("jdl",num!=0?df.format(selectnum/num):0);
                 resultmap.add(map);
-            }else if (zb.contains("高速沥青路面厚度钻芯法")){
-                int selectnum = jjgFbgcLmgcGslqlmhdzxfService.selectnum(proname, htd);
+            }else if (zb.contains("沥青路面压实度")){
+                int selectnum = jjgFbgcLmgcLqlmysdService.selectnum(proname, htd);
                 Double num = Double.valueOf(map.get("num").toString());
                 map.put("jcs",selectnum);
                 map.put("jdl",num!=0?df.format(selectnum/num):0);
                 resultmap.add(map);
-            }else if (zb.contains("混凝土路面厚度钻芯法")){
-                int selectnum = jjgFbgcLmgcHntlmhdzxfService.selectnum(proname, htd);
+            }else if (zb.contains("路面弯沉")){
+                int selectnum1 = jjgFbgcLmgcLmwcService.selectnum(proname, htd);
+                int selectnum2 = jjgFbgcLmgcLmwcLcfService.selectnum(proname, htd);
+                int selectnum = selectnum1+selectnum2;
                 Double num = Double.valueOf(map.get("num").toString());
                 map.put("jcs",selectnum);
                 map.put("jdl",num!=0?df.format(selectnum/num):0);
                 resultmap.add(map);
-            }else if (zb.contains("混凝土路面强度")){
-                int selectnum = jjgFbgcLmgcHntlmqdService.selectnum(proname, htd);
-                Double num = Double.valueOf(map.get("num").toString());
-                map.put("jcs",selectnum);
-                map.put("jdl",num!=0?df.format(selectnum/num):0);
-                resultmap.add(map);
-            }else if (zb.contains("路面构造深度手工铺砂法")){
-                int selectnum = jjgFbgcLmgcLmgzsdsgpsfService.selectnum(proname, htd);
-                Double num = Double.valueOf(map.get("num").toString());
-                map.put("jcs",selectnum);
-                map.put("jdl",num!=0?df.format(selectnum/num):0);
-                resultmap.add(map);
-            }else if (zb.contains("路面横坡")){
-                int selectnum = jjgFbgcLmgcLmhpService.selectnum(proname, htd);
+            }else if (zb.contains("沥青路面车辙")){
+                int selectnum = jjgZdhCzService.selectnum(proname, htd);
                 Double num = Double.valueOf(map.get("num").toString());
                 map.put("jcs",selectnum);
                 map.put("jdl",num!=0?df.format(selectnum/num):0);
@@ -292,26 +354,175 @@ public class JjgLookProjectPlanImpl extends ServiceImpl<JjgLookProjectPlanMapper
                 map.put("jcs",selectnum);
                 map.put("jdl",num!=0?df.format(selectnum/num):0);
                 resultmap.add(map);
-            }else if (zb.contains("路面弯沉贝克曼梁法")){
-                int selectnum = jjgFbgcLmgcLmwcService.selectnum(proname, htd);
+            }else if (zb.contains("混凝土路面强度")) {
+                int selectnum = jjgFbgcLmgcHntlmqdService.selectnum(proname, htd);
                 Double num = Double.valueOf(map.get("num").toString());
-                map.put("jcs",selectnum);
-                map.put("jdl",num!=0?df.format(selectnum/num):0);
-                resultmap.add(map);
-            }else if (zb.contains("路面弯沉落锤法")){
-                int selectnum = jjgFbgcLmgcLmwcLcfService.selectnum(proname, htd);
-                Double num = Double.valueOf(map.get("num").toString());
-                map.put("jcs",selectnum);
-                map.put("jdl",num!=0?df.format(selectnum/num):0);
-                resultmap.add(map);
-            }else if (zb.contains("沥青路面压实度")){
-                int selectnum = jjgFbgcLmgcLqlmysdService.selectnum(proname, htd);
-                Double num = Double.valueOf(map.get("num").toString());
-                map.put("jcs",selectnum);
-                map.put("jdl",num!=0?df.format(selectnum/num):0);
+                map.put("jcs", selectnum);
+                map.put("jdl", num != 0 ? df.format(selectnum / num) : 0);
                 resultmap.add(map);
             }else if (zb.contains("砼路面相邻板高差")){
                 int selectnum = jjgFbgcLmgcTlmxlbgcService.selectnum(proname, htd);
+                Double num = Double.valueOf(map.get("num").toString());
+                map.put("jcs",selectnum);
+                map.put("jdl",num!=0?df.format(selectnum/num):0);
+                resultmap.add(map);
+            }else if (zb.contains("平整度")){
+                int selectnum = jjgZdhPzdService.selectnum(proname, htd);
+                Double num = Double.valueOf(map.get("num").toString());
+                map.put("jcs",selectnum);
+                map.put("jdl",num!=0?df.format(selectnum/num):0);
+                resultmap.add(map);
+            }else if (zb.contains("抗滑")){
+                int selectnum1 = jjgZdhMcxsService.selectnum(proname, htd);
+                int selectnum2 = jjgZdhGzsdService.selectnum(proname, htd);
+                int selectnum3 = jjgFbgcLmgcLmgzsdsgpsfService.selectnum(proname, htd);
+                int selectnum = selectnum1+selectnum2+selectnum3;
+                Double num = Double.valueOf(map.get("num").toString());
+                map.put("jcs",selectnum);
+                map.put("jdl",num!=0?df.format(selectnum/num):0);
+                resultmap.add(map);
+            } else if (zb.contains("路面厚度")){
+                int selectnum1 = jjgFbgcLmgcGslqlmhdzxfService.selectnum(proname, htd);
+                int selectnum2 = jjgFbgcLmgcHntlmhdzxfService.selectnum(proname, htd);
+                int selectnum = selectnum1+selectnum2;
+                Double num = Double.valueOf(map.get("num").toString());
+                map.put("jcs",selectnum);
+                map.put("jdl",num!=0?df.format(selectnum/num):0);
+                resultmap.add(map);
+            }else if (zb.contains("路面横坡")){
+                int selectnum = jjgFbgcLmgcLmhpService.selectnum(proname, htd);
+                Double num = Double.valueOf(map.get("num").toString());
+                map.put("jcs",selectnum);
+                map.put("jdl",num!=0?df.format(selectnum/num):0);
+                resultmap.add(map);
+            }else if (zb.contains("桥梁上部砼强度")){
+                int selectnum = jjgFbgcQlgcSbTqdService.selectnum(proname, htd);
+                Double num = Double.valueOf(map.get("num").toString());
+                map.put("jcs",selectnum);
+                map.put("jdl",num!=0?df.format(selectnum/num):0);
+                resultmap.add(map);
+            }else if (zb.contains("桥梁上部主要结构尺寸")){
+                int selectnum = jjgFbgcQlgcSbJgccService.selectnum(proname, htd);
+                Double num = Double.valueOf(map.get("num").toString());
+                map.put("jcs",selectnum);
+                map.put("jdl",num!=0?df.format(selectnum/num):0);
+                resultmap.add(map);
+            }else if (zb.contains("桥梁上部保护层厚度")){
+                int selectnum = jjgFbgcQlgcSbBhchdService.selectnum(proname, htd);
+                Double num = Double.valueOf(map.get("num").toString());
+                map.put("jcs",selectnum);
+                map.put("jdl",num!=0?df.format(selectnum/num):0);
+                resultmap.add(map);
+            }else if (zb.contains("桥梁下部墩台砼强度")){
+                int selectnum = jjgFbgcQlgcXbTqdService.selectnum(proname, htd);
+                Double num = Double.valueOf(map.get("num").toString());
+                map.put("jcs",selectnum);
+                map.put("jdl",num!=0?df.format(selectnum/num):0);
+                resultmap.add(map);
+            }else if (zb.contains("桥梁下部主要结构尺寸")){
+                int selectnum = jjgFbgcQlgcXbJgccService.selectnum(proname, htd);
+                Double num = Double.valueOf(map.get("num").toString());
+                map.put("jcs",selectnum);
+                map.put("jdl",num!=0?df.format(selectnum/num):0);
+                resultmap.add(map);
+            }else if (zb.contains("桥梁下部保护层厚度")){
+                int selectnum = jjgFbgcQlgcXbBhchdService.selectnum(proname, htd);
+                Double num = Double.valueOf(map.get("num").toString());
+                map.put("jcs",selectnum);
+                map.put("jdl",num!=0?df.format(selectnum/num):0);
+                resultmap.add(map);
+            }else if (zb.contains("桥梁下部竖直度实")){
+                int selectnum = jjgFbgcQlgcXbSzdService.selectnum(proname, htd);
+                Double num = Double.valueOf(map.get("num").toString());
+                map.put("jcs",selectnum);
+                map.put("jdl",num!=0?df.format(selectnum/num):0);
+                resultmap.add(map);
+            }else if (zb.contains("桥面平整度")){
+                int selectnum = jjgFbgcQlgcQmpzdService.selectnum(proname, htd);
+                Double num = Double.valueOf(map.get("num").toString());
+                map.put("jcs",selectnum);
+                map.put("jdl",num!=0?df.format(selectnum/num):0);
+                resultmap.add(map);
+            }else if (zb.contains("桥面横坡")){
+                int selectnum = jjgFbgcQlgcQmhpService.selectnum(proname, htd);
+                Double num = Double.valueOf(map.get("num").toString());
+                map.put("jcs",selectnum);
+                map.put("jdl",num!=0?df.format(selectnum/num):0);
+                resultmap.add(map);
+            }else if (zb.contains("桥面构造深度")){
+                int selectnum = jjgFbgcQlgcQmgzsdService.selectnum(proname, htd);
+                Double num = Double.valueOf(map.get("num").toString());
+                map.put("jcs",selectnum);
+                map.put("jdl",num!=0?df.format(selectnum/num):0);
+                resultmap.add(map);
+            }else if (zb.contains("隧道衬砌砼强度")){
+                int selectnum = jjgFbgcSdgcCqtqdService.selectnum(proname, htd);
+                Double num = Double.valueOf(map.get("num").toString());
+                map.put("jcs",selectnum);
+                map.put("jdl",num!=0?df.format(selectnum/num):0);
+                resultmap.add(map);
+            }else if (zb.contains("隧道衬砌厚度")){
+                int selectnum = jjgFbgcSdgcCqhdService.selectnum(proname, htd);
+                Double num = Double.valueOf(map.get("num").toString());
+                map.put("jcs",selectnum);
+                map.put("jdl",num!=0?df.format(selectnum/num):0);
+                resultmap.add(map);
+            }else if (zb.contains("隧道大面平整度")){
+                int selectnum = jjgFbgcSdgcDmpzdService.selectnum(proname, htd);
+                Double num = Double.valueOf(map.get("num").toString());
+                map.put("jcs",selectnum);
+                map.put("jdl",num!=0?df.format(selectnum/num):0);
+                resultmap.add(map);
+            }else if (zb.contains("隧道总体宽度")){
+                int selectnum = jjgFbgcSdgcZtkdService.selectnum(proname, htd);
+                Double num = Double.valueOf(map.get("num").toString());
+                map.put("jcs",selectnum);
+                map.put("jdl",num!=0?df.format(selectnum/num):0);
+                resultmap.add(map);
+            }else if (zb.contains("隧道沥青路面压实度")){
+                int selectnum = jjgFbgcSdgcSdlqlmysdService.selectnum(proname, htd);
+                Double num = Double.valueOf(map.get("num").toString());
+                map.put("jcs",selectnum);
+                map.put("jdl",num!=0?df.format(selectnum/num):0);
+                resultmap.add(map);
+            }else if (zb.contains("隧道沥青路面渗水系数")){
+                int selectnum = jjgFbgcSdgcLmssxsService.selectnum(proname, htd);
+                Double num = Double.valueOf(map.get("num").toString());
+                map.put("jcs",selectnum);
+                map.put("jdl",num!=0?df.format(selectnum/num):0);
+                resultmap.add(map);
+            }else if (zb.contains("隧道混凝土路面强度")){
+                int selectnum = jjgFbgcSdgcHntlmqdService.selectnum(proname, htd);
+                Double num = Double.valueOf(map.get("num").toString());
+                map.put("jcs",selectnum);
+                map.put("jdl",num!=0?df.format(selectnum/num):0);
+                resultmap.add(map);
+            }else if (zb.contains("隧道砼路面相邻板高差")){
+                int selectnum = jjgFbgcSdgcTlmxlbgcService.selectnum(proname, htd);
+                Double num = Double.valueOf(map.get("num").toString());
+                map.put("jcs",selectnum);
+                map.put("jdl",num!=0?df.format(selectnum/num):0);
+                resultmap.add(map);
+            }else if (zb.contains("隧道路面构造深度")){
+                int selectnum = jjgFbgcSdgcLmgzsdsgpsfService.selectnum(proname, htd);
+                Double num = Double.valueOf(map.get("num").toString());
+                map.put("jcs",selectnum);
+                map.put("jdl",num!=0?df.format(selectnum/num):0);
+                resultmap.add(map);
+            }else if (zb.contains("高速隧道沥青路面厚度钻芯法")){
+                int selectnum = jjgFbgcSdgcGssdlqlmhdzxfService.selectnum(proname, htd);
+                Double num = Double.valueOf(map.get("num").toString());
+                map.put("jcs",selectnum);
+                map.put("jdl",num!=0?df.format(selectnum/num):0);
+                resultmap.add(map);
+            }else if (zb.contains("隧道混凝土路面厚度钻芯法")){
+                int selectnum = jjgFbgcSdgcSdhntlmhdzxfService.selectnum(proname, htd);
+                Double num = Double.valueOf(map.get("num").toString());
+                map.put("jcs",selectnum);
+                map.put("jdl",num!=0?df.format(selectnum/num):0);
+                resultmap.add(map);
+            }else if (zb.contains("隧道横坡")){
+                int selectnum = jjgFbgcSdgcSdhpService.selectnum(proname, htd);
                 Double num = Double.valueOf(map.get("num").toString());
                 map.put("jcs",selectnum);
                 map.put("jdl",num!=0?df.format(selectnum/num):0);
@@ -331,9 +542,11 @@ public class JjgLookProjectPlanImpl extends ServiceImpl<JjgLookProjectPlanMapper
          * 先获取到项目下的所有合同段，然后判断这个合同段的类型
          * 根据类型不同，产生不同的指标
          */
-        String[] ljlist = {"涵洞砼强度","涵洞结构尺寸","路基土石方压实度沙砾","路基土石方压实度灰土","压实度沉降","路基弯沉贝克曼梁法","路基弯沉落锤法","路基边坡","排水断面尺寸","排水铺砌厚度","小桥砼强度","小桥结构尺寸","支挡砼强度","支挡断面尺寸"};
+        String[] ljlist = {"涵洞砼强度","涵洞结构尺寸","路基土石方压实度","压实度沉降","路基弯沉","路基边坡","排水断面尺寸","排水铺砌厚度","小桥砼强度","小桥结构尺寸","支挡砼强度","支挡断面尺寸"};
         String[] jalist = {"交安标线","交安标志","交安波形防护栏","交安砼护栏强度","交安砼护栏断面尺寸"};
-        String[] lmlist = {"高速沥青路面厚度钻芯法","混凝土路面厚度钻芯法","混凝土路面强度","路面构造深度手工铺砂法","路面横坡","沥青路面渗水系数","路面弯沉贝克曼梁法","路面弯沉落锤法","沥青路面压实度","砼路面相邻板高差"};
+        String[] lmlist = {"沥青路面压实度","沥青路面弯沉","沥青路面车辙","沥青路面渗水系数","砼路面强度","砼路面相邻板高差","平整度","抗滑", "路面厚度", "路面横坡"};
+        String[] qllist = {"桥梁上部砼强度","桥梁上部主要结构尺寸","桥梁上部保护层厚度","桥梁下部墩台砼强度","桥梁下部主要结构尺寸","桥梁下部保护层厚度","桥梁下部竖直度实","桥面平整度","桥面横坡","桥面构造深度"};
+        String[] sdlist = {"隧道衬砌砼强度","隧道衬砌厚度","隧道大面平整度","隧道总体宽度","隧道沥青路面压实度","隧道沥青路面渗水系数","隧道混凝土路面强度","隧道砼路面相邻板高差","隧道路面构造深度","高速隧道沥青路面厚度钻芯法","隧道混凝土路面厚度钻芯法","隧道横坡"};
 
         List<JjgHtd> gethtd = jjgHtdService.gethtd(proname);
         for (JjgHtd jjgHtd : gethtd) {
@@ -361,6 +574,24 @@ public class JjgLookProjectPlanImpl extends ServiceImpl<JjgLookProjectPlanMapper
                     }
                 }else if (s.equals("交安工程")){
                     for (String s1 : jalist) {
+                        JjgPlaninfoVo jjgPlaninfoVo = new JjgPlaninfoVo();
+                        jjgPlaninfoVo.setProname(proname);
+                        jjgPlaninfoVo.setHtd(htd);
+                        jjgPlaninfoVo.setFbgc(s);
+                        jjgPlaninfoVo.setZb(s1);
+                        list.add(jjgPlaninfoVo);
+                    }
+                }else if (s.equals("桥梁工程")){
+                    for (String s1 : qllist) {
+                        JjgPlaninfoVo jjgPlaninfoVo = new JjgPlaninfoVo();
+                        jjgPlaninfoVo.setProname(proname);
+                        jjgPlaninfoVo.setHtd(htd);
+                        jjgPlaninfoVo.setFbgc(s);
+                        jjgPlaninfoVo.setZb(s1);
+                        list.add(jjgPlaninfoVo);
+                    }
+                }else if (s.equals("隧道工程")){
+                    for (String s1 : sdlist) {
                         JjgPlaninfoVo jjgPlaninfoVo = new JjgPlaninfoVo();
                         jjgPlaninfoVo.setProname(proname);
                         jjgPlaninfoVo.setHtd(htd);

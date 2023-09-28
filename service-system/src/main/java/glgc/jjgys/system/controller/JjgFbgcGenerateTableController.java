@@ -11,9 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +41,15 @@ public class JjgFbgcGenerateTableController {
     @Value(value = "${jjgys.path.filepath}")
     private String filespath;
 
+    /**
+     *[
+     * {
+     * proname:陕西高速，
+     * htds:[LJ-1,LJ-2]
+     * }
+     * ]
+     */
+
 
     @ApiOperation("生成评定表")
     @PostMapping("generatePdb")
@@ -60,13 +71,21 @@ public class JjgFbgcGenerateTableController {
     }
 
     @RequestMapping(value = "/downloadpdb", method = RequestMethod.GET)
-    public void downloadpdb(HttpServletResponse response, String proname, String htd) throws IOException {
+    public void downloadpdb(HttpServletRequest request,HttpServletResponse response, Map<String,Object> htds) throws IOException {
         String fileName = "00评定表.xlsx";
-        String p = filespath+ File.separator+proname+File.separator+htd+File.separator+fileName;
-        File file = new File(p);
-        if (file.exists()){
-            JjgFbgcCommonUtils.download(response,p,fileName);
+        String proname = htds.get("proname").toString();
+        String[] htdss = htds.get("htds").toString().replace("[", "").replace("]", "").split(",");
+        List<String> pathname = new ArrayList<>();
+        for (String s : htdss) {
+            String p = filespath+ File.separator+proname+File.separator+s+File.separator+fileName;
+            File file = new File(p);
+            if (file.exists()){
+                pathname.add(p);
+            }
         }
+        String zipName = "评定表";
+        JjgFbgcCommonUtils.downloadDifferentPathFile(request,response,zipName,pathname);
+
     }
 
 

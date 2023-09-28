@@ -13,18 +13,25 @@ import java.net.URLEncoder;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.apache.tools.zip.ZipEntry;
 import org.apache.tools.zip.ZipOutputStream;
+import org.springframework.beans.factory.annotation.Value;
 
 public class JjgFbgcCommonUtils {
 
+    @Value(value = "${jjgys.path.filepath}")
+    private static String filespath;
 
     /**
      *
@@ -580,5 +587,76 @@ public class JjgFbgcCommonUtils {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static void downloadDifferentPathFile(HttpServletRequest request, HttpServletResponse response, String zipName, List<String> pathname) throws IOException {
+        //设置压缩包的名字
+        String downloadName = URLEncoder.encode(zipName+".zip", "UTF-8");
+        response.reset();
+        response.setHeader("Content-disposition", "attachment; filename=" + downloadName);
+        response.setContentType("application/zip;charset=utf-8");
+
+        //设置压缩流：直接写入response，实现边压缩边下载
+        ZipOutputStream zipOs = null;
+        //循环将文件写入压缩流
+        DataOutputStream os = null;
+        //文件
+        File file;
+        // 创建临时文件夹
+        File tempDir = Files.createTempDirectory(Paths.get(filespath),"tempDir").toFile();
+
+        try {
+            zipOs = new ZipOutputStream(new BufferedOutputStream(response.getOutputStream()));
+            zipOs.setEncoding("UTF-8");
+            //设置压缩方法
+            zipOs.setMethod(ZipOutputStream.DEFLATED);
+            //遍历文件信息（主要获取文件名/文件路径等）
+            for (int i=0;i<pathname.size();i++) {
+                file = new File(pathname.get(i));
+                if (!file.exists()) {
+                    continue;
+                }
+                // 获取文件名
+                String fileName = file.getName();//00评定表.xlsx
+                // 复制原文件到临时文件
+                Files.copy(file.toPath(), tempDir.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                // 修改文件名
+                String newFileName = i+fileName;
+                File renamedFile = new File(file.getParent(), newFileName);
+
+                // 重命名临时文件
+                file.renameTo(renamedFile);
+
+                // 将修改后的文件添加到压缩流中
+                zipOs.putNextEntry(new ZipEntry(newFileName));
+
+                // 读取修改后的文件内容，写入压缩流
+                FileInputStream fis = new FileInputStream(renamedFile);
+                int length;
+                byte[] buffer = new byte[4096];
+                while ((length = fis.read(buffer)) != -1) {
+                    zipOs.write(buffer, 0, length);
+                }
+                fis.close();
+            }
+            // 删除临时文件夹
+            FileUtils.deleteDirectory(tempDir);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            //关闭流
+            try {
+                if (os != null) {
+                    os.flush();
+                    os.close();
+                }
+                if (zipOs != null) {
+                    zipOs.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 }

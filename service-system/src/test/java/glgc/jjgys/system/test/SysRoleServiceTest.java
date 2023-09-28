@@ -30,14 +30,52 @@ public class SysRoleServiceTest {
     @Autowired
     private JjgDpkshService jjgDpkshService;
 
+    @Autowired
+    private JjgFbgcLmgcLmhpService jjgFbgcLmgcLmhpService;
+
+    @Autowired
+    private JjgJgProjectinfoService jjgJgProjectinfoService;
+
 
 
     @Test
-    public void hdgqdsc() throws IOException {
-        /*List<JjgHtd> s = jjgDpkshService.gethtd("陕西高速");
-        System.out.println(s);*/
-        jjgDpkshService.getjsxmdata("陕西高速");
+    public void hdgqdsc() throws Exception {
+        Map<String, Map<String, List<Map<String, Object>>>> s = jjgDpkshService.getjsxmdata("陕西高速");
+
+
+        //jjgJgProjectinfoService.getlqsData("陕西高速");
+        /*CommonInfoVo commonInfoVo = new CommonInfoVo();
+        commonInfoVo.setHtd("LJ-1");
+        commonInfoVo.setProname("陕西高速");
+        jjgFbgcLmgcLmhpService.generateJdb(commonInfoVo);*/
+        //jjgDpkshService.getjsxmdata("陕西高速");
+        //Map<String, Map<String, Map<String, List<Map<String, Object>>>>> ss = jjgDpkshService.getdwgc("陕西高速");
+        //Map<String, Map<String, Map<String, List<Map<String, Object>>>>> s = jjgDpkshService.gethtddata("陕西高速");
+        //System.out.println(s);
+        //System.out.println(ss);
+        //jjgDpkshService.getjsxmdata("陕西高速");
     }
+
+    /**
+     * {LJ-2=
+     * {    合同段合格率={
+     *      路面工程=[{zds=118.0, htd=LJ-1, lx=路面工程, hgds=105.0}],
+     *      隧道工程=[{zds=409.0, htd=LJ-1, lx=隧道工程, hgds=386.0}],
+     *      交安工程=[{zds=3455.0, htd=LJ-1, lx=交安工程, hgds=3350.0}],
+     *      桥梁工程=[{zds=711.0, htd=LJ-1, lx=桥梁工程, hgds=685.0}],
+     *      路基工程=[{zds=578.0, htd=LJ-1, lx=路基工程, hgds=522.0}]},
+     *      合同段指标完成率={
+     *      路面工程=[{fbgcname=路面工程, zs=5.0, proname=陕西高速, jcs=0, htdname=LM-1}]}},
+     *
+     *LJ-1={合同段合格率={路面工程=[{zds=118.0, htd=LJ-1, lx=路面工程, hgds=105.0}],
+         * 隧道工程=[{zds=409.0, htd=LJ-1, lx=隧道工程, hgds=386.0}],
+         * 交安工程=[{zds=3455.0, htd=LJ-1, lx=交安工程, hgds=3350.0}],
+         * 桥梁工程=[{zds=711.0, htd=LJ-1, lx=桥梁工程, hgds=685.0}],
+         * 路基工程=[{zds=578.0, htd=LJ-1, lx=路基工程, hgds=522.0}]},
+     * 合同段指标完成率={路面工程=[{fbgcname=路面工程, zs=5.0, proname=陕西高速, jcs=0, htdname=LM-1}]}},
+     *
+     * LM-1={合同段指标完成率={路面工程=[{fbgcname=路面工程, zs=5.0, proname=陕西高速, jcs=0, htdname=LM-1}]}}}
+     */
 
 
 }

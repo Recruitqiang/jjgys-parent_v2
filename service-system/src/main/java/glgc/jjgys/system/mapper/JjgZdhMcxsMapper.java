@@ -38,4 +38,5 @@ public interface JjgZdhMcxsMapper extends BaseMapper<JjgZdhMcxs> {
 
     List<Map<String, Object>> selectqlmcxs(String proname,String bz,String lf, String qlzhq, String qlzhz, String zx, String zhq1, String zhz1);
 
+    int selectnum(String proname, String htd);
 }

@@ -44,6 +44,19 @@ public class ProjectController {
 
     }
 
+    @ApiOperation("校验项目")
+    @GetMapping("checkProname/{proname}")
+    public Result checkProname(@PathVariable String proname) {
+        QueryWrapper<Project> wrapper = new QueryWrapper<>();
+        wrapper.eq("proname",proname);
+        List<Project> list = projectService.list(wrapper);
+        if (list!=null && !list.isEmpty()){
+            return Result.ok().message("校验成功");
+        }else {
+            return Result.fail().message("校验失败");
+        }
+    }
+
     /**
      * 删除项目
      */
@@ -90,7 +103,7 @@ public class ProjectController {
             String proName = projectQueryVo.getProName();
             QueryWrapper<Project> wrapper=new QueryWrapper<>();
             if (!StringUtils.isEmpty(proName)){
-                wrapper.like("proName",proName);
+                wrapper.like("proname",proName);
             }
             wrapper.orderByDesc("create_time");
             //调用方法分页查询

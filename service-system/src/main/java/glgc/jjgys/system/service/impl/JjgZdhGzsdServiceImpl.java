@@ -1869,4 +1869,10 @@ public class JjgZdhGzsdServiceImpl extends ServiceImpl<JjgZdhGzsdMapper, JjgZdhG
         inputStream.close();
 
     }
+
+    @Override
+    public int selectnum(String proname, String htd) {
+        int selectnum = jjgZdhGzsdMapper.selectnum(proname, htd);
+        return selectnum;
+    }
 }

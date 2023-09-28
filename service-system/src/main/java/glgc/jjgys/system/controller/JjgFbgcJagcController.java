@@ -59,6 +59,7 @@ public class JjgFbgcJagcController {
         JjgFbgcUtils.deleteDirAndFiles(new File(workpath+"/交安工程"));
 
     }
+
     @ApiOperation("生成交安工程鉴定表")
     @PostMapping("generateJdb")
     public void generateJdb(@RequestBody CommonInfoVo commonInfoVo) throws Exception {
@@ -96,6 +97,7 @@ public class JjgFbgcJagcController {
         JjgFbgcUtils.deleteDirAndFiles(new File(filepath+"/交安工程"));
 
     }
+
     @ApiOperation("交安工程模板数据文件导入")
     @PostMapping("importjagc")
     public Result importjagc(@RequestParam("file") MultipartFile file, CommonInfoVo commonInfoVo) {

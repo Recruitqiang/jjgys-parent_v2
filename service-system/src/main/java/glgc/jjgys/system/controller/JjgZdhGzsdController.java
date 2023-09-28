@@ -42,6 +42,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/jjg/zdh/gzsd")
+@CrossOrigin
 public class JjgZdhGzsdController {
 
     @Autowired

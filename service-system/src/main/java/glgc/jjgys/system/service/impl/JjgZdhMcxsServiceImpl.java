@@ -2273,4 +2273,10 @@ public class JjgZdhMcxsServiceImpl extends ServiceImpl<JjgZdhMcxsMapper, JjgZdhM
 
 
     }
+
+    @Override
+    public int selectnum(String proname, String htd) {
+        int selectnum = jjgZdhMcxsMapper.selectnum(proname, htd);
+        return selectnum;
+    }
 }

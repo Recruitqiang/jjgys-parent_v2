@@ -38,4 +38,6 @@ public interface JjgZdhCzMapper extends BaseMapper<JjgZdhCz> {
     List<Map<String, Object>> selectsdcz(String proname, String bz, String lf, String sdzhq, String sdz, String zx, String zhq1, String zhz1);
 
     List<Map<String, Object>> selectqlcz(String proname, String bz, String lf, String qlzhq, String qlzhz, String zx, String zhq1, String zhz1);
+
+    int selectnum(String proname, String htd);
 }

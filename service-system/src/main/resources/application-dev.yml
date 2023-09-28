@@ -8,6 +8,7 @@ mybatis-plus:
 jjgys:
   path:
     filepath: D:/work/jjgys/opt/files
+    jgfilepath: D:/work/jjgys/opt/jgfiles
 
 
 spring:

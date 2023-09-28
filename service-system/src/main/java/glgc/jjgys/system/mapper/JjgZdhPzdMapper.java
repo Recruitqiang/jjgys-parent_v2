@@ -45,4 +45,6 @@ public interface JjgZdhPzdMapper extends BaseMapper<JjgZdhPzd> {
 
     Collection<? extends Map<String, Object>> selectqlpzd1(String proname, String bz, String lf, String qlzhq, String qlzhz, String zx, String zhq1, String zhz1);
 
+    int selectnum(String proname, String htd);
+
 }

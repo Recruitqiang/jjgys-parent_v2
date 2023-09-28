@@ -63,4 +63,8 @@
         ORDER BY mcxs.qdzh
     </select>
 
+    <select id="selectnum" resultType="java.lang.Integer" parameterType="java.lang.String">
+        select COUNT(DISTINCT(qdzh)) FROM jjg_zdh_cz where proname = #{proname} and htd = #{htd}
+    </select>
+
 </mapper>
