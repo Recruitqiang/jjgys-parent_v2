@@ -60,7 +60,7 @@ public class JjgFbgcQlgcXbJgccServiceImpl extends ServiceImpl<JjgFbgcQlgcXbJgccM
         wrapper.like("proname",proname);
         wrapper.like("htd",htd);
         wrapper.like("fbgc",fbgc);
-        wrapper.orderByAsc("dth");
+        wrapper.orderByAsc("qlmc","dth");
         List<JjgFbgcQlgcXbJgcc> data = jjgFbgcQlgcXbJgccMapper.selectList(wrapper);
 
         List<Map<String,Object>> selectnum = jjgFbgcQlgcXbJgccMapper.selectnum(proname, htd, fbgc);
@@ -416,7 +416,7 @@ public class JjgFbgcQlgcXbJgccServiceImpl extends ServiceImpl<JjgFbgcQlgcXbJgccM
      * @param row
      */
     private void fillCommonCellData(XSSFSheet sheet, int tableNum, int index, JjgFbgcQlgcXbJgcc row) {
-        sheet.getRow(tableNum*35+index).getCell(1).setCellValue(row.getLb());
+        sheet.getRow(tableNum*35+index).getCell(1).setCellValue(row.getDth());
         sheet.getRow(tableNum*35+index).getCell(2).setCellValue(row.getBw());
         sheet.getRow(tableNum*35+index).getCell(3).setCellValue(row.getLb());
         sheet.getRow(tableNum*35+index).getCell(4).setCellValue(Double.parseDouble(row.getSjz()));

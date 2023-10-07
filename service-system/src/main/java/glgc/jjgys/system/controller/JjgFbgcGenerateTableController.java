@@ -61,7 +61,7 @@ public class JjgFbgcGenerateTableController {
             for (String htd : htdss) {
                 CommonInfoVo commonInfoVo = new CommonInfoVo();
                 commonInfoVo.setProname(proname);
-                commonInfoVo.setHtd(htd);
+                commonInfoVo.setHtd(htd.trim());
                 jjgFbgcGenerateTablelService.generatePdb(commonInfoVo);
             }
             return Result.ok();
@@ -70,21 +70,21 @@ public class JjgFbgcGenerateTableController {
         }
     }
 
-    @RequestMapping(value = "/downloadpdb", method = RequestMethod.GET)
-    public void downloadpdb(HttpServletRequest request,HttpServletResponse response, Map<String,Object> htds) throws IOException {
+    @RequestMapping(value = "/downloadpdb", method = RequestMethod.POST)
+    public void downloadpdb(HttpServletRequest request,HttpServletResponse response, @RequestBody Map<String,Object> htds) throws IOException {
         String fileName = "00评定表.xlsx";
         String proname = htds.get("proname").toString();
         String[] htdss = htds.get("htds").toString().replace("[", "").replace("]", "").split(",");
         List<String> pathname = new ArrayList<>();
         for (String s : htdss) {
-            String p = filespath+ File.separator+proname+File.separator+s+File.separator+fileName;
+            String p = filespath+ File.separator+proname+File.separator+s.trim()+File.separator+fileName;
             File file = new File(p);
             if (file.exists()){
                 pathname.add(p);
             }
         }
         String zipName = "评定表";
-        JjgFbgcCommonUtils.downloadDifferentPathFile(request,response,zipName,pathname);
+        JjgFbgcCommonUtils.downloadDifferentPathFile(request,response,zipName,filespath+ File.separator+proname,pathname);
 
     }
 
@@ -92,8 +92,6 @@ public class JjgFbgcGenerateTableController {
     @ApiOperation("生成建设项目质量评定表")
     @PostMapping("generateJSZLPdb")
     public Result generateJSZLPdb(@RequestBody CommonInfoVo commonInfoVo) throws IOException {
-        String proname = commonInfoVo.getProname();
-        String htd = commonInfoVo.getHtd();
         jjgFbgcGenerateTablelService.generateJSZLPdb(commonInfoVo);
         return Result.ok();
     }

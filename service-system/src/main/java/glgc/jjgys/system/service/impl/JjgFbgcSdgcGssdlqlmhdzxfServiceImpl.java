@@ -90,14 +90,14 @@ public class JjgFbgcSdgcGssdlqlmhdzxfServiceImpl extends ServiceImpl<JjgFbgcSdgc
         wrapper.like("sdmc",sdmc);
         wrapper.orderByAsc("zh");
         List<JjgFbgcSdgcGssdlqlmhdzxf> data = jjgFbgcSdgcGssdlqlmhdzxfMapper.selectList(wrapper);
-        Integer level = projectService.getlevel(proname);
-        File f;
+        //Integer level = projectService.getlevel(proname);
+        File f = new File(filepath+File.separator+proname+File.separator+htd+File.separator+"53隧道沥青路面厚度-钻芯法-"+sdmc+".xlsx");
         //鉴定表要存放的路径
-        if (level ==0){
+        /*if (level ==0){
             f = new File(filepath+File.separator+proname+File.separator+htd+File.separator+"53隧道沥青路面厚度-钻芯法-"+sdmc+".xlsx");
         }else {
             f = new File(filepath+File.separator+proname+File.separator+htd+File.separator+"54隧道混凝土路面厚度-钻芯法-"+sdmc+".xlsx");
-        }
+        }*/
         //File f = new File(filepath+File.separator+proname+File.separator+htd+File.separator+"53隧道沥青路面厚度-钻芯法-"+sdmc+".xlsx");
         if (data == null || data.size()==0 ){
             return;
@@ -114,35 +114,35 @@ public class JjgFbgcSdgcGssdlqlmhdzxfServiceImpl extends ServiceImpl<JjgFbgcSdgc
                 //创建文件根目录
                 fdir.mkdirs();
             }
-            File directory = new File("src/main/resources/static");
+            File directory = new File("service-system/src/main/resources/static");
             String reportPath = directory.getCanonicalPath();
             String path;
-
-            if (level ==0){
+            path = reportPath + File.separator + "沥青路面厚度-钻芯法.xlsx";
+            /*if (level ==0){
                 path = reportPath + File.separator + "沥青路面厚度-钻芯法.xlsx";
 
             }else {
                 path = reportPath + File.separator + "普通公路沥青路面厚度-钻芯法.xlsx";
-            }
+            }*/
             Files.copy(Paths.get(path), new FileOutputStream(f));
             FileInputStream out = new FileInputStream(f);
             wb = new XSSFWorkbook(out);
             //路面左幅
-            lqlmysd(wb, zxzfdata, "路面左幅",level);
+            lqlmysd(wb, zxzfdata, "路面左幅");
             //主线右幅
-            lqlmysd(wb, zxyfdata, "路面右幅",level);
+            lqlmysd(wb, zxyfdata, "路面右幅");
             //隧道左幅
-            lqlmysd(wb, sdzfdata, "隧道左幅",level);
+            lqlmysd(wb, sdzfdata, "隧道左幅");
             //隧道右幅
-            lqlmysd(wb, sdyfdata, "隧道右幅",level);
+            lqlmysd(wb, sdyfdata, "隧道右幅");
             //桥面左幅
-            lqlmysd(wb, qlzfdata, "桥面左幅",level);
+            lqlmysd(wb, qlzfdata, "桥面左幅");
             //桥面右幅
-            lqlmysd(wb, qlyfdata, "桥面右幅",level);
+            lqlmysd(wb, qlyfdata, "桥面右幅");
             //路面匝道
-            lqlmysd(wb, zddata, "路面匝道",level);
+            lqlmysd(wb, zddata, "路面匝道");
 
-            if (level == 0){
+            //if (level == 0){
                 for (int j = 0; j < wb.getNumberOfSheets(); j++) {
                     if (shouldBeCalculate(wb.getSheetAt(j))) {
                         calculateCompactionSheet(wb.getSheetAt(j), wb.getSheetName(j));
@@ -160,7 +160,8 @@ public class JjgFbgcSdgcGssdlqlmhdzxfServiceImpl extends ServiceImpl<JjgFbgcSdgc
                 }
                 JjgFbgcCommonUtils.deleteEmptySheets(wb);
 
-            }else {
+            //}
+            /*else {
                 for (int j = 0; j < wb.getNumberOfSheets(); j++) {
                     if (shouldBeCalculate(wb.getSheetAt(j))) {
                         calculateThicknessSheet(wb.getSheetAt(j),level);
@@ -171,7 +172,7 @@ public class JjgFbgcSdgcGssdlqlmhdzxfServiceImpl extends ServiceImpl<JjgFbgcSdgc
                     JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
                 }
                 JjgFbgcCommonUtils.deletezxfEmptySheets(wb);
-            }
+            }*/
 
 
             FileOutputStream fileOut = new FileOutputStream(f);
@@ -643,10 +644,10 @@ public class JjgFbgcSdgcGssdlqlmhdzxfServiceImpl extends ServiceImpl<JjgFbgcSdgc
      * @param data
      * @param sheetname
      */
-    private void lqlmysd(XSSFWorkbook wb, List<JjgFbgcSdgcGssdlqlmhdzxf> data, String sheetname,int level) throws ParseException {
+    private void lqlmysd(XSSFWorkbook wb, List<JjgFbgcSdgcGssdlqlmhdzxf> data, String sheetname) throws ParseException {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy.MM.dd");
         if(data.size() > 0){
-            if (level == 0){
+            //if (level == 0){
                 createTable(wb, gettableNum(data.size()), sheetname);
                 XSSFSheet sheet = wb.getSheet(sheetname);
                 String type = data.get(0).getLqszd();
@@ -689,8 +690,8 @@ public class JjgFbgcSdgcGssdlqlmhdzxfServiceImpl extends ServiceImpl<JjgFbgcSdgc
                     sheet.getRow(index+i).getCell(14).setCellValue(Double.parseDouble(data.get(i).getZhdz4()));
                     sheet.getRow(index+i).getCell(16).setCellValue(Double.parseDouble(data.get(i).getZhdsjz()));
                 }
-            }
-            else {
+            //}
+            /*else {
                 createptTable(wb, gettptableNum(data.size()), sheetname);
                 XSSFSheet sheet = wb.getSheet(sheetname);
                 int index = 6;
@@ -729,7 +730,7 @@ public class JjgFbgcSdgcGssdlqlmhdzxfServiceImpl extends ServiceImpl<JjgFbgcSdgc
                     sheet.getRow(index+i).getCell(9).setCellValue(Double.parseDouble(data.get(i).getZhdsjz())<=60?-10:Double.parseDouble(data.get(i).getZhdsjz())*-0.15);
                 }
 
-            }
+            }*/
 
         }
     }
@@ -807,7 +808,7 @@ public class JjgFbgcSdgcGssdlqlmhdzxfServiceImpl extends ServiceImpl<JjgFbgcSdgc
         String htd = commonInfoVo.getHtd();
         //String fbgc = commonInfoVo.getFbgc();
         List<Map<String, Object>> mapList = new ArrayList<>();
-
+        Integer level = projectService.getlevel(proname);
         List<Map<String,Object>> sdmclist = jjgFbgcSdgcGssdlqlmhdzxfMapper.selectsdmc1(proname,htd);
         if (sdmclist.size()>0){
             for (Map<String, Object> m : sdmclist) {
@@ -819,9 +820,9 @@ public class JjgFbgcSdgcGssdlqlmhdzxfServiceImpl extends ServiceImpl<JjgFbgcSdgc
                     }
                 }
             }
-            return mapList;
         }
-        return null;
+        return mapList;
+        //return null;
     }
 
     /**

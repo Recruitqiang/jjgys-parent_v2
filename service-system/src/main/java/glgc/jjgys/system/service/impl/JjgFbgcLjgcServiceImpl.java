@@ -177,11 +177,6 @@ public class JjgFbgcLjgcServiceImpl implements JjgFbgcLjgcService {
                     f.delete();
                 }
             }
-
-
-
-
-
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -193,8 +188,11 @@ public class JjgFbgcLjgcServiceImpl implements JjgFbgcLjgcService {
     @Override
     public void importljgc( CommonInfoVo commonInfoVo,String workpath){
         String zippath=workpath;
+
         try {
+
             File unzipfile = new File(zippath);
+
             File[] filest = unzipfile.listFiles();
             File[] files=null;
             if(zippath.substring(zippath.length()-2).equals("暂存")){
@@ -209,6 +207,7 @@ public class JjgFbgcLjgcServiceImpl implements JjgFbgcLjgcService {
 
                 for(File f1:files1){
                     String name=f1.getName();
+
                     switch (name){
                         case "08涵洞砼强度实测数据.xlsx":
                             commonInfoVo.setFbgc("涵洞");
@@ -280,8 +279,6 @@ public class JjgFbgcLjgcServiceImpl implements JjgFbgcLjgcService {
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
-
-
     }
 
     @Transactional
@@ -371,7 +368,8 @@ public class JjgFbgcLjgcServiceImpl implements JjgFbgcLjgcService {
         list.add(new File(workpath+File.separator+htd+File.separator+"06路基小桥砼强度.xlsx"));
         list.add(new File(workpath+File.separator+htd+File.separator+"11路基支挡断面尺寸.xlsx"));
         list.add(new File(workpath+File.separator+htd+File.separator+"10路基支挡砼强度.xlsx"));
-        list.add(new File(workpath+File.separator+htd+File.separator+"00评定表.xlsx"));
+        //list.add(new File(workpath+File.separator+htd+File.separator+"00评定表.xlsx"));
         JjgFbgcUtils.addFile(list,workpath+File.separator+"合同段鉴定表"+File.separator+htd,workpath+File.separator+htd);
     }
+
 }

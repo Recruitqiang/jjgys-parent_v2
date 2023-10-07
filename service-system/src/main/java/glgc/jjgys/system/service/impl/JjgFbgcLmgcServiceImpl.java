@@ -167,7 +167,7 @@ public class JjgFbgcLmgcServiceImpl implements JjgFbgcLmgcService {
     public void generateJdb(CommonInfoVo commonInfoVo) throws IOException{
         try {
             commonInfoVo.setFbgc("路面工程");
-            //jjgFbgcLmgcLqlmysdService.generateJdb(commonInfoVo);
+            jjgFbgcLmgcLqlmysdService.generateJdb(commonInfoVo);
             jjgFbgcLmgcLmwcService.generateJdb(commonInfoVo);
             jjgFbgcLmgcLmwcLcfService.generateJdb(commonInfoVo);
 
@@ -236,7 +236,7 @@ public class JjgFbgcLmgcServiceImpl implements JjgFbgcLmgcService {
         list.add(new File(workpath+File.separator+htd+File.separator+"22沥青路面厚度-钻芯法.xlsx"));
         list.add(new File(workpath+File.separator+htd+File.separator+"23混凝土路面厚度-钻芯法.xlsx"));
         list.add(new File(workpath+File.separator+htd+File.separator+"24路面横坡.xlsx"));
-        list.add(new File(workpath+File.separator+htd+File.separator+"00评定表.xlsx"));
+        //list.add(new File(workpath+File.separator+htd+File.separator+"00评定表.xlsx"));
         List<Map<String,String>> lmlx = jjgFbgcLmgcLmhpMapper.selectlx(proname,htd); //[{lxlx=主线}, {lxlx=岳口枢纽立交}, {lxlx=延壶路小桥连接线}, {lxlx=延长互通式立交}]
         if (lmlx.size()>0){
             for (Map<String, String> map : lmlx) {

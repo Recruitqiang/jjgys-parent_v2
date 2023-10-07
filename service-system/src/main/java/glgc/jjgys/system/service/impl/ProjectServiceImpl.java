@@ -79,7 +79,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
         dpSysMenu.setType(1);
         dpSysMenu.setPath("dp");
         dpSysMenu.setComponent("sysproject/projectInfo/dp");
-        dpSysMenu.setName("大屏");
+        dpSysMenu.setName("数据可视化");
         dpSysMenu.setSortValue(5);
 
 

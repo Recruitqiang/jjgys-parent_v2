@@ -379,7 +379,7 @@ public class JjgFbgcQlgcQmhpServiceImpl extends ServiceImpl<JjgFbgcQlgcQmhpMappe
             //创建文件根目录
             fdir.mkdirs();
         }
-        File directory = new File("src/main/resources/static");
+        File directory = new File("service-system/src/main/resources/static");
         String reportPath = directory.getCanonicalPath();
         String name = "横坡.xlsx";
         String path = reportPath + File.separator + name;

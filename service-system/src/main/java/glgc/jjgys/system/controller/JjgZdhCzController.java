@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -55,12 +56,18 @@ public class JjgZdhCzController {
 
     @RequestMapping(value = "/download", method = RequestMethod.GET)
     public void downloadExport(HttpServletResponse response, String proname, String htd) throws IOException {
-        String fileName = ".xlsx";
-        String p = filespath+ File.separator+proname+File.separator+htd+File.separator+fileName;
-        File file = new File(p);
-        if (file.exists()){
-            JjgFbgcCommonUtils.download(response,p,fileName);
+        List<Map<String,Object>> lxlist = jjgZdhCzService.selectlx(proname,htd);
+        List<String> fileName = new ArrayList<>();
+        for (Map<String, Object> map : lxlist) {
+            String lxbs = map.get("lxbs").toString();
+            if (lxbs.equals("主线")){
+                fileName.add("14路面车辙");;
+            }else {
+                fileName.add("69互通车辙-"+lxbs);
+            }
         }
+        String zipname = "车辙鉴定表";
+        JjgFbgcCommonUtils.batchDowndFile(response,zipname,fileName,filespath+File.separator+proname+File.separator+htd);
     }
 
     @ApiOperation("生成车辙鉴定表")
@@ -80,8 +87,8 @@ public class JjgZdhCzController {
 
     @ApiOperation("车辙模板文件导出")
     @GetMapping("exportcz")
-    public void exportcz(HttpServletResponse response,String cdsl) throws IOException {
-        jjgZdhCzService.exportcz(response,cdsl);
+    public void exportcz(HttpServletResponse response,@RequestParam String cd) throws IOException {
+        jjgZdhCzService.exportcz(response,cd);
     }
 
 

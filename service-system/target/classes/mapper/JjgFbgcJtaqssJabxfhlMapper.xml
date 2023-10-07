@@ -4,11 +4,11 @@
 
 
     <select id="selectnum" resultType="java.lang.Integer" parameterType="java.lang.String">
-        select COUNT(DISTINCT(zh)) FROM jjg_fbgc_jtaqss_jabxfhl where proname = #{proname} and htd = #{htd}
+        select COUNT(DISTINCT(wzjlx)) FROM jjg_fbgc_jtaqss_jabxfhl where proname = #{proname} and htd = #{htd}
     </select>
 
     <select id="selectnumname" resultType="java.lang.Integer" parameterType="java.lang.String">
-        select COUNT(DISTINCT(zh)) FROM jjg_fbgc_jtaqss_jabxfhl where proname = #{proname}
+        select COUNT(DISTINCT(wzjlx)) FROM jjg_fbgc_jtaqss_jabxfhl where proname = #{proname}
     </select>
 
 </mapper>

@@ -84,7 +84,7 @@ public class JjgJgglImpl extends ServiceImpl<JjgJgglMapper, Object> implements J
             String sheetName5 = "收费站清单";
             ExcelUtil.writeExcelWithSheets(response, null, fileName, sheetName1, new QlVo())
                     .write(null, sheetName2, new SdVo())
-                    .write(null, sheetName3, new FhlmVo())
+                    .write(null, sheetName3, new LjxVo())
                     .write(null, sheetName4, new HntlmzdVo())
                     .write(null, sheetName5, new SfzVo())
                     .finish();
@@ -128,6 +128,20 @@ public class JjgJgglImpl extends ServiceImpl<JjgJgglMapper, Object> implements J
             }
         }).build();
 
+        ReadSheet sheetljx = EasyExcel.readSheet(4).head(LjxVo.class).registerReadListener(new ExcelHandler<LjxVo>(LjxVo.class) {
+            @Override
+            public void handle(List<LjxVo> dataList) {
+                for(LjxVo ljx: dataList)
+                {
+                    JjgLqsJgLjx jjgLjx = new JjgLqsJgLjx();
+                    BeanUtils.copyProperties(ljx,jjgLjx);
+                    jjgLjx.setProname(projectname);
+                    jjgLjx.setCreateTime(new Date());
+                    jjgLqsJgLjxMapper.insert(jjgLjx);
+                }
+            }
+        }).build();
+
         ReadSheet sheethntlmzd = EasyExcel.readSheet(2).head(HntlmzdVo.class).registerReadListener(new ExcelHandler<HntlmzdVo>(HntlmzdVo.class) {
             @Override
             public void handle(List<HntlmzdVo> dataList) {
@@ -153,21 +167,9 @@ public class JjgJgglImpl extends ServiceImpl<JjgJgglMapper, Object> implements J
                 }
             }
         }).build();
-        ReadSheet sheetljx = EasyExcel.readSheet(4).head(LjxVo.class).registerReadListener(new ExcelHandler<LjxVo>(LjxVo.class) {
-            @Override
-            public void handle(List<LjxVo> dataList) {
-                for(LjxVo ljx: dataList)
-                {
-                    JjgLqsJgLjx jjgLjx = new JjgLqsJgLjx();
-                    BeanUtils.copyProperties(ljx,jjgLjx);
-                    jjgLjx.setProname(projectname);
-                    jjgLjx.setCreateTime(new Date());
-                    jjgLqsJgLjxMapper.insert(jjgLjx);
-                }
-            }
-        }).build();
 
-        excelReader.read(sheetql,sheetsd,sheethntlmzd,sheetsfz,sheetljx);
+
+        excelReader.read(sheetql,sheetsd,sheetljx,sheethntlmzd,sheetsfz);
         excelReader.finish();
 
     }

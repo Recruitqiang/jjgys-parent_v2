@@ -518,15 +518,43 @@ public class JjgFbgcLmgcLqlmysdServiceImpl extends ServiceImpl<JjgFbgcLmgcLqlmys
      * @param row
      */
     private void fillzxsmcCommonCellData(XSSFSheet sheet, int index, JjgFbgcLmgcLqlmysd row) {
-        sheet.getRow(index).getCell(3).setCellValue(Double.parseDouble(row.getGzsjzl()));
-        sheet.getRow(index).getCell(4).setCellValue(Double.parseDouble(row.getSjszzl()));
-        sheet.getRow(index).getCell(5).setCellValue(Double.parseDouble(row.getSjbgzl()));
-        sheet.getRow(index).getCell(7).setCellValue(Double.parseDouble(row.getSysbzmd()));
-        sheet.getRow(index).getCell(8).setCellValue(Double.parseDouble(row.getZdllmd()));
-        sheet.getRow(index).getCell(11).setCellValue(Double.parseDouble(row.getSysbzmdgdz())-1);
-        sheet.getRow(index).getCell(12).setCellValue(Double.parseDouble(row.getZdllmdgdz())-1);
-        sheet.getRow(sheet.getLastRowNum()-1).getCell(2).setCellValue(Double.parseDouble(row.getSysbzmdgdz()));
-        sheet.getRow(sheet.getLastRowNum()-1).getCell(8).setCellValue(Double.parseDouble(row.getZdllmdgdz()));
+        if(!"".equals(row.getGzsjzl()) && row.getGzsjzl() != null){
+            sheet.getRow(index).getCell(3).setCellValue(Double.parseDouble(row.getGzsjzl()));
+        }else {
+            sheet.getRow(index).getCell(3).setCellValue("-");
+        }
+        if(!"".equals(row.getSjszzl()) && row.getSjszzl() != null){
+            sheet.getRow(index).getCell(4).setCellValue(Double.parseDouble(row.getSjszzl()));
+        }else {
+            sheet.getRow(index).getCell(4).setCellValue("-");
+        }
+        if(!"".equals(row.getSjbgzl()) && row.getSjbgzl() != null){
+            sheet.getRow(index).getCell(5).setCellValue(Double.parseDouble(row.getSjbgzl()));
+        }else {
+            sheet.getRow(index).getCell(5).setCellValue("-");
+        }
+        if(!"".equals(row.getSysbzmd()) && row.getSysbzmd() != null){
+            sheet.getRow(index).getCell(7).setCellValue(Double.parseDouble(row.getSysbzmd()));
+        }else {
+            sheet.getRow(index).getCell(7).setCellValue("-");
+        }
+        if(!"".equals(row.getZdllmd()) && row.getZdllmd() != null){
+            sheet.getRow(index).getCell(8).setCellValue(Double.parseDouble(row.getZdllmd()));
+        }else {
+            sheet.getRow(index).getCell(8).setCellValue("-");
+        }
+        if(!"".equals(row.getSysbzmdgdz()) && row.getSysbzmdgdz() != null){
+            sheet.getRow(index).getCell(11).setCellValue(Double.parseDouble(row.getSysbzmdgdz()));
+        }
+        if(!"".equals(row.getZdllmdgdz()) && row.getZdllmdgdz() != null){
+            sheet.getRow(index).getCell(12).setCellValue(Double.parseDouble(row.getZdllmdgdz()));
+        }
+        if(!"".equals(row.getSysbzmdgdz()) && row.getSysbzmdgdz() != null){
+            sheet.getRow(sheet.getLastRowNum()-1).getCell(2).setCellValue(Double.parseDouble(row.getSysbzmdgdz()));
+        }
+        if(!"".equals(row.getZdllmdgdz()) && row.getZdllmdgdz() != null){
+            sheet.getRow(sheet.getLastRowNum()-1).getCell(8).setCellValue(Double.parseDouble(row.getZdllmdgdz()));
+        }
 
     }
 
@@ -973,30 +1001,49 @@ public class JjgFbgcLmgcLqlmysdServiceImpl extends ServiceImpl<JjgFbgcLmgcLqlmys
         sheet.getRow(index).getCell(1).setCellValue(zfdata.getQywz());
         if(!"".equals(zfdata.getGzsjzl()) && zfdata.getGzsjzl() != null){
             sheet.getRow(index).getCell(3).setCellValue(Double.parseDouble(zfdata.getGzsjzl()));
+        }else {
+            sheet.getRow(index).getCell(3).setCellValue("-");
         }
         if(!"".equals(zfdata.getSjszzl()) && zfdata.getSjszzl()!=null){
             sheet.getRow(index).getCell(4).setCellValue(Double.parseDouble(zfdata.getSjszzl()));
+        }else {
+            sheet.getRow(index).getCell(4).setCellValue("-");
         }
         if(!"".equals(zfdata.getSjbgzl()) && zfdata.getSjbgzl()!=null){
             sheet.getRow(index).getCell(5).setCellValue(Double.parseDouble(zfdata.getSjbgzl()));
+        }else {
+            sheet.getRow(index).getCell(5).setCellValue("-");
         }
         if(!"".equals(zfdata.getSysbzmd()) && zfdata.getSysbzmd()!=null){
             sheet.getRow(index).getCell(7).setCellValue(Double.parseDouble(zfdata.getSysbzmd()));
+        }else {
+            sheet.getRow(index).getCell(7).setCellValue("-");
         }
 
         if(!"".equals(zfdata.getZdllmd()) && zfdata.getZdllmd()!=null){
             sheet.getRow(index).getCell(8).setCellValue(Double.parseDouble(zfdata.getZdllmd()));
+        }else {
+            sheet.getRow(index).getCell(8).setCellValue("-");
         }
 
         if(!"".equals(zfdata.getSysbzmdgdz()) && zfdata.getSysbzmdgdz()!=null){
             sheet.getRow(index).getCell(11).setCellValue(Double.parseDouble(zfdata.getSysbzmdgdz()));
+        }else {
+            sheet.getRow(index).getCell(11).setCellValue("-");
         }
 
         if(!"".equals(zfdata.getZdllmdgdz()) && zfdata.getZdllmdgdz()!=null){
             sheet.getRow(index).getCell(12).setCellValue(Double.parseDouble(zfdata.getZdllmdgdz()));
+        }else {
+            sheet.getRow(index).getCell(12).setCellValue("-");
         }
-        sheet.getRow(sheet.getLastRowNum()-1).getCell(2).setCellValue(Double.parseDouble(zfdata.getSysbzmdgdz()));
-        sheet.getRow(sheet.getLastRowNum()-1).getCell(8).setCellValue(Double.parseDouble(zfdata.getZdllmdgdz()));
+        if(!"".equals(zfdata.getSysbzmdgdz()) && zfdata.getSysbzmdgdz()!=null){
+            sheet.getRow(sheet.getLastRowNum()-1).getCell(2).setCellValue(Double.parseDouble(zfdata.getSysbzmdgdz()));
+        }
+        if(!"".equals(zfdata.getZdllmdgdz()) && zfdata.getZdllmdgdz()!=null){
+            sheet.getRow(sheet.getLastRowNum()-1).getCell(8).setCellValue(Double.parseDouble(zfdata.getZdllmdgdz()));
+
+        }
     }
 
 

@@ -239,6 +239,11 @@ public class JjgFbgcJagcServiceImpl implements JjgFbgcJagcService {
 
     @Override
     public void getFile(String workpath, String proname, String htd) {
+        File fdir = new File(workpath+File.separator+"合同段鉴定表"+File.separator+htd);
+        if (!fdir.exists()) {
+            //创建文件根目录
+            fdir.mkdirs();
+        }
         List<File> list = new ArrayList<>();
         list.add(new File(workpath +File.separator+htd+File.separator+ "57交安标线厚度.xlsx"));
         list.add(new File(workpath +File.separator+htd+File.separator+ "57交安标线白线逆反射系数.xlsx"));
@@ -247,8 +252,9 @@ public class JjgFbgcJagcServiceImpl implements JjgFbgcJagcService {
         list.add(new File(workpath +File.separator+htd+File.separator+ "58交安钢防护栏.xlsx"));
         list.add(new File(workpath +File.separator+htd+File.separator+ "59交安砼护栏强度.xlsx"));
         list.add(new File(workpath +File.separator+htd+File.separator+ "60交安砼护栏断面尺寸.xlsx"));
-        list.add(new File(workpath +File.separator+htd+File.separator+ "00评定表.xlsx"));
+        //list.add(new File(workpath +File.separator+htd+File.separator+ "00评定表.xlsx"));
         //JjgFbgcUtils.addFile(list, workpath + "/交安工程/防护栏", workpath);
+        //JjgFbgcUtils.addFile(list,workpath+File.separator+"合同段鉴定表"+File.separator+htd,workpath+htd);
         JjgFbgcUtils.addFile(list,workpath+File.separator+"合同段鉴定表"+File.separator+htd,workpath+File.separator+htd);
         list.clear();
     }

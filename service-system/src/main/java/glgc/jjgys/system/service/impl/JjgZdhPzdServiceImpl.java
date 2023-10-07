@@ -577,7 +577,7 @@ public class JjgZdhPzdServiceImpl extends ServiceImpl<JjgZdhPzdMapper, JjgZdhPzd
             //创建文件根目录
             fdir.mkdirs();
         }
-        File directory = new File("src/main/resources/static");
+        File directory = new File("service-system/src/main/resources/static");
         String reportPath = directory.getCanonicalPath();
         String filename = "";
 
@@ -685,8 +685,8 @@ public class JjgZdhPzdServiceImpl extends ServiceImpl<JjgZdhPzdMapper, JjgZdhPzd
 
         }
 
-        //String[] arr = {"混凝土收费站","混凝土匝道隧道","沥青匝道隧道","混凝土匝道桥","沥青匝道桥","沥青匝道","混凝土匝道","混凝土隧道","沥青隧道","混凝土桥","沥青桥","混凝土路面","沥青路面"};
-        String[] arr = {"混凝土隧道","沥青隧道","混凝土桥","沥青桥","混凝土路面","沥青路面"};
+        String[] arr = {"混凝土收费站","混凝土匝道隧道","沥青匝道隧道","混凝土匝道桥","沥青匝道桥","沥青匝道","混凝土匝道","混凝土隧道","沥青隧道","混凝土桥","沥青桥","混凝土路面","沥青路面"};
+        //String[] arr = {"混凝土隧道","沥青隧道","混凝土桥","沥青桥","混凝土路面","沥青路面"};
         for (int i = 0; i < arr.length; i++) {
             if (shouldBeCalculate(wb.getSheet(arr[i]))) {
                 calculateAsphaltPavementSheet(wb,wb.getSheet(arr[i]),cdsl);
@@ -1550,7 +1550,7 @@ public class JjgZdhPzdServiceImpl extends ServiceImpl<JjgZdhPzdMapper, JjgZdhPzd
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         SimpleDateFormat outputDateFormat = new SimpleDateFormat("yyyy.MM.dd");
         if (data != null && !data.isEmpty()) {
-            createTable(getNum(data,cdsl)/2, wb, sheetname, cdsl);
+            createTable(getNum(data,cdsl)/2+10, wb, sheetname, cdsl);
             XSSFSheet sheet = wb.getSheet(sheetname);
 
             String time = String.valueOf(data.get(0).get("createTime")) ;
@@ -2348,7 +2348,7 @@ public class JjgZdhPzdServiceImpl extends ServiceImpl<JjgZdhPzdMapper, JjgZdhPzd
             for (Map<String, Object> map : lxlist) {
                 String zx = map.get("lxbs").toString();
                 int num = jjgZdhPzdMapper.selectcdnum(proname,htd,zx);
-                List<Map<String, Object>> looksdjdb = lookjdb(proname, htd, zx,num/2);
+                List<Map<String, Object>> looksdjdb = lookjdb(proname, htd, zx,num);
                 mapList.addAll(looksdjdb);
             }
             return mapList;
@@ -2385,7 +2385,7 @@ public class JjgZdhPzdServiceImpl extends ServiceImpl<JjgZdhPzdMapper, JjgZdhPzd
 
                     XSSFCell xmname = slSheet.getRow(1).getCell(5);//项目名
                     XSSFCell htdname = slSheet.getRow(1).getCell(cds*4+4);//合同段名
-                    Map map = new HashMap();
+
 
                     if (proname.equals(xmname.toString()) && htd.equals(htdname.toString())) {
                         slSheet.getRow(5).getCell(cds*4+9).setCellType(CellType.STRING);//总点数
@@ -2393,11 +2393,12 @@ public class JjgZdhPzdServiceImpl extends ServiceImpl<JjgZdhPzdMapper, JjgZdhPzd
 
                         slSheet.getRow(5).getCell(cds*4+11).setCellType(CellType.STRING);
                         slSheet.getRow(5).getCell(cds*4+12).setCellType(CellType.STRING);
-
+                        slSheet.getRow(3).getCell(5).setCellType(CellType.STRING);
                         double zds = Double.valueOf(slSheet.getRow(5).getCell(cds*4+9).getStringCellValue());
                         double hgds = Double.valueOf(slSheet.getRow(5).getCell(cds*4+10).getStringCellValue());
                         String zdsz1 = decf.format(zds);
                         String hgdsz1 = decf.format(hgds);
+                        Map map = new HashMap();
                         map.put("检测项目", zx);
                         map.put("路面类型", wb.getSheetName(j));
                         map.put("总点数", zdsz1);
@@ -2406,8 +2407,9 @@ public class JjgZdhPzdServiceImpl extends ServiceImpl<JjgZdhPzdMapper, JjgZdhPzd
                         map.put("合格率", zds!=0 ? df.format(hgds/zds*100) : 0);
                         map.put("Max",slSheet.getRow(5).getCell(cds*4+11).getStringCellValue());
                         map.put("Min",slSheet.getRow(5).getCell(cds*4+12).getStringCellValue());
+                        jgmap.add(map);
                     }
-                    jgmap.add(map);
+
 
                 }
             }
@@ -2491,5 +2493,11 @@ public class JjgZdhPzdServiceImpl extends ServiceImpl<JjgZdhPzdMapper, JjgZdhPzd
     public int selectnum(String proname, String htd) {
         int selectnum = jjgZdhPzdMapper.selectnum(proname, htd);
         return selectnum;
+    }
+
+    @Override
+    public List<Map<String, Object>> selectlx(String proname, String htd) {
+        List<Map<String,Object>> lxlist = jjgZdhPzdMapper.selectlx(proname,htd);
+        return lxlist;
     }
 }

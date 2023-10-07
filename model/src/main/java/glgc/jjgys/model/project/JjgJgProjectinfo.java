@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableField;
 import java.io.Serializable;
+import java.util.Date;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -34,11 +35,14 @@ public class JjgJgProjectinfo implements Serializable {
     @TableField("proname")
     private String proname;
 
+    @TableField("xmqc")
+    private String xmqc;
+
     @TableField("grade")
     private String grade;
 
     @TableField("create_time")
-    private LocalDate createTime;
+    private Date createTime;
 
 
 }

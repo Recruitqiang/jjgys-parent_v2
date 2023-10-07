@@ -45,25 +45,29 @@ public class JjgFbgcQlgcQmpzdVo extends BaseRowModel {
     @ExcelProperty(value = "桥名" ,index = 1)
     private String qm;
 
+    @ColumnWidth(23)
+    @ExcelProperty(value = "桩号" ,index = 2)
+    private String zh;
+
     /**
      * 位置
      */
     @ColumnWidth(23)
-    @ExcelProperty(value = "位置" ,index = 2)
+    @ExcelProperty(value = "位置" ,index = 3)
     private String wz;
 
     /**
      * 设计值
      */
     @ColumnWidth(23)
-    @ExcelProperty(value = "设计值" ,index = 3)
+    @ExcelProperty(value = "设计值" ,index = 4)
     private String sjz;
 
     /**
      * 实测值
      */
     @ColumnWidth(23)
-    @ExcelProperty(value = "实测值" ,index = 4)
+    @ExcelProperty(value = "实测值" ,index = 5)
     private String scz;
 
 

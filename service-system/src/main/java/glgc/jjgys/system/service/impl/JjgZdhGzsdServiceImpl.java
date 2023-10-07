@@ -516,7 +516,7 @@ public class JjgZdhGzsdServiceImpl extends ServiceImpl<JjgZdhGzsdMapper, JjgZdhG
             //创建文件根目录
             fdir.mkdirs();
         }
-        File directory = new File("src/main/resources/static");
+        File directory = new File("service-system/src/main/resources/static");
         String reportPath = directory.getCanonicalPath();
         String filename = "";
         String sheetlmname = "";
@@ -1766,7 +1766,7 @@ public class JjgZdhGzsdServiceImpl extends ServiceImpl<JjgZdhGzsdMapper, JjgZdhG
 
                     XSSFCell xmname = slSheet.getRow(1).getCell(2);//项目名
                     XSSFCell htdname = slSheet.getRow(1).getCell(cds*3+4);//合同段名
-                    Map map = new HashMap();
+
 
                     if (proname.equals(xmname.toString()) && htd.equals(htdname.toString())) {
                         slSheet.getRow(0).getCell(4*cds+10).setCellType(CellType.STRING);//总点数
@@ -1780,6 +1780,7 @@ public class JjgZdhGzsdServiceImpl extends ServiceImpl<JjgZdhGzsdMapper, JjgZdhG
                         double hgds = Double.valueOf(slSheet.getRow(0).getCell(4*cds+11).getStringCellValue());
                         String zdsz1 = decf.format(zds);
                         String hgdsz1 = decf.format(hgds);
+                        Map map = new HashMap();
                         map.put("检测项目", zx);
                         map.put("路面类型", wb.getSheetName(j));
                         map.put("总点数", zdsz1);
@@ -1787,8 +1788,9 @@ public class JjgZdhGzsdServiceImpl extends ServiceImpl<JjgZdhGzsdMapper, JjgZdhG
                         map.put("合格点数", hgdsz1);
                         map.put("最大值", slSheet.getRow(0).getCell(4*cds+6).getStringCellValue());
                         map.put("最小值", slSheet.getRow(0).getCell(4*cds+7).getStringCellValue());
+                        jgmap.add(map);
                     }
-                    jgmap.add(map);
+
 
                 }
             }
@@ -1874,5 +1876,11 @@ public class JjgZdhGzsdServiceImpl extends ServiceImpl<JjgZdhGzsdMapper, JjgZdhG
     public int selectnum(String proname, String htd) {
         int selectnum = jjgZdhGzsdMapper.selectnum(proname, htd);
         return selectnum;
+    }
+
+    @Override
+    public List<Map<String, Object>> selectlx(String proname, String htd) {
+        List<Map<String,Object>> lxlist = jjgZdhGzsdMapper.selectlx(proname,htd);
+        return lxlist;
     }
 }

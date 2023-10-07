@@ -45,7 +45,7 @@ public class JjgFbgcCommonUtils {
         response.reset();
         response.setHeader("Content-disposition", "attachment; filename=" + downloadName);
         response.setContentType("application/zip;charset=utf-8");
-        //response.setCharacterEncoding("utf-8");
+        response.setCharacterEncoding("utf-8");
 
         //设置压缩流：直接写入response，实现边压缩边下载
         ZipOutputStream zipOs = null;
@@ -69,6 +69,76 @@ public class JjgFbgcCommonUtils {
                 }
                 //添加ZipEntry，并将ZipEntry写入文件流
                 zipOs.putNextEntry(new ZipEntry(name));
+                zipOs.setEncoding("gbk");
+                os = new DataOutputStream(zipOs);
+                FileInputStream fs = new FileInputStream(file);
+                byte[] b = new byte[100];
+                int length;
+                //读入需要下载的文件的内容，打包到zip文件
+                while ((length = fs.read(b)) != -1) {
+                    os.write(b, 0, length);
+                }
+                //关闭流
+                fs.close();
+                zipOs.closeEntry();
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            //关闭流
+            try {
+                if (os != null) {
+                    os.flush();
+                    os.close();
+                }
+                if (zipOs != null) {
+                    zipOs.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+    /**
+     *
+     * @param response
+     * @param zipName 压缩包的名字
+     * @param list 文件名
+     */
+    public static void batchDowndFile( HttpServletResponse response,String zipName,List list,String filepath) throws UnsupportedEncodingException {
+        //设置压缩包的名字
+        String downloadName = URLEncoder.encode(zipName+".zip", "UTF-8");
+        response.reset();
+        response.setHeader("Content-disposition", "attachment; filename=" + downloadName);
+        response.setContentType("application/zip;charset=utf-8");
+        response.setCharacterEncoding("utf-8");
+
+        //设置压缩流：直接写入response，实现边压缩边下载
+        ZipOutputStream zipOs = null;
+        //循环将文件写入压缩流
+        DataOutputStream os = null;
+        //文件
+        File file;
+        try {
+            zipOs = new ZipOutputStream(new BufferedOutputStream(response.getOutputStream()));
+            //设置压缩方法
+            zipOs.setMethod(ZipOutputStream.DEFLATED);
+            //遍历文件信息（主要获取文件名/文件路径等）
+            for (int i=0;i<list.size();i++) {
+                String name = list.get(i)+".xlsx";
+                String path = filepath+File.separator+list.get(i)+".xlsx";
+                System.out.println(path);
+
+                file = new File(path);
+                if (!file.exists()) {
+                    break;
+                }
+                //添加ZipEntry，并将ZipEntry写入文件流
+                zipOs.putNextEntry(new ZipEntry(name));
+                zipOs.setEncoding("gbk");
                 os = new DataOutputStream(zipOs);
                 FileInputStream fs = new FileInputStream(file);
                 byte[] b = new byte[100];
@@ -523,7 +593,7 @@ public class JjgFbgcCommonUtils {
         response.reset();
         response.setHeader("Content-disposition", "attachment; filename=" + downloadName);
         response.setContentType("application/zip;charset=utf-8");
-        //response.setCharacterEncoding("utf-8");
+        response.setCharacterEncoding("utf-8");
 
         //设置压缩流：直接写入response，实现边压缩边下载
         ZipOutputStream zipOs = null;
@@ -535,7 +605,7 @@ public class JjgFbgcCommonUtils {
             //ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(zipFileName), Charset.forName("UTF-8"));
 
             zipOs = new ZipOutputStream(new BufferedOutputStream(response.getOutputStream()));
-            zipOs.setEncoding("UTF-8");
+            zipOs.setEncoding("gbk");
             //zipOs = new ZipOutputStream(new BufferedOutputStream(response.getOutputStream()), Charset.forName("UTF-8"));
 
             //设置压缩方法
@@ -589,8 +659,8 @@ public class JjgFbgcCommonUtils {
         }
     }
 
-    public static void downloadDifferentPathFile(HttpServletRequest request, HttpServletResponse response, String zipName, List<String> pathname) throws IOException {
-        //设置压缩包的名字
+    public static void downloadDifferentPathFile(HttpServletRequest request, HttpServletResponse response, String zipName, String filespath, List<String> pathname) throws IOException {
+        //设置压缩包的名字pathname = {ArrayList@12144}  size = 1
         String downloadName = URLEncoder.encode(zipName+".zip", "UTF-8");
         response.reset();
         response.setHeader("Content-disposition", "attachment; filename=" + downloadName);
@@ -603,11 +673,15 @@ public class JjgFbgcCommonUtils {
         //文件
         File file;
         // 创建临时文件夹
-        File tempDir = Files.createTempDirectory(Paths.get(filespath),"tempDir").toFile();
-
+        System.out.println(filespath);
+        //File tempDir = Files.createTempDirectory(Paths.get(filespath),"tempDir").toFile();
+        Path tempDirPath = Files.createTempDirectory(Paths.get(filespath), "tempDir");
+        File tempDir = tempDirPath.toFile();
+        // 创建临时文件夹
+        tempDir.mkdir();
         try {
             zipOs = new ZipOutputStream(new BufferedOutputStream(response.getOutputStream()));
-            zipOs.setEncoding("UTF-8");
+            zipOs.setEncoding("GBK");
             //设置压缩方法
             zipOs.setMethod(ZipOutputStream.DEFLATED);
             //遍历文件信息（主要获取文件名/文件路径等）
@@ -616,22 +690,28 @@ public class JjgFbgcCommonUtils {
                 if (!file.exists()) {
                     continue;
                 }
+                //创建合同段目录
+                String result = "";
+                String folderName  = pathname.get(i);
+                int lastSlashIndex = folderName.lastIndexOf(File.separator);
+                int secondToLastSlashIndex = folderName.lastIndexOf(File.separator, lastSlashIndex - 1);
+                if (lastSlashIndex != -1 && secondToLastSlashIndex != -1) {
+                    result = folderName.substring(secondToLastSlashIndex + 1, lastSlashIndex);
+                }
+                Path subFolderPath = tempDirPath.resolve(result);
+                Files.createDirectory(subFolderPath);
                 // 获取文件名
                 String fileName = file.getName();//00评定表.xlsx
-                // 复制原文件到临时文件
-                Files.copy(file.toPath(), tempDir.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                // 修改文件名
-                String newFileName = i+fileName;
-                File renamedFile = new File(file.getParent(), newFileName);
+                // 复制原文件到临时文件夹 子文件夹中
+                Path tempFilePath = subFolderPath.resolve(fileName);
+                Files.copy(file.toPath(), tempFilePath, StandardCopyOption.REPLACE_EXISTING);
 
-                // 重命名临时文件
-                file.renameTo(renamedFile);
+                Path relativePath = tempDirPath.relativize(tempFilePath);
+                // 将复制后的文件添加到压缩流中
+                zipOs.putNextEntry(new ZipEntry(relativePath.toString()));
 
-                // 将修改后的文件添加到压缩流中
-                zipOs.putNextEntry(new ZipEntry(newFileName));
-
-                // 读取修改后的文件内容，写入压缩流
-                FileInputStream fis = new FileInputStream(renamedFile);
+                //读取复制后的文件内容，写入压缩流
+                FileInputStream fis = new FileInputStream(tempFilePath.toFile());
                 int length;
                 byte[] buffer = new byte[4096];
                 while ((length = fis.read(buffer)) != -1) {

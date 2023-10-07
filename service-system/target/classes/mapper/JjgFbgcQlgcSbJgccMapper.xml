@@ -3,15 +3,15 @@
 <mapper namespace="glgc.jjgys.system.mapper.JjgFbgcQlgcSbJgccMapper">
 
     <select id="selectnum" resultType="java.util.Map" parameterType="java.lang.String">
-        SELECT COUNT(*) num from jjg_fbgc_qlgc_sb_jgcc where proname = #{proname} and htd = #{htd} and fbgc= #{fbgc} GROUP BY qlmc
+        SELECT COUNT(*) num from jjg_fbgc_qlgc_sb_jgcc where proname = #{proname} and htd = #{htd}
     </select>
 
     <select id="selectnums" resultType="java.lang.Integer" parameterType="java.lang.String">
-        select COUNT(DISTINCT(zh)) FROM jjg_fbgc_qlgc_sb_jgcc where proname = #{proname} and htd = #{htd}
+        select COUNT(DISTINCT(lbh)) FROM jjg_fbgc_qlgc_sb_jgcc where proname = #{proname} and htd = #{htd}
     </select>
 
     <select id="selectnumname" resultType="java.lang.Integer" parameterType="java.lang.String">
-        select COUNT(DISTINCT(zh)) FROM jjg_fbgc_qlgc_sb_jgcc where proname = #{proname}
+        select COUNT(DISTINCT(lbh)) FROM jjg_fbgc_qlgc_sb_jgcc where proname = #{proname}
     </select>
 
 </mapper>

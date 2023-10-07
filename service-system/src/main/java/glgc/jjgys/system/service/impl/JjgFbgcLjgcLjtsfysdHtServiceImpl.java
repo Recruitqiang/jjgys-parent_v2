@@ -971,7 +971,7 @@ public class JjgFbgcLjgcLjtsfysdHtServiceImpl extends ServiceImpl<JjgFbgcLjgcLjt
                     XSSFCell cell = row.getCell(j);
 
                     //cell.setCellType(CellType.STRING);
-                    System.out.println(cell);
+                    System.out.println(cell.getCellType());
                     switch (cell.getCellType()){
                         case XSSFCell.CELL_TYPE_STRING ://String
                             cell.setCellType(CellType.STRING);
@@ -992,9 +992,9 @@ public class JjgFbgcLjgcLjtsfysdHtServiceImpl extends ServiceImpl<JjgFbgcLjgcLjt
                                 System.out.println(date);
                                 map.put(fields[k].getName(),dateFormat.format(date));//属性赋值
                             }else {//不是日期直接赋值
-                                cell.setCellType(CellType.STRING);
+                                //cell.setCellType(CellType.STRING);
                                 //map.put(fields[k].getName(),Double.valueOf(cell.getNumericCellValue()).toString());//属性赋值
-                                map.put(fields[k].getName(),String.valueOf(cell.getStringCellValue()));//属性赋值
+                                map.put(fields[k].getName(),String.valueOf(cell.getNumericCellValue()));//属性赋值
                             }
                             break;
                         case XSSFCell.CELL_TYPE_BLANK :
@@ -1007,7 +1007,8 @@ public class JjgFbgcLjgcLjtsfysdHtServiceImpl extends ServiceImpl<JjgFbgcLjgcLjt
                 }
                 jjgFbgcLjgcLjtsfysdHt.setHtgdz((String) map.get("htgdz"));
                 jjgFbgcLjgcLjtsfysdHt.setSysj(simpleDateFormat.parse((String) map.get("sysj")));
-                jjgFbgcLjgcLjtsfysdHt.setZh((String) map.get("zh"));
+                System.out.println(map.get("zh"));
+                jjgFbgcLjgcLjtsfysdHt.setZh(String.valueOf(map.get("zh")));
                 jjgFbgcLjgcLjtsfysdHt.setJgcc((String) map.get("jgcc"));
                 jjgFbgcLjgcLjtsfysdHt.setJglx((String) map.get("jglx"));
                 jjgFbgcLjgcLjtsfysdHt.setZdgmd((String) map.get("zdgmd"));

@@ -69,10 +69,7 @@ public class JjgFbgcJagcController {
     @ApiOperation("交安工程模板文件导出")
     @GetMapping("exportjagc")
     public void exportjagc(HttpServletResponse response) {
-
-
-        String filepath = System.getProperty("user.dir");
-        jjgFbgcJagcService.exportjagc(response,filepath);
+        jjgFbgcJagcService.exportjagc(response,filespath);
         String zipName = "交安工程指标模板文件";
         String downloadName = null;
 
@@ -85,35 +82,35 @@ public class JjgFbgcJagcController {
 
         response.setHeader("Content-disposition", "attachment; filename=" + downloadName);
         response.setContentType("application/zip;charset=utf-8");
-        //response.setCharacterEncoding("utf-8");
+        response.setCharacterEncoding("utf-8");
         try {
-            JjgFbgcUtils.zipFile(filepath+"/交安工程",response.getOutputStream());
+            JjgFbgcUtils.zipFile(filespath+"/交安工程",response.getOutputStream());
         } catch (ZipException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        JjgFbgcUtils.deleteDirAndFiles(new File(filepath+"/交安工程"));
+        JjgFbgcUtils.deleteDirAndFiles(new File(filespath+"/交安工程"));
 
     }
 
     @ApiOperation("交安工程模板数据文件导入")
     @PostMapping("importjagc")
     public Result importjagc(@RequestParam("file") MultipartFile file, CommonInfoVo commonInfoVo) {
-        String filepath = System.getProperty("user.dir");
         File file1=JjgFbgcUtils.multipartFileToFile(file);
         ZipFile zipFile= null;
+        String tempath = filespath+File.separator+commonInfoVo.getProname();
         try {
             zipFile = new ZipFile(file1);
             zipFile.setFileNameCharset("GBK");
-            JjgFbgcUtils.createDirectory("暂存", filepath);
-            zipFile.extractAll(filepath + "/暂存");
+            JjgFbgcUtils.createDirectory("暂存", tempath);
+            zipFile.extractAll(tempath + "/暂存");
         } catch (ZipException e) {
             throw new RuntimeException(e);
         }
 
-        jjgFbgcJagcService.importjagc(commonInfoVo,filepath+"/暂存");
+        jjgFbgcJagcService.importjagc(commonInfoVo,tempath+"/暂存");
         file1.delete();
         return Result.ok();
 

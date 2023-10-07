@@ -376,7 +376,7 @@ public class JjgFbgcJtaqssJathldmccServiceImpl extends ServiceImpl<JjgFbgcJtaqss
                 String zdsz = decf.format(zds);
                 String hgdsz = decf.format(hgds);
                 String hglz = df.format(hgl);
-                jgmap.put("总点数", zdsz);
+                jgmap.put("检测总点数", zdsz);
                 jgmap.put("合格点数", hgdsz);
                 jgmap.put("合格率", hglz);
                 mapList.add(jgmap);

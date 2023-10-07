@@ -391,7 +391,13 @@ public class JjgZdhMcxsServiceImpl extends ServiceImpl<JjgZdhMcxsMapper, JjgZdhM
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         SimpleDateFormat outputDateFormat  = new SimpleDateFormat("yyyy.MM.dd");
         if (data!=null && !data.isEmpty()){
-            createTableZd(getNum1(data),wb,sheetname,cdsl);
+            /**
+             *处理数据，将data和zfsdqlData中相同的qdzh的name为空
+             * 还得查一下收费站的数据
+             */
+            List<Map<String, Object>> lmdata = handlezdData(proname,data,zfsdqlData,zx);
+
+            createTableZd(getNum1(lmdata),wb,sheetname,cdsl);
             XSSFSheet sheet = wb.getSheet(sheetname);
             if (cdsl ==2){
                 sheet.getRow(1).getCell(1).setCellValue(proname);
@@ -411,12 +417,6 @@ public class JjgZdhMcxsServiceImpl extends ServiceImpl<JjgZdhMcxsMapper, JjgZdhM
             String time = outputDateFormat.format(parse);
 
             fillZdTitleCellData(sheet, tableNum, proname, htd, name,time,sheetname,cdsl,sjz);
-
-            /**
-             *处理数据，将data和zfsdqlData中相同的qdzh的name为空
-             * 还得查一下收费站的数据
-             */
-            List<Map<String, Object>> lmdata = handlezdData(proname,data,zfsdqlData,zx);
 
             if (lmdata.size()>0) {
                 List<Map<String, Object>> rowAndcol = new ArrayList<>();
@@ -564,7 +564,6 @@ public class JjgZdhMcxsServiceImpl extends ServiceImpl<JjgZdhMcxsMapper, JjgZdhM
 
     }
 
-
     /**
      * 合并匝道的sfc值，需要根据name和qdzh
      * @param list
@@ -682,7 +681,7 @@ public class JjgZdhMcxsServiceImpl extends ServiceImpl<JjgZdhMcxsMapper, JjgZdhM
             //创建文件根目录
             fdir.mkdirs();
         }
-        File directory = new File("src/main/resources/static");
+        File directory = new File("service-system/src/main/resources/static");
         String reportPath = directory.getCanonicalPath();
         String filename = "";
         String sheetlmname = "";
@@ -1082,9 +1081,9 @@ public class JjgZdhMcxsServiceImpl extends ServiceImpl<JjgZdhMcxsMapper, JjgZdhM
             lf = "右幅";
         }
         QueryWrapper<JjgSfz> wrapper = new QueryWrapper<>();
-        wrapper.like("proname", proname);
-        wrapper.like("sshtmc", zx);
-        wrapper.like("lf", lf);
+        wrapper.eq("proname", proname);
+        wrapper.eq("sshtmc", zx);
+        wrapper.eq("lf", lf);
         List<JjgSfz> jjgSfzs = jjgLqsSfzMapper.selectList(wrapper);//(id=1, zdsfzname=淮宁湾收费站, htd=土建2标, lf=左幅, zhq=930.0, zhz=1250.0, pzlx=水泥混凝土, sszd=E, sshtmc=淮宁湾立交, proname=陕西高速, createTime=Tue Jun 13 21:03:29 CST 2023)
         List<Map<String, Object>> sfzlist = new ArrayList<>();
         for (int i = 0; i < jjgSfzs.size(); i++) {
@@ -2122,7 +2121,7 @@ public class JjgZdhMcxsServiceImpl extends ServiceImpl<JjgZdhMcxsMapper, JjgZdhM
             for (Map<String, Object> map : lxlist) {
                 String zx = map.get("lxbs").toString();
                 int num = jjgZdhMcxsMapper.selectcdnum(proname,htd,zx);
-                List<Map<String, Object>> looksdjdb = lookjdb(proname, htd, zx,num/2);
+                List<Map<String, Object>> looksdjdb = lookjdb(proname, htd, zx,num);
                 mapList.addAll(looksdjdb);
             }
             return mapList;
@@ -2172,7 +2171,7 @@ public class JjgZdhMcxsServiceImpl extends ServiceImpl<JjgZdhMcxsMapper, JjgZdhM
 
                     XSSFCell xmname = slSheet.getRow(1).getCell(pronamecl);//项目名
                     XSSFCell htdname = slSheet.getRow(1).getCell(htdcl);//合同段名
-                    Map map = new HashMap();
+
 
                     if (proname.equals(xmname.toString()) && htd.equals(htdname.toString())) {
                         slSheet.getRow(1).getCell(3*cds+3).setCellType(CellType.STRING);//总点数
@@ -2180,11 +2179,12 @@ public class JjgZdhMcxsServiceImpl extends ServiceImpl<JjgZdhMcxsMapper, JjgZdhM
 
                         slSheet.getRow(1).getCell(3*cds+6).setCellType(CellType.STRING);//合格点数
                         slSheet.getRow(1).getCell(3*cds+7).setCellType(CellType.STRING);//合格点数
-
+                        slSheet.getRow(37).getCell(cds*2+3).setCellType(CellType.STRING);
                         double zds = Double.valueOf(slSheet.getRow(1).getCell(3*cds+3).getStringCellValue());
                         double hgds = Double.valueOf(slSheet.getRow(1).getCell(3*cds+4).getStringCellValue());
                         String zdsz1 = decf.format(zds);
                         String hgdsz1 = decf.format(hgds);
+                        Map map = new HashMap();
                         map.put("检测项目", zx);
                         map.put("路面类型", wb.getSheetName(j));
                         map.put("总点数", zdsz1);
@@ -2192,8 +2192,9 @@ public class JjgZdhMcxsServiceImpl extends ServiceImpl<JjgZdhMcxsMapper, JjgZdhM
                         map.put("合格点数", hgdsz1);
                         map.put("Min", slSheet.getRow(1).getCell(3*cds+7).getStringCellValue());
                         map.put("Max", slSheet.getRow(1).getCell(3*cds+6).getStringCellValue());
+                        jgmap.add(map);
                     }
-                    jgmap.add(map);
+
 
                 }
             }
@@ -2278,5 +2279,11 @@ public class JjgZdhMcxsServiceImpl extends ServiceImpl<JjgZdhMcxsMapper, JjgZdhM
     public int selectnum(String proname, String htd) {
         int selectnum = jjgZdhMcxsMapper.selectnum(proname, htd);
         return selectnum;
+    }
+
+    @Override
+    public List<Map<String, Object>> selectlx(String proname, String htd) {
+        List<Map<String,Object>> lxlist = jjgZdhMcxsMapper.selectlx(proname,htd);
+        return lxlist;
     }
 }

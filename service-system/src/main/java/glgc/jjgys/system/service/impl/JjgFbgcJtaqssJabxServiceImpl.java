@@ -101,10 +101,10 @@ public class JjgFbgcJtaqssJabxServiceImpl extends ServiceImpl<JjgFbgcJtaqssJabxM
             //查询是否有白线逆反射系数
             List<JjgFbgcJtaqssJabx> bxnfsxsdata = jjgFbgcJtaqssJabxMapper.selectbxnfsxs(proname,htd,fbgc);
             List<JjgFbgcJtaqssJabx> hxnfsxsdata = jjgFbgcJtaqssJabxMapper.selecthxnfsxs(proname,htd,fbgc);
-            if (bxnfsxsdata !=null || bxnfsxsdata.size()>0){
+            if (bxnfsxsdata !=null && bxnfsxsdata.size()>0){
                 bxnfsxs(data);
             }
-            if (hxnfsxsdata !=null || hxnfsxsdata.size()>0){
+            if (hxnfsxsdata !=null && hxnfsxsdata.size()>0){
                 hxnfsxs(data);
             }
 
@@ -134,7 +134,7 @@ public class JjgFbgcJtaqssJabxServiceImpl extends ServiceImpl<JjgFbgcJtaqssJabxM
                 //创建文件根目录
                 fdir.mkdirs();
             }
-            File directory = new File("src/main/resources");
+            File directory = new File("service-system/src/main/resources");
             String reportPath = directory.getCanonicalPath();
             String path = reportPath + "/static/交安标线逆反射系数新.xlsx";
             Files.copy(Paths.get(path), new FileOutputStream(f));
@@ -144,7 +144,6 @@ public class JjgFbgcJtaqssJabxServiceImpl extends ServiceImpl<JjgFbgcJtaqssJabxM
             if(DBtohxnfsxsExcel(data,xwb,proname,htd,fbgc)){
                 for (int j = 0; j < xwb.getNumberOfSheets(); j++) {
                     calculatebxnfsxs(xwb.getSheetAt(j));
-
                 }
                 for (int j = 0; j < xwb.getNumberOfSheets(); j++) {   //表内公式  计算 显示结果
                     JjgFbgcCommonUtils.updateFormula(xwb, xwb.getSheetAt(j));
@@ -231,7 +230,12 @@ public class JjgFbgcJtaqssJabxServiceImpl extends ServiceImpl<JjgFbgcJtaqssJabxM
     public void fillhxCommonCellData(XSSFSheet sheet, int tableNum, int index,JjgFbgcJtaqssJabx row) {
         sheet.getRow(index).getCell(0).setCellValue(row.getWz());  //位置
         sheet.getRow(index).getCell(2).setCellValue(row.getBxlx());
-        sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(row.getHxnfsxsgdz()));
+        if(row.getHxnfsxsgdz() != null && !"".equals(row.getHxnfsxsgdz())){
+            sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(row.getHxnfsxsgdz()));
+        }else {
+            sheet.getRow(index).getCell(3).setCellValue("-");
+        }
+
         if(row.getHxscz1() != null && !"".equals(row.getHxscz1())){//第1条线
             sheet.getRow(tableNum*37+index).getCell(4).setCellValue(Double.valueOf(row.getHxscz1()));
         }else{
@@ -653,19 +657,15 @@ public class JjgFbgcJtaqssJabxServiceImpl extends ServiceImpl<JjgFbgcJtaqssJabxM
     public void calculateTotal(XSSFSheet sheet, int i, XSSFRow rowstart, XSSFRow rowend) {
         //总点数
         sheet.getRow(i).getCell(14).setCellFormula(
-                "COUNT(" + rowstart.getCell(4).getReference() + ":"
-                        + rowend.getCell(4).getReference() + ")+COUNT("
-                        + rowstart.getCell(7).getReference() + ":"
-                        + rowend.getCell(7).getReference() + ")+COUNT("
-                        + rowstart.getCell(10).getReference() + ":"
-                        + rowend.getCell(10).getReference() + ")+COUNT("
-                        + rowstart.getCell(13).getReference() + ":"
-                        + rowend.getCell(13).getReference() + ")+COUNT("
-                        + rowstart.getCell(16).getReference() + ":"
-                        + rowend.getCell(16).getReference() + ")");
+                "COUNT(" + rowstart.getCell(4).getReference() + ":" + rowend.getCell(4).getReference()
+                        + ")+COUNT(" + rowstart.getCell(7).getReference() + ":" + rowend.getCell(7).getReference()
+                        + ")+COUNT(" + rowstart.getCell(10).getReference() + ":" + rowend.getCell(10).getReference()
+                        + ")+COUNT(" + rowstart.getCell(13).getReference() + ":" + rowend.getCell(13).getReference()
+                        + ")+COUNT(" + rowstart.getCell(16).getReference() + ":" + rowend.getCell(16).getReference() + ")");
+
 
         //合格点数
-        sheet.getRow(i+1).getCell(14).setCellFormula(
+        sheet.getRow(i + 1).getCell(14).setCellFormula(
                 "COUNTIF(" + rowstart.getCell(5).getReference() + ":"
                         + rowend.getCell(5).getReference()
                         + ",\"√\")+COUNTIF("

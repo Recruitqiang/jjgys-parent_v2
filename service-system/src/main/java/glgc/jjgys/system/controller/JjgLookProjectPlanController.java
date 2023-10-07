@@ -113,8 +113,8 @@ public class JjgLookProjectPlanController {
             String name = jjgPlaninfo.getProname();
             String htd = jjgPlaninfo.getHtd();
             QueryWrapper<JjgPlaninfo> wrapper=new QueryWrapper<>();
-            wrapper.like("proname",name);
-            wrapper.like("htd",htd);
+            wrapper.eq("proname",name);
+            //wrapper.like("htd",htd);
             wrapper.orderByDesc("create_time");
             //调用方法分页查询
             IPage<JjgPlaninfo> pageModel = jjgLookProjectPlanService.page(pageParam, wrapper);

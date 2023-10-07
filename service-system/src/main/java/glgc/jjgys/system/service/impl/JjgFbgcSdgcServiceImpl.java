@@ -459,7 +459,7 @@ public class JjgFbgcSdgcServiceImpl implements JjgFbgcSdgcService {
         sdmclist.clear();
 
         list.add(new File(workpath +File.separator+htd+File.separator+ "41隧道总体宽度.xlsx"));
-        list.add(new File(workpath +File.separator+htd+File.separator+ "00评定表.xlsx"));
+        //list.add(new File(workpath +File.separator+htd+File.separator+ "00评定表.xlsx"));
         JjgFbgcUtils.addFile(list,workpath+File.separator+"合同段鉴定表"+File.separator+htd,workpath+File.separator+htd);
         //JjgFbgcUtils.addFile(list, workpath + "/隧道工程/总体", workpath);
 

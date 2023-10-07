@@ -32,7 +32,7 @@ public class HntlmzdVo extends BaseRowModel {
     private String zhq;
 
     @ColumnWidth(23)
-    @ExcelProperty(value = "桩号起止" ,index = 4)
+    @ExcelProperty(value = "桩号止" ,index = 4)
     private String zhz;
 
     @ColumnWidth(23)

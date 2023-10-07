@@ -108,8 +108,9 @@ public class JjgFbgcQlgcQmgzsdServiceImpl extends ServiceImpl<JjgFbgcQlgcQmgzsdM
                 for (int j = 0; j < wb.getNumberOfSheets(); j++) {
                     JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
                 }
-
+                //wb.setSheetHidden(wb.getSheetIndex("source"), true);
                 JjgFbgcCommonUtils.deleteEmptySheets(wb);
+
                 FileOutputStream fileOut = new FileOutputStream(f);
                 wb.write(fileOut);
                 fileOut.flush();

@@ -62,10 +62,10 @@ public class JjgFbgcLjgcLjcjServiceImpl extends ServiceImpl<JjgFbgcLjgcLjcjMappe
         String fbgc = commonInfoVo.getFbgc();
         //获得数据
         QueryWrapper<JjgFbgcLjgcLjcj> wrapper=new QueryWrapper<>();
-        wrapper.like("proname",proname);
-        wrapper.like("htd",htd);
-        wrapper.like("fbgc",fbgc);
-        wrapper.orderByAsc("zh","jczh");
+        wrapper.eq("proname",proname);
+        wrapper.eq("htd",htd);
+        wrapper.eq("fbgc",fbgc);
+        wrapper.orderByAsc("xh");
         List<JjgFbgcLjgcLjcj> data = jjgFbgcLjgcLjcjMapper.selectList(wrapper);
 
         File f = new File(filepath+File.separator+proname+File.separator+htd+File.separator+"01路基压实度沉降.xlsx");
@@ -85,7 +85,6 @@ public class JjgFbgcLjgcLjcjServiceImpl extends ServiceImpl<JjgFbgcLjgcLjcjMappe
             FileInputStream in = new FileInputStream(f);
             wb = new XSSFWorkbook(in);
             List<String> numsList = jjgFbgcLjgcLjcjMapper.selectNums(proname,htd,fbgc);
-            System.out.println(gettableNum(numsList));
             createTable(gettableNum(numsList));
             String sheetname = "路基沉降";
             if(DBtoExcel(data,proname,htd,fbgc,sheetname)){
@@ -190,18 +189,17 @@ public class JjgFbgcLjgcLjcjServiceImpl extends ServiceImpl<JjgFbgcLjgcLjcjMappe
 
             sheet.getRow(7).createCell(8).setCellFormula("SUM("
                     +sheet.getRow(31).getCell(8).getReference()+":"
-                    +sheet.getRow(tableNum*33+31).getCell(8).getReference()+")");
+                    +sheet.getRow(tableNum*32+31).getCell(8).getReference()+")");
 
             sheet.getRow(7).createCell(9).setCellFormula("SUM("
                     +sheet.getRow(31).getCell(9).getReference()+":"
-                    +sheet.getRow(tableNum*33+31).getCell(9).getReference()+")");
+                    +sheet.getRow(tableNum*32+31).getCell(9).getReference()+")");
 
             sheet.getRow(7).createCell(10).setCellFormula(
                     sheet.getRow(7).getCell(9).getReference()+"*100/"
                             +sheet.getRow(7).getCell(8).getReference());
             return true;
-        }
-        else{
+        } else{
             return false;
         }
     }
@@ -216,18 +214,18 @@ public class JjgFbgcLjgcLjcjServiceImpl extends ServiceImpl<JjgFbgcLjgcLjcjMappe
      * @param cellstyle
      */
     public void fillCommonCellData(XSSFSheet sheet, int tableNum, int index, JjgFbgcLjgcLjcj row, DecimalFormat nf, XSSFCellStyle cellstyle) {
-        sheet.getRow(tableNum*33+8+index%23).getCell(0).setCellValue(row.getJczh());
-        sheet.getRow(tableNum*33+8+index%23).getCell(1).setCellValue(Double.valueOf(row.getNyds1()));
-        sheet.getRow(tableNum*33+8+index%23).getCell(2).setCellValue(Double.valueOf(row.getNyds2()));
+        sheet.getRow(tableNum*32+8+index%23).getCell(0).setCellValue(row.getJczh());
+        sheet.getRow(tableNum*32+8+index%23).getCell(1).setCellValue(Double.valueOf(row.getNyds1()));
+        sheet.getRow(tableNum*32+8+index%23).getCell(2).setCellValue(Double.valueOf(row.getNyds2()));
 
-        sheet.getRow(tableNum*33+8+index%23).getCell(3).setCellFormula("ROUND(("
-                +sheet.getRow(tableNum*33+8+index%23).getCell(2).getReference()+"-"
-                +sheet.getRow(tableNum*33+8+index%23).getCell(1).getReference()+"),1)");
-        sheet.getRow(tableNum*33+8+index%23).getCell(4).setCellFormula("IF("
-                +sheet.getRow(tableNum*33+8+index%23).getCell(3).getReference()+"<="
+        sheet.getRow(tableNum*32+8+index%23).getCell(3).setCellFormula("ROUND(("
+                +sheet.getRow(tableNum*32+8+index%23).getCell(2).getReference()+"-"
+                +sheet.getRow(tableNum*32+8+index%23).getCell(1).getReference()+"),1)");
+        sheet.getRow(tableNum*32+8+index%23).getCell(4).setCellFormula("IF("
+                +sheet.getRow(tableNum*32+8+index%23).getCell(3).getReference()+"<="
                 +Double.valueOf(row.getYxps())+",\"√\",\"\")");
-        sheet.getRow(tableNum*33+8+index%23).getCell(5).setCellFormula("IF("
-                +sheet.getRow(tableNum*33+8+index%23).getCell(3).getReference()+"<="
+        sheet.getRow(tableNum*32+8+index%23).getCell(5).setCellFormula("IF("
+                +sheet.getRow(tableNum*32+8+index%23).getCell(3).getReference()+"<="
                 +Double.valueOf(row.getYxps())+",\"\",\"×\")");
     }
 
@@ -237,18 +235,18 @@ public class JjgFbgcLjgcLjcjServiceImpl extends ServiceImpl<JjgFbgcLjgcLjcjMappe
      * @param tableNum
      */
     public void calculateTotal(XSSFSheet sheet, int tableNum) {
-        sheet.getRow(tableNum*33+31).getCell(1).setCellFormula("COUNT("
-                +sheet.getRow(tableNum*33+8).getCell(1).getReference()+":"
-                +sheet.getRow(tableNum*33+30).getCell(1).getReference()+")");
-        sheet.getRow(tableNum*33+31).getCell(3).setCellFormula("COUNTIF("
-                +sheet.getRow(tableNum*33+8).getCell(4).getReference()+":"
-                +sheet.getRow(tableNum*33+30).getCell(4).getReference()+",\"√\")");
-        sheet.getRow(tableNum*33+31).getCell(6).setCellFormula(
-                sheet.getRow(tableNum*33+31).getCell(3).getReference()+"*100/"
-                        +sheet.getRow(tableNum*33+31).getCell(1).getReference());
+        sheet.getRow(tableNum*32+31).getCell(1).setCellFormula("COUNT("
+                +sheet.getRow(tableNum*32+8).getCell(1).getReference()+":"
+                +sheet.getRow(tableNum*32+30).getCell(1).getReference()+")");
+        sheet.getRow(tableNum*32+31).getCell(3).setCellFormula("COUNTIF("
+                +sheet.getRow(tableNum*32+8).getCell(4).getReference()+":"
+                +sheet.getRow(tableNum*32+30).getCell(4).getReference()+",\"√\")");
+        sheet.getRow(tableNum*32+31).getCell(6).setCellFormula(
+                sheet.getRow(tableNum*32+31).getCell(3).getReference()+"*100/"
+                        +sheet.getRow(tableNum*32+31).getCell(1).getReference());
 
-        sheet.getRow(tableNum*33+31).createCell(8).setCellFormula(sheet.getRow(tableNum*33+31).getCell(1).getReference());
-        sheet.getRow(tableNum*33+31).createCell(9).setCellFormula(sheet.getRow(tableNum*33+31).getCell(3).getReference());
+        sheet.getRow(tableNum*32+31).createCell(8).setCellFormula(sheet.getRow(tableNum*32+31).getCell(1).getReference());
+        sheet.getRow(tableNum*32+31).createCell(9).setCellFormula(sheet.getRow(tableNum*32+31).getCell(3).getReference());
     }
 
     /**
@@ -262,13 +260,13 @@ public class JjgFbgcLjgcLjcjServiceImpl extends ServiceImpl<JjgFbgcLjgcLjcjMappe
      */
     public void fillTitleCellData(XSSFSheet sheet, int tableNum, JjgFbgcLjgcLjcj row,String proname,String htd,String position) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy.MM.dd");
-        sheet.getRow(tableNum * 33 + 2).getCell(1).setCellValue(proname);
-        sheet.getRow(tableNum * 33 + 2).getCell(4).setCellValue(htd);
-        sheet.getRow(tableNum * 33 + 3).getCell(1).setCellValue(row.getFbgc());
-        sheet.getRow(tableNum*33+3).getCell(4).setCellValue(simpleDateFormat.format(row.getJcsj()));//检测日期
+        sheet.getRow(tableNum * 32 + 2).getCell(1).setCellValue(proname);
+        sheet.getRow(tableNum * 32 + 2).getCell(4).setCellValue(htd);
+        sheet.getRow(tableNum * 32 + 3).getCell(1).setCellValue(row.getFbgc());
+        sheet.getRow(tableNum*32+3).getCell(4).setCellValue(simpleDateFormat.format(row.getJcsj()));//检测日期
 
-        sheet.getRow(tableNum*33+4).getCell(0).setCellValue("检查段落："+position);//工程部位
-        sheet.getRow(tableNum*33+4).getCell(3).setCellValue("允许偏差："+Double.valueOf(row.getYxps()).intValue()+"mm");
+        sheet.getRow(tableNum*32+4).getCell(0).setCellValue("检查段落："+position);//工程部位
+        sheet.getRow(tableNum*32+4).getCell(3).setCellValue("允许偏差："+Double.valueOf(row.getYxps()).intValue()+"mm");
 
     }
 
@@ -280,11 +278,10 @@ public class JjgFbgcLjgcLjcjServiceImpl extends ServiceImpl<JjgFbgcLjgcLjcjMappe
      */
     public void createTable(int tableNum) throws IOException {
         for(int i = 1; i < tableNum; i++){
-            //System.out.println("正在生成表格 -> "+i);
-            RowCopy.copyRows(wb, "路基沉降", "路基沉降", 0, 32, i*33);
+            RowCopy.copyRows(wb, "路基沉降", "路基沉降", 0, 31, i*32);
         }
         if(tableNum >1){
-            wb.setPrintArea(wb.getSheetIndex("路基沉降"), 0, 6, 0, tableNum*33-1);
+            wb.setPrintArea(wb.getSheetIndex("路基沉降"), 0, 6, 0, tableNum*32-1);
         }else
         {
             wb.setPrintArea(wb.getSheetIndex("路基沉降"), 0, 6, 0, 32);

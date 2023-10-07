@@ -5,7 +5,7 @@ import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.util.Zip4jConstants;
 import org.apache.commons.compress.utils.IOUtils;
-//import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 
@@ -119,13 +119,13 @@ public class JjgFbgcUtils {
      * file 转 multipartFile
      */
     public static MultipartFile getMultipartFile(File file) {
-        /*try {
+        try {
             MultipartFile cMultiFile = new MockMultipartFile(file.getName(), file.getName(), null, new FileInputStream(file));
             return cMultiFile;
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }*/
-        return null;
+        }
+        //return null;
 
     }
     /**
@@ -173,13 +173,13 @@ public class JjgFbgcUtils {
      **/
     public static void addFile(List<File> files, String path, String pathName) {
         //遍历所有的文件
-        int i = 0;
+        //int i = 0;
         for (File file : files) {
             if (file.exists()){
-                i++;
+                //i++;
                 String name=file.getName();
-                String type = name.substring(name.lastIndexOf("."));
-                java.nio.file.Path targetPath = Paths.get(path + "/"+name);
+                //String type = name.substring(name.lastIndexOf("."));
+                java.nio.file.Path targetPath = Paths.get(path +File.separator+name);
                 copyFile(file.getName(), targetPath, pathName);
             }
         }

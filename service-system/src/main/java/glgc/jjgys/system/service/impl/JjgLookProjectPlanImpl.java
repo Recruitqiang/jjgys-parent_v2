@@ -602,6 +602,7 @@ public class JjgLookProjectPlanImpl extends ServiceImpl<JjgLookProjectPlanMapper
                 }
             }
         }
+        System.out.println(list);
         ExcelUtil.writeExcelWithSheets(response, list, fileName, sheetName, new JjgPlaninfoVo()).finish();
 
     }

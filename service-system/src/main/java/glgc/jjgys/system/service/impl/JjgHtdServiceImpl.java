@@ -511,7 +511,7 @@ public class JjgHtdServiceImpl extends ServiceImpl<JjgHtdMapper, JjgHtd> impleme
 
     @Override
     public boolean generateZip(String proname, String[] htds) {
-        String workpath=filespath+ File.separator+proname;
+        String workpath=filespath+ File.separator+proname + File.separator;
         File fdir = new File(workpath);
         if (!fdir.exists()) {
             //创建文件根目录

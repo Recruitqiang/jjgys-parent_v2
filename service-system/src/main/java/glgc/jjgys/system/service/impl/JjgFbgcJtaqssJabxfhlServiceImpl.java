@@ -846,7 +846,7 @@ public class JjgFbgcJtaqssJabxfhlServiceImpl extends ServiceImpl<JjgFbgcJtaqssJa
                 slSheet.getRow(5).getCell(10).setCellType(XSSFCell.CELL_TYPE_STRING);
                 double zds3 = Double.valueOf(slSheet.getRow(lastRowNum - 3).getCell(10).getStringCellValue());
                 double hgds3 = Double.valueOf(slSheet.getRow(lastRowNum - 2).getCell(10).getStringCellValue());
-                double bhgds3 = Double.valueOf(slSheet.getRow(lastRowNum - 2).getCell(10).getStringCellValue());
+                double bhgds3 = Double.valueOf(slSheet.getRow(lastRowNum - 1).getCell(10).getStringCellValue());
                 double hgl3 = Double.valueOf(slSheet.getRow(lastRowNum).getCell(10).getStringCellValue());
                 String zdsz3 = decf.format(zds3);
                 String hgdsz3 = decf.format(hgds3);

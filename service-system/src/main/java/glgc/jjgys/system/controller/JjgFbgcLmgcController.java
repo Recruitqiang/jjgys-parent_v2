@@ -69,9 +69,7 @@ public class JjgFbgcLmgcController {
     @GetMapping("exportlmgc")
     public void exportlmgc(HttpServletResponse response) {
 
-
-        String filepath = System.getProperty("user.dir");
-        jjgFbgcLmgcService.exportlmgc(response,filepath);
+        jjgFbgcLmgcService.exportlmgc(response,filespath);
         String zipName = "路面工程指标模板文件";
         String downloadName = null;
 
@@ -86,32 +84,32 @@ public class JjgFbgcLmgcController {
         response.setContentType("application/zip;charset=utf-8");
         //response.setCharacterEncoding("utf-8");
         try {
-            JjgFbgcUtils.zipFile(filepath+"/路面工程",response.getOutputStream());
+            JjgFbgcUtils.zipFile(filespath+"/路面工程",response.getOutputStream());
         } catch (ZipException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        JjgFbgcUtils.deleteDirAndFiles(new File(filepath+"/路面工程"));
+        JjgFbgcUtils.deleteDirAndFiles(new File(filespath+"/路面工程"));
 
     }
     @ApiOperation("路面工程模板数据文件导入")
     @PostMapping("importlmgc")
     public Result importlmgc(@RequestParam("file") MultipartFile file, CommonInfoVo commonInfoVo) {
-        String filepath = System.getProperty("user.dir");
         File file1=JjgFbgcUtils.multipartFileToFile(file);
+        String tempath = filespath+File.separator+commonInfoVo.getProname();
         ZipFile zipFile= null;
         try {
             zipFile = new ZipFile(file1);
             zipFile.setFileNameCharset("GBK");
-            JjgFbgcUtils.createDirectory("暂存", filepath);
-            zipFile.extractAll(filepath + "/暂存");
+            JjgFbgcUtils.createDirectory("暂存", tempath);
+            zipFile.extractAll(tempath + "/暂存");
         } catch (ZipException e) {
             throw new RuntimeException(e);
         }
 
-        jjgFbgcLmgcService.importlmgc(commonInfoVo,filepath+"/暂存");
+        jjgFbgcLmgcService.importlmgc(commonInfoVo,tempath+"/暂存");
         file1.delete();
         return Result.ok();
 

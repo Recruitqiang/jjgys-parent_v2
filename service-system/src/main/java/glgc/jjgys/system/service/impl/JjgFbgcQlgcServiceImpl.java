@@ -306,7 +306,7 @@ public class JjgFbgcQlgcServiceImpl implements JjgFbgcQlgcService {
         list.add(new File(workpath +File.separator+htd+File.separator+ "26桥梁下部主要结构尺寸.xlsx"));
         list.add(new File(workpath +File.separator+htd+File.separator+ "27桥梁下部保护层厚度.xlsx"));
         list.add(new File(workpath +File.separator+htd+File.separator+ "28桥梁下部墩台垂直度.xlsx"));
-        list.add(new File(workpath +File.separator+htd+File.separator+ "00评定表.xlsx"));
+        //list.add(new File(workpath +File.separator+htd+File.separator+ "00评定表.xlsx"));
 
         //JjgFbgcUtils.addFile(list, workpath + "/桥梁工程/下部", workpath);
         JjgFbgcUtils.addFile(list,workpath+File.separator+"合同段鉴定表"+File.separator+htd,workpath+File.separator+htd);

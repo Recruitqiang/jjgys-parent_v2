@@ -30,4 +30,6 @@ public interface JjgZdhMcxsService extends IService<JjgZdhMcxs> {
     void importmcxs(MultipartFile file, CommonInfoVo commonInfoVo) throws IOException;
 
     int selectnum(String proname, String htd);
+
+    List<Map<String, Object>> selectlx(String proname, String htd);
 }

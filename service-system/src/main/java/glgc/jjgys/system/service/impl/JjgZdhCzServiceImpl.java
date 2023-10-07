@@ -2120,4 +2120,10 @@ public class JjgZdhCzServiceImpl extends ServiceImpl<JjgZdhCzMapper, JjgZdhCz> i
         int selectnum = jjgZdhCzMapper.selectnum(proname, htd);
         return selectnum;
     }
+
+    @Override
+    public List<Map<String, Object>> selectlx(String proname, String htd) {
+        List<Map<String,Object>> lxlist = jjgZdhCzMapper.selectlx(proname,htd);
+        return lxlist;
+    }
 }

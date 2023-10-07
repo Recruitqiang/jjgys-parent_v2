@@ -31,4 +31,7 @@ public interface JjgZdhGzsdService extends IService<JjgZdhGzsd> {
     void importgzsd(MultipartFile file, CommonInfoVo commonInfoVo) throws IOException;
 
     int selectnum(String proname, String htd);
+
+    List<Map<String, Object>> selectlx(String proname, String htd);
+
 }

@@ -152,38 +152,39 @@ public class JjgFbgcLmgcLmwcVo extends BaseRowModel {
     @ExcelProperty(value = "路表温度" ,index = 16)
     private String lbwd;
 
-    /**
-     * 备注
-     */
-    @ColumnWidth(23)
-    @ExcelProperty(value = "备注" ,index = 17)
-    private String bz;
+
 
     /**
      * 沥青层总厚度
      */
     @ColumnWidth(23)
-    @ExcelProperty(value = "沥青层总厚度" ,index = 18)
+    @ExcelProperty(value = "沥青层总厚度" ,index = 17)
     private String lqczhd;
 
     /**
      * 沥青表面温度
      */
     @ColumnWidth(23)
-    @ExcelProperty(value = "沥青表面温度" ,index = 19)
+    @ExcelProperty(value = "沥青表面温度" ,index = 18)
     private String lqbmwd;
 
     /**
      * 测前5h平均温度
      */
     @ColumnWidth(23)
-    @ExcelProperty(value = "测前5h平均温度" ,index = 20)
+    @ExcelProperty(value = "测前5h平均温度" ,index = 19)
     private String cqpjwd;
 
 
     @ColumnWidth(23)
-    @ExcelProperty(value = "序号" ,index = 21)
+    @ExcelProperty(value = "序号" ,index = 20)
     private String xh;
+    /**
+     * 备注
+     */
+    @ColumnWidth(23)
+    @ExcelProperty(value = "备注" ,index = 21)
+    private String bz;
 
 
 }

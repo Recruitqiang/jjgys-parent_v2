@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -55,13 +56,25 @@ public class JjgZdhMcxsController {
     private String filespath;
 
     @RequestMapping(value = "/download", method = RequestMethod.GET)
-    public void downloadExport(HttpServletResponse response, String proname, String htd) throws IOException {
-        String fileName = ".xlsx";
-        String p = filespath+ File.separator+proname+File.separator+htd+File.separator+fileName;
+    public void downloadExport(HttpServletRequest request,HttpServletResponse response, String proname, String htd) throws IOException {
+        List<Map<String,Object>> lxlist = jjgZdhMcxsService.selectlx(proname,htd);
+        List<String> fileName = new ArrayList<>();
+        for (Map<String, Object> map : lxlist) {
+            String lxbs = map.get("lxbs").toString();
+            if (lxbs.equals("主线")){
+                fileName.add("19路面摩擦系数");;
+            }else {
+                fileName.add("62互通摩擦系数-"+lxbs);
+            }
+        }
+        String zipname = "摩擦系数鉴定表";
+        JjgFbgcCommonUtils.batchDowndFile(response,zipname,fileName,filespath+File.separator+proname+File.separator+htd);
+        //String fileName = ".xlsx";
+        /*String p = filespath+ File.separator+proname+File.separator+htd+File.separator+fileName;
         File file = new File(p);
         if (file.exists()){
             JjgFbgcCommonUtils.download(response,p,fileName);
-        }
+        }*/
     }
 
     @ApiOperation("生成摩擦系数鉴定表")
@@ -83,8 +96,8 @@ public class JjgZdhMcxsController {
 
     @ApiOperation("摩擦系数模板文件导出")
     @GetMapping("exportmcxs")
-    public void exportmcxs(HttpServletResponse response,String cdsl) throws IOException {
-        jjgZdhMcxsService.exportmcxs(response,cdsl);
+    public void exportmcxs(HttpServletResponse response,@RequestParam String cd) throws IOException {
+        jjgZdhMcxsService.exportmcxs(response,cd);
     }
 
 

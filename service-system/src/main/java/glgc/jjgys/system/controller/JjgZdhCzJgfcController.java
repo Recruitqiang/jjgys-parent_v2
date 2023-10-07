@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.List;
 
 /**
  * <p>
@@ -67,7 +68,7 @@ public class JjgZdhCzJgfcController {
         if (jjgZdhCz != null) {
             QueryWrapper<JjgZdhCzJgfc> wrapper = new QueryWrapper<>();
             wrapper.like("proname", jjgZdhCz.getProname());
-            wrapper.like("htd", jjgZdhCz.getHtd());
+            //wrapper.like("htd", jjgZdhCz.getHtd());
 
             //调用方法分页查询
             IPage<JjgZdhCzJgfc> pageModel = jjgZdhCzJgfcService.page(pageParam, wrapper);
@@ -75,6 +76,18 @@ public class JjgZdhCzJgfcController {
             return Result.ok(pageModel);
         }
         return Result.ok().message("无数据");
+    }
+
+    @ApiOperation("批量删除竣工车辙数据")
+    @DeleteMapping("removeBatch")
+    public Result removeBeatch(@RequestBody List<String> idList){
+        boolean hd = jjgZdhCzJgfcService.removeByIds(idList);
+        if(hd){
+            return Result.ok();
+        } else {
+            return Result.fail().message("删除失败！");
+        }
+
     }
 
 }

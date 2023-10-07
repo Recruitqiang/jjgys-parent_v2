@@ -28,6 +28,9 @@ public class Project{
     @TableField("proname")
     private String proName;
 
+    @TableField("xmqc")
+    private String xmqc;
+
     @ApiModelProperty(value = "公路等级")
     @TableField("grade")
     private String grade;

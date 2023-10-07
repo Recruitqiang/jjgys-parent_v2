@@ -31,4 +31,6 @@ public interface JjgZdhPzdService extends IService<JjgZdhPzd> {
 
     int selectnum(String proname, String htd);
 
+    List<Map<String, Object>> selectlx(String proname, String htd);
+
 }

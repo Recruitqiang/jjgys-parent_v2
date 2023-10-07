@@ -15,10 +15,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Enumeration;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * <p>
@@ -75,12 +77,11 @@ public class JjgFbgcLjgcController {
         jjgFbgcLjgcService.generateJdb(commonInfoVo);
 
     }
+
     @ApiOperation("路基工程模板文件导出")
     @GetMapping("exportljgc")
     public void exportljgc(HttpServletResponse response) {
-
-        String filepath = System.getProperty("user.dir");
-        jjgFbgcLjgcService.exportljgc(response,filepath);
+        jjgFbgcLjgcService.exportljgc(response,filespath);
         String zipName = "路基工程指标模板文件";
         String downloadName = null;
 
@@ -89,38 +90,43 @@ public class JjgFbgcLjgcController {
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
+
+
         response.setHeader("Content-disposition", "attachment; filename=" + downloadName);
         response.setContentType("application/zip;charset=utf-8");
-        //response.setCharacterEncoding("utf-8");
+        response.setCharacterEncoding("utf-8");
         try {
-            JjgFbgcUtils.zipFile(filepath+"/路基工程",response.getOutputStream());
+            JjgFbgcUtils.zipFile(filespath+"/路基工程",response.getOutputStream());
         } catch (ZipException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        JjgFbgcUtils.deleteDirAndFiles(new File(filepath+"/路基工程"));
+        JjgFbgcUtils.deleteDirAndFiles(new File(filespath+"/路基工程"));
+
 
     }
 
 
+
     @ApiOperation("路基工程模板数据文件导入")
     @PostMapping("importljgc")
-    public Result importljgc(@RequestParam("file")MultipartFile file, CommonInfoVo commonInfoVo) {
-        String filepath = System.getProperty("user.dir");
+    public Result importljgc(@RequestParam("file") MultipartFile file, CommonInfoVo commonInfoVo) {
         File file1=JjgFbgcUtils.multipartFileToFile(file);
         ZipFile zipFile= null;
+        String tempath = filespath+File.separator+commonInfoVo.getProname();
         try {
             zipFile = new ZipFile(file1);
             zipFile.setFileNameCharset("GBK");
-            JjgFbgcUtils.createDirectory("暂存", filepath);
-            zipFile.extractAll(filepath + "/暂存");
+            JjgFbgcUtils.createDirectory("暂存", tempath);
+            zipFile.extractAll(tempath + "/暂存");
         } catch (ZipException e) {
             throw new RuntimeException(e);
         }
-        jjgFbgcLjgcService.importljgc(commonInfoVo,filepath+"/暂存");
+        jjgFbgcLjgcService.importljgc(commonInfoVo,tempath+"/暂存");
         file1.delete();
+
         return Result.ok();
     }
 

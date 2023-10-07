@@ -45,7 +45,7 @@ public class JjgFbgcLmgcLmssxsVo extends BaseRowModel {
      * 路线类型
      */
     @ColumnWidth(23)
-    @ExcelProperty(value = "路、匝道、隧道" ,index = 1)
+    @ExcelProperty(value = "主线、匝道、隧道" ,index = 1)
     private String lxlx;
 
     /**

@@ -52,7 +52,7 @@ public class JjgFbgcSdgcSdlqlmysdVo extends BaseRowModel {
      */
     @ColumnWidth(23)
     @ExcelProperty(value = "路，桥，隧" ,index = 2)
-    private Date lqs;
+    private String lqs;
 
     /**
      * 隧道名称

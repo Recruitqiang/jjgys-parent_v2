@@ -18,7 +18,7 @@
     </select>
 
     <select id="selectnumname" resultType="java.lang.Integer" parameterType="java.lang.String">
-        select COUNT(DISTINCT(zh)) FROM jjg_fbgc_ljgc_zddmcc where proname = #{proname}
+        select COUNT(DISTINCT(cjzh)) FROM jjg_fbgc_ljgc_zddmcc where proname = #{proname}
     </select>
 
 </mapper>

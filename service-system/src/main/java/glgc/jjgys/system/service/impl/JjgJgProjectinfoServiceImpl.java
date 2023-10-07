@@ -228,7 +228,7 @@ public class JjgJgProjectinfoServiceImpl extends ServiceImpl<JjgJgProjectinfoMap
             log.info("删除{}竣工项目信息",proname);
             QueryWrapper<JjgJgProjectinfo> wrapperxm = new QueryWrapper<>();
             wrapperxm.eq("proname",proname);
-            jjgJgProjectinfoMapper.selectOne(wrapperxm);
+            jjgJgProjectinfoMapper.delete(wrapperxm);
 
 
         }

@@ -626,6 +626,8 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                             sdjcds += Double.valueOf(map.get("检测点数").toString());
                             sdhgds += Double.valueOf(map.get("合格点数").toString());
                             sdgdz = map.get("规定值").toString();
+                            System.out.println(sdgdz);
+                            System.out.println(sdgdz);
 
                         }else {
                         //if (map.get("路面类型").toString().contains("沥青路面压实度右幅") || map.get("路面类型").toString().contains("沥青路面压实度左幅")){
@@ -635,7 +637,11 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
 
                         }
                     }
-                    double gdz1 = Double.valueOf(sdgdz)+1;
+                    double gdz1 = 0;
+                    if (!sdgdz.equals("")){
+                        gdz1 = Double.valueOf(sdgdz);
+                    }
+
                     String gdz2= String.valueOf(gdz1);
                     Map<String, Object> newMap1 = new HashMap<>();
                     newMap1.put("filename","详见《沥青路面压实度质量鉴定表》检测"+sdjcds+"点,合格"+sdhgds+"点");
@@ -648,7 +654,10 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                     newMap1.put("合格点数", sdhgds);
                     newMap1.put("合格率", (sdjcds != 0) ? df.format(sdhgds/sdjcds*100) : "0");
 
-                    double gdz3 = Double.valueOf(lmgdz)+1;
+                    double gdz3 = 0;
+                    if (!lmgdz.equals("")){
+                        gdz3 = Double.valueOf(lmgdz);
+                    }
                     String gdz4 = String.valueOf(gdz3);
                     Map<String, Object> newMap2 = new HashMap<>();
                     newMap2.put("filename","详见《沥青路面压实度质量鉴定表》检测"+lmjcds+"点,合格"+lmhgds+"点");
@@ -2118,6 +2127,10 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         }
 
         DBwriteJSZLToExcel(mapList,commonInfoVo);
+
+
+
+
     }
 
 
@@ -2160,12 +2173,41 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
             index++;
         }
 
+        calculateJSZLSheet(sheet);
+        for (int j = 0; j < wb.getNumberOfSheets(); j++) {
+            JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
+        }
+
         FileOutputStream fileOut = new FileOutputStream(f);
         wb.write(fileOut);
         fileOut.flush();
         fileOut.close();
         out.close();
         wb.close();
+
+
+    }
+
+    private void calculateJSZLSheet(XSSFSheet sheet) {
+        XSSFRow row = null;
+        XSSFRow rowstart = null;
+        XSSFRow rowend = null;
+        for (int i = sheet.getFirstRowNum(); i <= sheet.getPhysicalNumberOfRows(); i++) {
+            row = sheet.getRow(i);
+            if (row == null) {
+                continue;
+            }
+            if ("建设项目质量等级".equals(row.getCell(0).toString())) {
+                rowstart = sheet.getRow(i-24);
+                rowend = sheet.getRow(i-1);
+                /*row.getCell(1).setCellFormula("IF(COUNTIF("+rowstart.getCell(2).getReference() +":"+rowend.getCell(2).getReference()
+                        +",\"<>合格\")=0,\"合格\", \"不合格\")");*///=IF(COUNTIF(C64:C81,"<>合格")=0, "合格", "不合格")
+                row.getCell(3).setCellFormula("IF(COUNTIF("+rowstart.getCell(3).getReference()
+                        +":"+rowend.getCell(3).getReference()+",\"合格\")=COUNTA("+rowstart.getCell(2).getReference()
+                        +":"+rowend.getCell(3).getReference()+"),\"合格\", \"不合格\")");//=IF(COUNTIF(T7:T21, "合格") = COUNTA(T7:T21), "√", "")
+
+            }
+        }
 
 
     }
@@ -2300,6 +2342,32 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
             fillCommonHtdData(sheet,tableNum,index, datum);
             index++;
         }
+        calculateHtdSheet(sheet);
+        for (int j = 0; j < wb.getNumberOfSheets(); j++) {
+            JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
+        }
+    }
+
+    private void calculateHtdSheet(XSSFSheet sheet) {
+        XSSFRow row = null;
+        XSSFRow rowstart = null;
+        XSSFRow rowend = null;
+        for (int i = sheet.getFirstRowNum(); i <= sheet.getPhysicalNumberOfRows(); i++) {
+            row = sheet.getRow(i);
+            if (row == null) {
+                continue;
+            }
+            if ("合同段质量等级".equals(row.getCell(0).toString())) {
+                rowstart = sheet.getRow(i-21);
+                rowend = sheet.getRow(i-1);
+                /*row.getCell(1).setCellFormula("IF(COUNTIF("+rowstart.getCell(2).getReference() +":"+rowend.getCell(2).getReference()
+                        +",\"<>合格\")=0,\"合格\", \"不合格\")");*///=IF(COUNTIF(C64:C81,"<>合格")=0, "合格", "不合格")
+                row.getCell(1).setCellFormula("IF(COUNTIF("+rowstart.getCell(4).getReference()
+                        +":"+rowend.getCell(4).getReference()+",\"合格\")=COUNTA("+rowstart.getCell(4).getReference()
+                        +":"+rowend.getCell(4).getReference()+"),\"合格\", \"不合格\")");//=IF(COUNTIF(T7:T21, "合格") = COUNTA(T7:T21), "√", "")
+
+            }
+        }
     }
 
     /**
@@ -2408,31 +2476,34 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
      * @param data
      */
     private void writedwgcData(XSSFWorkbook wb, List<Map<String, Object>> data) {
-        XSSFSheet sheet = wb.getSheet("单位工程");
-        createdwgcTable(wb,getdwgcNum(data));
+        if (data.size()>0&&data!=null){
+            XSSFSheet sheet = wb.getSheet("单位工程");
+            createdwgcTable(wb,getdwgcNum(data));
 
-        int index = 0;
-        int tableNum = 0;
-        String fbgc = data.get(0).get("dwgc").toString();
-        for (Map<String, Object> datum : data) {
-            if (fbgc.equals(datum.get("dwgc"))){
-                fillTitleDwgcData(sheet,tableNum,datum);
-                fillCommonDwgcData(sheet,tableNum,index,datum);
-                index++;
-            }else {
-                fbgc = datum.get("dwgc").toString();
-                tableNum ++;
-                index = 0;
-                fillTitleDwgcData(sheet,tableNum,datum);
-                fillCommonDwgcData(sheet,tableNum,index,datum);
-                index += 1;
+            int index = 0;
+            int tableNum = 0;
+            String fbgc = data.get(0).get("dwgc").toString();
+            for (Map<String, Object> datum : data) {
+                if (fbgc.equals(datum.get("dwgc"))){
+                    fillTitleDwgcData(sheet,tableNum,datum);
+                    fillCommonDwgcData(sheet,tableNum,index,datum);
+                    index++;
+                }else {
+                    fbgc = datum.get("dwgc").toString();
+                    tableNum ++;
+                    index = 0;
+                    fillTitleDwgcData(sheet,tableNum,datum);
+                    fillCommonDwgcData(sheet,tableNum,index,datum);
+                    index += 1;
+                }
+
             }
+            calculateDwgcSheet(sheet);
+            for (int j = 0; j < wb.getNumberOfSheets(); j++) {
+                JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
+            }
+        }
 
-        }
-        calculateDwgcSheet(sheet);
-        for (int j = 0; j < wb.getNumberOfSheets(); j++) {
-            JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
-        }
 
     }
 
@@ -2599,6 +2670,11 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         int tableNum = 0;
         String fbgc = data.get(0).get("fbgc").toString();
         for (Map<String, Object> datum : data) {
+            if (index % 15 == 0 && index!=0){
+                tableNum++;
+                fillTitleData(sheet,tableNum,proname,htd,htdlist,datum.get("fbgc").toString());
+                index = 0;
+            }
             if (fbgc.equals(datum.get("fbgc"))){
                 fillTitleData(sheet,tableNum,proname,htd,htdlist,datum.get("fbgc").toString());
                 fillCommonData(sheet,tableNum,index,datum);
@@ -10951,7 +11027,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         List<Map<String,Object>> tsflist = new ArrayList<>();
         Map<String, Object> tsdmap = new HashMap<>();
         List<Map<String, Object>> list1 = jjgFbgcLjgcLjtsfysdHtService.lookJdbjg(commonInfoVo);
-        if (list1.size()>0){
+        if (list1!=null && list1.size()>0){
             double j = 0;
             double h = 0;
             for (Map<String, Object> map : list1) {
@@ -10965,7 +11041,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         }
         //沉降
         List<Map<String, Object>> list2 = jjgFbgcLjgcLjcjService.lookJdbjg(commonInfoVo);
-        if (list2.size()>0){
+        if (list2!=null && list2.size()>0){
             for (Map<String, Object> map : list2) {
                 tsdmap.put("cjjcds",map.get("总点数"));
                 tsdmap.put("cjhgds",map.get("合格点数"));
@@ -10984,7 +11060,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
 
         //边坡
         List<Map<String, Object>> list5 = jjgFbgcLjgcLjbpService.lookJdbjg(commonInfoVo);
-        if (list5.size()>0){
+        if (list5!=null && list5.size()>0){
             tsdmap.put("bpjcds",list5.get(0).get("总点数"));
             tsdmap.put("bphgds",list5.get(0).get("合格点数"));
             tsdmap.put("bphgl",list5.get(0).get("合格率"));

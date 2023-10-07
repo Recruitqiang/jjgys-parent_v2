@@ -33,7 +33,7 @@ public class JjgJgjcsjController {
     private JjgJgjcsjService jjgJgjcsjService;
 
     @ApiOperation("导出交工检测数据")
-    @PostMapping("exportjgjcdata")
+    @GetMapping("exportjgjcdata")
     public void exportjgjcdata(HttpServletResponse response, String proname){
         jjgJgjcsjService.exportjgjcdata(response,proname);
     }

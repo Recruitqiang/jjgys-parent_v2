@@ -129,6 +129,7 @@ public class JjgFbgcQlgcXbSzdServiceImpl extends ServiceImpl<JjgFbgcQlgcXbSzdMap
             if (row == null) {
                 continue;
             }
+            System.out.println(row.getCell(2)+"   "+flag);
             if (row.getCell(2) != null && !"".equals(row.getCell(2).toString()) && flag) {
                 //=IF(C6>60000,MIN(C6/3000,30),IF(5000<C6,MIN(C6/1000,20),IF(C6<=5000,5)))
                 row.getCell(3).setCellFormula(
@@ -185,7 +186,7 @@ public class JjgFbgcQlgcXbSzdServiceImpl extends ServiceImpl<JjgFbgcQlgcXbSzdMap
                 end.add(rowend);
             }
             // 可以计算啦
-            if (row.getCell(0) != null &&"桥 梁      名 称".equals(row.getCell(0).toString())) {
+            if (row.getCell(0) != null &&"桥梁名称".equals(row.getCell(0).toString())) {
                 flag = true;
                 i += 1;
                 rowstart = sheet.getRow(i + 1);

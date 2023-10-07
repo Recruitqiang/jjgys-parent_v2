@@ -423,9 +423,9 @@ public class JjgFbgcSdgcHntlmqdServiceImpl extends ServiceImpl<JjgFbgcSdgcHntlmq
                 jgmap.put("检测点数", zdsz1);
                 jgmap.put("合格点数", hgdsz1);
                 jgmap.put("合格率", hglz1);
-                jgmap.put("最小值", slSheet.getRow(lastRowNum).getCell(11));
-                jgmap.put("最大值", slSheet.getRow(lastRowNum).getCell(10));
-                jgmap.put("平均值", slSheet.getRow(lastRowNum).getCell(12));
+                jgmap.put("最小值", slSheet.getRow(lastRowNum).getCell(11).getStringCellValue());
+                jgmap.put("最大值", slSheet.getRow(lastRowNum).getCell(10).getStringCellValue());
+                jgmap.put("平均值", slSheet.getRow(lastRowNum).getCell(12).getStringCellValue());
             }
             return jgmap;
         }

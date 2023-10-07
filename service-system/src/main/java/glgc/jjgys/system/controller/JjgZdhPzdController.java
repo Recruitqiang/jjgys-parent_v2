@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -55,12 +56,24 @@ public class JjgZdhPzdController {
 
     @RequestMapping(value = "/download", method = RequestMethod.GET)
     public void downloadExport(HttpServletResponse response, String proname, String htd) throws IOException {
-        String fileName = ".xlsx";
+        List<Map<String,Object>> lxlist = jjgZdhPzdService.selectlx(proname,htd);
+        List<String> fileName = new ArrayList<>();
+        for (Map<String, Object> map : lxlist) {
+            String lxbs = map.get("lxbs").toString();
+            if (lxbs.equals("主线")){
+                fileName.add("18路面平整度");;
+            }else {
+                fileName.add("61互通平整度-"+lxbs);
+            }
+        }
+        String zipname = "平整度鉴定表";
+        JjgFbgcCommonUtils.batchDowndFile(response,zipname,fileName,filespath+File.separator+proname+File.separator+htd);
+        /*String fileName = ".xlsx";
         String p = filespath+ File.separator+proname+File.separator+htd+File.separator+fileName;
         File file = new File(p);
         if (file.exists()){
             JjgFbgcCommonUtils.download(response,p,fileName);
-        }
+        }*/
     }
 
     /**
@@ -91,8 +104,8 @@ public class JjgZdhPzdController {
 
     @ApiOperation("平整度模板文件导出")
     @GetMapping("exportpzd")
-    public void exportpzd(HttpServletResponse response,String cdsl) throws IOException {
-        jjgZdhPzdService.exportpzd(response,cdsl);
+    public void exportpzd(HttpServletResponse response,@RequestParam String cd) throws IOException {
+        jjgZdhPzdService.exportpzd(response,cd);
     }
 
 

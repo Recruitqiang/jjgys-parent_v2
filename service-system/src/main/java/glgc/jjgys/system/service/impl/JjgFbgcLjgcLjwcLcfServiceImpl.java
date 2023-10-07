@@ -61,7 +61,7 @@ public class JjgFbgcLjgcLjwcLcfServiceImpl extends ServiceImpl<JjgFbgcLjgcLjwcLc
         wrapper.like("proname",proname);
         wrapper.like("htd",htd);
         wrapper.like("fbgc",fbgc);
-        wrapper.orderByAsc("xh","cjzh");
+        wrapper.orderByAsc("xh");
         List<JjgFbgcLjgcLjwcLcf> data = jjgFbgcLjgcLjwcLcfMapper.selectList(wrapper);
         File f = new File(filepath+File.separator+proname+File.separator+htd+File.separator+"02路基弯沉(落锤法).xlsx");
         if (data == null || data.size()==0){
