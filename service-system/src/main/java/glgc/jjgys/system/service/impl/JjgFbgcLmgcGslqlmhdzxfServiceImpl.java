@@ -59,11 +59,12 @@ public class JjgFbgcLmgcGslqlmhdzxfServiceImpl extends ServiceImpl<JjgFbgcLmgcGs
     public void generateJdb(CommonInfoVo commonInfoVo) throws IOException, ParseException {
         String proname = commonInfoVo.getProname();
         Integer level = projectService.getlevel(proname);
-        if (level == 0){
+        DBtoExcelLqData(commonInfoVo);
+        /*if (level == 0){
             DBtoExcelLqData(commonInfoVo);
         }else {
             DBtoExcelPtData(commonInfoVo,level);
-        }
+        }*/
 
     }
 
@@ -904,7 +905,7 @@ public class JjgFbgcLmgcGslqlmhdzxfServiceImpl extends ServiceImpl<JjgFbgcLmgcGs
                     if (proname.equals(xmname.toString()) && htd.equals(htdname.toString())) {
                         //获取到最后一行
                         int lastRowNum = slSheet.getLastRowNum();
-                        slSheet.getRow(lastRowNum).getCell(3).setCellType(CellType.STRING);
+                        /*slSheet.getRow(lastRowNum).getCell(3).setCellType(CellType.STRING);
                         slSheet.getRow(lastRowNum).getCell(6).setCellType(CellType.STRING);
                         slSheet.getRow(lastRowNum).getCell(10).setCellType(CellType.STRING);
 
@@ -924,9 +925,9 @@ public class JjgFbgcLmgcGslqlmhdzxfServiceImpl extends ServiceImpl<JjgFbgcLmgcGs
                         jgmap.put("最小值",slSheet.getRow(lastRowNum-2).getCell(16).getStringCellValue());
                         jgmap.put("代表值",slSheet.getRow(lastRowNum-2).getCell(10).getStringCellValue());
                         jgmap.put("设计值",slSheet.getRow(3).getCell(2).getStringCellValue());
-                        mapList.add(jgmap);
+                        mapList.add(jgmap);*/
                         //jgmap.add(map);
-                        /*slSheet.getRow(lastRowNum).getCell(5).setCellType(CellType.STRING);//总点数
+                        slSheet.getRow(lastRowNum).getCell(5).setCellType(CellType.STRING);//总点数
                         slSheet.getRow(lastRowNum).getCell(7).setCellType(CellType.STRING);//合格点数
                         slSheet.getRow(lastRowNum).getCell(9).setCellType(CellType.STRING);//合格率
 
@@ -973,7 +974,8 @@ public class JjgFbgcLmgcGslqlmhdzxfServiceImpl extends ServiceImpl<JjgFbgcLmgcGs
                         map.put("总厚度代表值", slSheet.getRow(lastRowNum-1).getCell(16).getStringCellValue());
 
                         map.put("总厚度平均值最大值", slSheet.getRow(lastRowNum-1).getCell(25).getStringCellValue());
-                        map.put("总厚度平均值最小值", slSheet.getRow(lastRowNum-1).getCell(26).getStringCellValue());*/
+                        map.put("总厚度平均值最小值", slSheet.getRow(lastRowNum-1).getCell(26).getStringCellValue());
+                        mapList.add(map);
                     }
 
 

@@ -258,6 +258,19 @@ public class JjgFbgcCommonUtils {
 
     }
 
+    public static void deleteSheets(XSSFWorkbook wb){
+        ArrayList<String> delsheets = new ArrayList<String>();
+        for (int i = 0; i < wb.getNumberOfSheets(); i++) {
+            //wb.getSheetAt(i).getRow(3).getCell(0).setCellType(CellType.STRING);
+            if (wb.getSheetAt(i).getRow(3) == null || wb.getSheetAt(i).getRow(3).getCell(0).getStringCellValue().equals("")) {
+                delsheets.add(wb.getSheetAt(i).getSheetName());
+            }
+        }
+        for (int i = 0; i < delsheets.size(); i++) {
+            wb.setSheetHidden(wb.getSheetIndex(delsheets.get(i)), true);
+        }
+    }
+
 
     /**
      *

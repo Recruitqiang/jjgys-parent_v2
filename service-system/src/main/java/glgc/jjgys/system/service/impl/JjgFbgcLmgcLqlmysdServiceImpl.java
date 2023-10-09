@@ -1158,36 +1158,65 @@ public class JjgFbgcLmgcLqlmysdServiceImpl extends ServiceImpl<JjgFbgcLmgcLqlmys
                     XSSFSheet slSheet = wb.getSheetAt(j);
                     XSSFCell xmname = slSheet.getRow(1).getCell(2);//项目名
                     XSSFCell htdname = slSheet.getRow(1).getCell(9);//合同段名
-                    Map map = new HashMap();
+
                     if (proname.equals(xmname.toString()) && htd.equals(htdname.toString())) {
                         //获取到最后一行
                         int lastRowNum = slSheet.getLastRowNum();
-                        slSheet.getRow(lastRowNum-2).getCell(6).setCellType(CellType.STRING);//总点数
+                        //标准密度
+                        slSheet.getRow(lastRowNum-2).getCell(6).setCellType(CellType.STRING);//检测点数
                         slSheet.getRow(lastRowNum-1).getCell(6).setCellType(CellType.STRING);//合格点数
                         slSheet.getRow(lastRowNum).getCell(6).setCellType(CellType.STRING);//合格率
-                        slSheet.getRow(lastRowNum-1).getCell(2).setCellType(CellType.STRING);//合格率
-                        slSheet.getRow(lastRowNum-2).getCell(16).setCellType(CellType.STRING);
-                        slSheet.getRow(lastRowNum-1).getCell(16).setCellType(CellType.STRING);
-                        slSheet.getRow(lastRowNum).getCell(4).setCellType(CellType.STRING);
-                        double zds = Double.valueOf(slSheet.getRow(lastRowNum-2).getCell(6).getStringCellValue());
-                        double hgds = Double.valueOf(slSheet.getRow(lastRowNum-1).getCell(6).getStringCellValue());
-                        double hgl = Double.valueOf(slSheet.getRow(lastRowNum).getCell(6).getStringCellValue());
-                        double gdz = Double.valueOf(slSheet.getRow(lastRowNum-1).getCell(2).getStringCellValue());
-                        String zdsz1 = decf.format(zds);
-                        String hgdsz1 = decf.format(hgds);
-                        String hglz1 = df.format(hgl);
-                        String gdz1 = df.format(gdz);
-                        map.put("路面类型", wb.getSheetName(j));
-                        map.put("规定值", gdz1);
-                        map.put("检测点数", zdsz1);
-                        map.put("合格点数", hgdsz1);
-                        map.put("合格率", hglz1);
-                        map.put("最大值", slSheet.getRow(lastRowNum-2).getCell(16).getStringCellValue());
-                        map.put("最小值", slSheet.getRow(lastRowNum-1).getCell(16).getStringCellValue());
-                        map.put("代表值", slSheet.getRow(lastRowNum).getCell(4).getStringCellValue());
-                    }
-                    jgmap.add(map);
+                        slSheet.getRow(lastRowNum-1).getCell(2).setCellType(CellType.STRING);//规定值
+                        slSheet.getRow(lastRowNum).getCell(4).setCellType(CellType.STRING);//代表值
+                        slSheet.getRow(lastRowNum-2).getCell(16).setCellType(CellType.STRING);//最大值
+                        slSheet.getRow(lastRowNum-1).getCell(16).setCellType(CellType.STRING);//最小值
 
+                        String max1 = slSheet.getRow(lastRowNum - 2).getCell(16).getStringCellValue();
+                        String min1 = slSheet.getRow(lastRowNum - 1).getCell(16).getStringCellValue();
+                        String dbz1 = slSheet.getRow(lastRowNum).getCell(4).getStringCellValue();
+                        String gdz1 = slSheet.getRow(lastRowNum - 1).getCell(2).getStringCellValue();
+                        String jcds1 = decf.format(Double.valueOf(slSheet.getRow(lastRowNum - 2).getCell(6).getStringCellValue()));
+                        String hgds1 = decf.format(Double.valueOf(slSheet.getRow(lastRowNum - 1).getCell(6).getStringCellValue()));
+                        String hgl1 = df.format(Double.valueOf(slSheet.getRow(lastRowNum).getCell(6).getStringCellValue()));
+                        //最大理论密度
+                        slSheet.getRow(lastRowNum-2).getCell(12).setCellType(CellType.STRING);//检测点数
+                        slSheet.getRow(lastRowNum-1).getCell(12).setCellType(CellType.STRING);//合格点数
+                        slSheet.getRow(lastRowNum).getCell(12).setCellType(CellType.STRING);//合格率
+                        slSheet.getRow(lastRowNum-1).getCell(8).setCellType(CellType.STRING);//规定值
+                        slSheet.getRow(lastRowNum).getCell(10).setCellType(CellType.STRING);//代表值
+                        slSheet.getRow(lastRowNum-2).getCell(17).setCellType(CellType.STRING);//最大值
+                        slSheet.getRow(lastRowNum-1).getCell(17).setCellType(CellType.STRING);//最小值
+
+                        String max2 = slSheet.getRow(lastRowNum - 2).getCell(17).getStringCellValue();
+                        String min2 = slSheet.getRow(lastRowNum - 1).getCell(17).getStringCellValue();
+                        String dbz2 = slSheet.getRow(lastRowNum).getCell(10).getStringCellValue();
+                        String gdz2 = slSheet.getRow(lastRowNum - 1).getCell(8).getStringCellValue();
+                        String jcds2 = decf.format(Double.valueOf(slSheet.getRow(lastRowNum - 2).getCell(12).getStringCellValue()));
+                        String hgds2 = decf.format(Double.valueOf(slSheet.getRow(lastRowNum - 1).getCell(12).getStringCellValue()));
+                        String hgl2 = df.format(Double.valueOf(slSheet.getRow(lastRowNum).getCell(12).getStringCellValue()));
+
+                        Map map1 = new HashMap();
+                        map1.put("路面类型", wb.getSheetName(j));
+                        map1.put("标准", "标准密度");
+                        map1.put("实测值变化范围", min1+"~"+max1);
+                        map1.put("密度代表值", dbz1);
+                        map1.put("密度规定值", gdz1);
+                        map1.put("检测点数", jcds1);
+                        map1.put("合格点数", hgds1);
+                        map1.put("合格率", hgl1);
+                        jgmap.add(map1);
+
+                        Map map2 = new HashMap();
+                        map2.put("路面类型", wb.getSheetName(j));
+                        map2.put("标准", "最大理论密度");
+                        map2.put("实测值变化范围", min2+"~"+max2);
+                        map2.put("密度代表值", dbz2);
+                        map2.put("密度规定值", gdz2);
+                        map2.put("检测点数", jcds2);
+                        map2.put("合格点数", hgds2);
+                        map2.put("合格率", hgl2);
+                        jgmap.add(map2);
+                    }
                 }
             }
             return jgmap;

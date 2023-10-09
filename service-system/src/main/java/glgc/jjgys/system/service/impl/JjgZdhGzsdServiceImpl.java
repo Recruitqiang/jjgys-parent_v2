@@ -1730,7 +1730,7 @@ public class JjgZdhGzsdServiceImpl extends ServiceImpl<JjgZdhGzsdMapper, JjgZdhG
            for (Map<String, Object> map : lxlist) {
                String zx = map.get("lxbs").toString();
                int num = jjgZdhGzsdMapper.selectcdnum(proname,htd,zx);
-               List<Map<String, Object>> looksdjdb = lookjdb(proname, htd, zx,num/2);
+               List<Map<String, Object>> looksdjdb = lookjdb(proname, htd, zx,num);
                mapList.addAll(looksdjdb);
            }
             return mapList;

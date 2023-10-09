@@ -3090,6 +3090,11 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                 List<Map<String, Object>> ljhzb = getljhzbData(commonInfoVo);
                 ljhzblist.addAll(ljhzb);
 
+                List<Map<String,Object>> ljjchzlist = getljhzData(commonInfoVo);
+                ljhzlist.addAll(ljjchzlist);
+
+
+
 
             }
             if (lx.contains("路面工程")){
@@ -3143,6 +3148,8 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                 lmhplist.addAll(hp);
 
                 //表4.1.2-10 汇总
+                List<Map<String,Object>> lmjchzlist = getlmhzData(commonInfoVo);
+                lmhzlist.addAll(lmjchzlist);
 
                 //桥面平整度
                 List<Map<String, Object>> qmpzd = getqmpzdData(commonInfoVo);
@@ -3157,6 +3164,8 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                 qmkhlist.addAll(qmkh);
 
                 //桥面汇总
+                List<Map<String,Object>> lmqlhzlist = getlmqlhzData(commonInfoVo);
+                qmxhzlist.addAll(lmqlhzlist);
 
                 //隧道路面压实度
                 List<Map<String, Object>> sdysd = getsdysdData(commonInfoVo);
@@ -3207,6 +3216,16 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                 List<Map<String, Object>> sdhp = getsdhpData(commonInfoVo);
                 sdhplist.addAll(sdhp);
 
+                List<Map<String,Object>> xmcc = getxmccData(commonInfoVo);
+                xmcclist.addAll(xmcc);
+
+                List<Map<String,Object>> sdlmhzlist = getsdlmhzData(commonInfoVo);
+                if (sdlmhzlist !=null && sdlmhzlist.size()>0){
+                    sdlmhzblist.addAll(sdlmhzlist);
+                }
+
+
+
             }
             if (lx.contains("桥梁工程")){
 
@@ -3226,6 +3245,11 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
 
                 List<Map<String, Object>> qlpd = getqlpdData(commonInfoVo);
                 qlpdlist.addAll(qlpd);
+
+                List<Map<String,Object>> qlgc = getqlgcData(commonInfoVo);
+                qlgclist.addAll(qlgc);
+
+
 
             }
             if (lx.contains("交安工程")){
@@ -3248,6 +3272,9 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                 //表4.1.5-4  防护栏（砼防护栏）检测结果汇总表
                 List<Map<String,Object>> qdcc = getqdccData(commonInfoVo);
                 qdcclist.addAll(qdcc);
+
+                List<Map<String,Object>> jabz = getjabzData(commonInfoVo);
+                jabzlist.addAll(jabz);
             }
             if (lx.contains("隧道工程")){
 
@@ -3269,31 +3296,14 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                 List<Map<String, Object>> sdpd = getsdpdData(commonInfoVo);
                 sdpdlist.addAll(sdpd);
 
+                List<Map<String,Object>> sdgc = getsdgcData(commonInfoVo);
+                sdgclist.addAll(sdgc);
+
             }
 
-            List<Map<String,Object>> ljjchzlist = getljhzData(commonInfoVo);
-            ljhzlist.addAll(ljjchzlist);
 
-            List<Map<String,Object>> lmjchzlist = getlmhzData(commonInfoVo);
-            lmhzlist.addAll(lmjchzlist);
 
-            List<Map<String,Object>> lmqlhzlist = getlmqlhzData(commonInfoVo);
-            qmxhzlist.addAll(lmqlhzlist);
 
-            List<Map<String,Object>> sdlmhzlist = getsdlmhzData(commonInfoVo);
-            sdlmhzblist.addAll(sdlmhzlist);
-
-            List<Map<String,Object>> xmcc = getxmccData(commonInfoVo);
-            xmcclist.addAll(xmcc);
-
-            List<Map<String,Object>> qlgc = getqlgcData(commonInfoVo);
-            qlgclist.addAll(qlgc);
-
-            List<Map<String,Object>> sdgc = getsdgcData(commonInfoVo);
-            sdgclist.addAll(sdgc);
-
-            List<Map<String,Object>> jabz = getjabzData(commonInfoVo);
-            jabzlist.addAll(jabz);
 
             List<Map<String,Object>> ysdfxb = getysdfxbData(commonInfoVo);
             ysdfxblist.addAll(ysdfxb);
@@ -3308,6 +3318,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
             htdpdlist.addAll(htdpd);
 
         }
+
         List<Map<String,Object>> xsxmpd = getxsxmpdData(proname);
         xsxmpdlist.addAll(xsxmpd);
 
@@ -3317,7 +3328,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         if (!fdir.exists()) {
             fdir.mkdirs();
         }
-        File directory = new File("src/main/resources/static");
+        File directory = new File("service-system/src/main/resources/static");
         String reportPath = directory.getCanonicalPath();
         String name = "报告中表格.xlsx";
         String path = reportPath + File.separator + name;
@@ -3501,6 +3512,10 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         if (CollectionUtils.isNotEmpty(sdcqfxblist)){
             DBExcelsdcqfxData(wb,sdcqfxblist);
         }
+
+        //删除空的工作簿
+        JjgFbgcCommonUtils.deleteSheets(wb);
+
         FileOutputStream fileOut = new FileOutputStream(f);
         wb.write(fileOut);
         fileOut.flush();
@@ -3659,197 +3674,197 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         XSSFSheet sheet = wb.getSheet("表4.1.5-5");
         int index = 3;
         for (Map<String, Object> datum : data) {
-            sheet.getRow(2).getCell(index).setCellValue(datum.get("htd").toString());
+            sheet.getRow(2).createCell(index).setCellValue(datum.get("htd").toString());
             if (datum.containsKey("szdzds")){
-                sheet.getRow(3).getCell(index).setCellValue(Double.valueOf(datum.get("szdzds").toString()));
+                sheet.getRow(3).createCell(index).setCellValue(Double.valueOf(datum.get("szdzds").toString()));
             }else {
-                sheet.getRow(3).getCell(index).setCellValue(0);
+                sheet.getRow(3).createCell(index).setCellValue(0);
             }
             if (datum.containsKey("szdhgds")){
-                sheet.getRow(4).getCell(index).setCellValue(Double.valueOf(datum.get("szdhgds").toString()));
+                sheet.getRow(4).createCell(index).setCellValue(Double.valueOf(datum.get("szdhgds").toString()));
             }else {
-                sheet.getRow(4).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(4).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("szdhgl")){
-                sheet.getRow(5).getCell(index).setCellValue(Double.valueOf(datum.get("szdhgl").toString()));
+                sheet.getRow(5).createCell(index).setCellValue(Double.valueOf(datum.get("szdhgl").toString()));
             }else {
-                sheet.getRow(5).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(5).createCell(index).setCellValue(Double.valueOf(0));
             }
 
             if (datum.containsKey("jkzds")){
-                sheet.getRow(6).getCell(index).setCellValue(Double.valueOf(datum.get("jkzds").toString()));
+                sheet.getRow(6).createCell(index).setCellValue(Double.valueOf(datum.get("jkzds").toString()));
             }else {
-                sheet.getRow(6).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(6).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("jkhgds")){
-                sheet.getRow(7).getCell(index).setCellValue(Double.valueOf(datum.get("jkhgds").toString()));
+                sheet.getRow(7).createCell(index).setCellValue(Double.valueOf(datum.get("jkhgds").toString()));
             }else {
-                sheet.getRow(7).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(7).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("jkhgl")){
-                sheet.getRow(8).getCell(index).setCellValue(Double.valueOf(datum.get("jkhgl").toString()));
+                sheet.getRow(8).createCell(index).setCellValue(Double.valueOf(datum.get("jkhgl").toString()));
             }else {
-                sheet.getRow(8).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(8).createCell(index).setCellValue(Double.valueOf(0));
             }
 
             if (datum.containsKey("bzbhdzds")){
-                sheet.getRow(9).getCell(index).setCellValue(Double.valueOf(datum.get("bzbhdzds").toString()));
+                sheet.getRow(9).createCell(index).setCellValue(Double.valueOf(datum.get("bzbhdzds").toString()));
             }else {
-                sheet.getRow(9).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(9).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("bzbhdhgds")){
-                sheet.getRow(10).getCell(index).setCellValue(Double.valueOf(datum.get("bzbhdhgds").toString()));
+                sheet.getRow(10).createCell(index).setCellValue(Double.valueOf(datum.get("bzbhdhgds").toString()));
             }else {
-                sheet.getRow(10).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(10).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("bzbhdhgl")){
-                sheet.getRow(11).getCell(index).setCellValue(Double.valueOf(datum.get("bzbhdhgl").toString()));
+                sheet.getRow(11).createCell(index).setCellValue(Double.valueOf(datum.get("bzbhdhgl").toString()));
             }else {
-                sheet.getRow(11).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(11).createCell(index).setCellValue(Double.valueOf(0));
             }
 
             if (datum.containsKey("xszds")){
-                sheet.getRow(12).getCell(index).setCellValue(Double.valueOf(datum.get("xszds").toString()));
+                sheet.getRow(12).createCell(index).setCellValue(Double.valueOf(datum.get("xszds").toString()));
             }else {
-                sheet.getRow(12).getCell(index).setCellValue(0);
+                sheet.getRow(12).createCell(index).setCellValue(0);
             }
             if (datum.containsKey("xshgds")){
-                sheet.getRow(13).getCell(index).setCellValue(Double.valueOf(datum.get("xshgds").toString()));
+                sheet.getRow(13).createCell(index).setCellValue(Double.valueOf(datum.get("xshgds").toString()));
             }else {
-                sheet.getRow(13).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(13).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("xshgl")){
-                sheet.getRow(14).getCell(index).setCellValue(Double.valueOf(datum.get("xshgl").toString()));
+                sheet.getRow(14).createCell(index).setCellValue(Double.valueOf(datum.get("xshgl").toString()));
             }else {
-                sheet.getRow(14).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(14).createCell(index).setCellValue(Double.valueOf(0));
             }
 
 
             if (datum.containsKey("xzds")){
-                sheet.getRow(15).getCell(index).setCellValue(Double.valueOf(datum.get("xzds").toString()));
+                sheet.getRow(15).createCell(index).setCellValue(Double.valueOf(datum.get("xzds").toString()));
             }else {
-                sheet.getRow(15).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(15).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("xhgds")){
-                sheet.getRow(16).getCell(index).setCellValue(Double.valueOf(datum.get("xhgds").toString()));
+                sheet.getRow(16).createCell(index).setCellValue(Double.valueOf(datum.get("xhgds").toString()));
             }else {
-                sheet.getRow(16).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(16).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("xhgl")){
-                sheet.getRow(17).getCell(index).setCellValue(Double.valueOf(datum.get("xhgl").toString()));
+                sheet.getRow(17).createCell(index).setCellValue(Double.valueOf(datum.get("xhgl").toString()));
             }else {
-                sheet.getRow(17).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(17).createCell(index).setCellValue(Double.valueOf(0));
             }
 
             if (datum.containsKey("bxhdzds")){
-                sheet.getRow(18).getCell(index).setCellValue(Double.valueOf(datum.get("bxhdzds").toString()));
+                sheet.getRow(18).createCell(index).setCellValue(Double.valueOf(datum.get("bxhdzds").toString()));
             }else {
-                sheet.getRow(18).getCell(index).setCellValue(0);
+                sheet.getRow(18).createCell(index).setCellValue(0);
             }
             if (datum.containsKey("bxhdhgds")){
-                sheet.getRow(19).getCell(index).setCellValue(Double.valueOf(datum.get("bxhdhgds").toString()));
+                sheet.getRow(19).createCell(index).setCellValue(Double.valueOf(datum.get("bxhdhgds").toString()));
             }else {
-                sheet.getRow(19).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(19).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("bxhdhgl")){
-                sheet.getRow(20).getCell(index).setCellValue(Double.valueOf(datum.get("bxhdhgl").toString()));
+                sheet.getRow(20).createCell(index).setCellValue(Double.valueOf(datum.get("bxhdhgl").toString()));
             }else {
-                sheet.getRow(20).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(20).createCell(index).setCellValue(Double.valueOf(0));
             }
 
             if (datum.containsKey("jzds")){
-                sheet.getRow(21).getCell(index).setCellValue(Double.valueOf(datum.get("jzds").toString()));
+                sheet.getRow(21).createCell(index).setCellValue(Double.valueOf(datum.get("jzds").toString()));
             }else {
-                sheet.getRow(21).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(21).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("jhgds")){
-                sheet.getRow(22).getCell(index).setCellValue(Double.valueOf(datum.get("jhgds").toString()));
+                sheet.getRow(22).createCell(index).setCellValue(Double.valueOf(datum.get("jhgds").toString()));
             }else {
-                sheet.getRow(22).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(22).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("jhgl")){
-                sheet.getRow(23).getCell(index).setCellValue(Double.valueOf(datum.get("jhgl").toString()));
+                sheet.getRow(23).createCell(index).setCellValue(Double.valueOf(datum.get("jhgl").toString()));
             }else {
-                sheet.getRow(23).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(23).createCell(index).setCellValue(Double.valueOf(0));
             }
 
             if (datum.containsKey("lzds")){
-                sheet.getRow(24).getCell(index).setCellValue(Double.valueOf(datum.get("lzds").toString()));
+                sheet.getRow(24).createCell(index).setCellValue(Double.valueOf(datum.get("lzds").toString()));
             }else {
-                sheet.getRow(24).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(24).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("lhgds")){
-                sheet.getRow(25).getCell(index).setCellValue(Double.valueOf(datum.get("lhgds").toString()));
+                sheet.getRow(25).createCell(index).setCellValue(Double.valueOf(datum.get("lhgds").toString()));
             }else {
-                sheet.getRow(25).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(25).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("lhgl")){
-                sheet.getRow(26).getCell(index).setCellValue(Double.valueOf(datum.get("lhgl").toString()));
+                sheet.getRow(26).createCell(index).setCellValue(Double.valueOf(datum.get("lhgl").toString()));
             }else {
-                sheet.getRow(26).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(26).createCell(index).setCellValue(Double.valueOf(0));
             }
 
             if (datum.containsKey("szds")){
-                sheet.getRow(27).getCell(index).setCellValue(Double.valueOf(datum.get("szds").toString()));
+                sheet.getRow(27).createCell(index).setCellValue(Double.valueOf(datum.get("szds").toString()));
             }else {
-                sheet.getRow(27).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(27).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("shgds")){
-                sheet.getRow(28).getCell(index).setCellValue(Double.valueOf(datum.get("shgds").toString()));
+                sheet.getRow(28).createCell(index).setCellValue(Double.valueOf(datum.get("shgds").toString()));
             }else {
-                sheet.getRow(28).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(28).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("shgl")){
-                sheet.getRow(29).getCell(index).setCellValue(Double.valueOf(datum.get("shgl").toString()));
+                sheet.getRow(29).createCell(index).setCellValue(Double.valueOf(datum.get("shgl").toString()));
             }else {
-                sheet.getRow(29).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(29).createCell(index).setCellValue(Double.valueOf(0));
             }
 
             if (datum.containsKey("gzds")){
-                sheet.getRow(30).getCell(index).setCellValue(Double.valueOf(datum.get("gzds").toString()));
+                sheet.getRow(30).createCell(index).setCellValue(Double.valueOf(datum.get("gzds").toString()));
             }else {
-                sheet.getRow(30).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(30).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("ghgds")){
-                sheet.getRow(31).getCell(index).setCellValue(Double.valueOf(datum.get("ghgds").toString()));
+                sheet.getRow(31).createCell(index).setCellValue(Double.valueOf(datum.get("ghgds").toString()));
             }else {
-                sheet.getRow(31).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(31).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("ghgl")){
-                sheet.getRow(32).getCell(index).setCellValue(Double.valueOf(datum.get("ghgl").toString()));
+                sheet.getRow(32).createCell(index).setCellValue(Double.valueOf(datum.get("ghgl").toString()));
             }else {
-                sheet.getRow(32).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(32).createCell(index).setCellValue(Double.valueOf(0));
             }
 
             if (datum.containsKey("qdzds")){
-                sheet.getRow(33).getCell(index).setCellValue(Double.valueOf(datum.get("qdzds").toString()));
+                sheet.getRow(33).createCell(index).setCellValue(Double.valueOf(datum.get("qdzds").toString()));
             }else {
-                sheet.getRow(33).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(33).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("qdhgs")){
-                sheet.getRow(34).getCell(index).setCellValue(Double.valueOf(datum.get("qdhgs").toString()));
+                sheet.getRow(34).createCell(index).setCellValue(Double.valueOf(datum.get("qdhgs").toString()));
             }else {
-                sheet.getRow(34).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(34).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("qdhgl")){
-                sheet.getRow(35).getCell(index).setCellValue(Double.valueOf(datum.get("qdhgl").toString()));
+                sheet.getRow(35).createCell(index).setCellValue(Double.valueOf(datum.get("qdhgl").toString()));
             }else {
-                sheet.getRow(35).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(35).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("cczds")){
-                sheet.getRow(36).getCell(index).setCellValue(Double.valueOf(datum.get("cczds").toString()));
+                sheet.getRow(36).createCell(index).setCellValue(Double.valueOf(datum.get("cczds").toString()));
             }else {
-                sheet.getRow(36).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(36).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("cchgs")){
-                sheet.getRow(37).getCell(index).setCellValue(Double.valueOf(datum.get("cchgs").toString()));
+                sheet.getRow(37).createCell(index).setCellValue(Double.valueOf(datum.get("cchgs").toString()));
             }else {
-                sheet.getRow(37).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(37).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("cchgl")){
-                sheet.getRow(38).getCell(index).setCellValue(Double.valueOf(datum.get("cchgl").toString()));
+                sheet.getRow(38).createCell(index).setCellValue(Double.valueOf(datum.get("cchgl").toString()));
             }else {
-                sheet.getRow(38).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(38).createCell(index).setCellValue(Double.valueOf(0));
             }
             index++;
         }
@@ -4117,198 +4132,201 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         XSSFSheet sheet = wb.getSheet("表4.1.4-4");
         int index = 3;
         for (Map<String, Object> datum : data) {
-            sheet.getRow(2).getCell(index).setCellValue(datum.get("htd").toString());
-            if (datum.containsKey("cqqdjcds")){
-                sheet.getRow(3).getCell(index).setCellValue(Double.valueOf(datum.get("cqqdjcds").toString()));
-            }else {
-                sheet.getRow(3).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("cqqdhgds")){
-                sheet.getRow(4).getCell(index).setCellValue(Double.valueOf(datum.get("cqqdhgds").toString()));
-            }else {
-                sheet.getRow(4).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("cqqdhgl")){
-                sheet.getRow(5).getCell(index).setCellValue(Double.valueOf(datum.get("cqqdhgl").toString()));
-            }else {
-                sheet.getRow(5).getCell(index).setCellValue(Double.valueOf(0));
-            }
+            if (datum.size()>0){
+                sheet.getRow(2).createCell(index).setCellValue(datum.get("htd").toString());
+                if (datum.containsKey("cqqdjcds")){
+                    sheet.getRow(3).createCell(index).setCellValue(Double.valueOf(datum.get("cqqdjcds").toString()));
+                }else {
+                    sheet.getRow(3).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("cqqdhgds")){
+                    sheet.getRow(4).createCell(index).setCellValue(Double.valueOf(datum.get("cqqdhgds").toString()));
+                }else {
+                    sheet.getRow(4).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("cqqdhgl")){
+                    sheet.getRow(5).createCell(index).setCellValue(Double.valueOf(datum.get("cqqdhgl").toString()));
+                }else {
+                    sheet.getRow(5).createCell(index).setCellValue(Double.valueOf(0));
+                }
 
-            if (datum.containsKey("cqhdjcds")){
-                sheet.getRow(6).getCell(index).setCellValue(Double.valueOf(datum.get("cqhdjcds").toString()));
-            }else {
-                sheet.getRow(6).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("cqhdhgds")){
-                sheet.getRow(7).getCell(index).setCellValue(Double.valueOf(datum.get("cqhdhgds").toString()));
-            }else {
-                sheet.getRow(7).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("cqhdhgl")){
-                sheet.getRow(8).getCell(index).setCellValue(Double.valueOf(datum.get("cqhdhgl").toString()));
-            }else {
-                sheet.getRow(8).getCell(index).setCellValue(Double.valueOf(0));
-            }
+                if (datum.containsKey("cqhdjcds")){
+                    sheet.getRow(6).createCell(index).setCellValue(Double.valueOf(datum.get("cqhdjcds").toString()));
+                }else {
+                    sheet.getRow(6).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("cqhdhgds")){
+                    sheet.getRow(7).createCell(index).setCellValue(Double.valueOf(datum.get("cqhdhgds").toString()));
+                }else {
+                    sheet.getRow(7).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("cqhdhgl")){
+                    sheet.getRow(8).createCell(index).setCellValue(Double.valueOf(datum.get("cqhdhgl").toString()));
+                }else {
+                    sheet.getRow(8).createCell(index).setCellValue(Double.valueOf(0));
+                }
 
-            if (datum.containsKey("dmpzdjcds")){
-                sheet.getRow(9).getCell(index).setCellValue(Double.valueOf(datum.get("dmpzdjcds").toString()));
-            }else {
-                sheet.getRow(9).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("dmpzdhgds")){
-                sheet.getRow(10).getCell(index).setCellValue(Double.valueOf(datum.get("dmpzdhgds").toString()));
-            }else {
-                sheet.getRow(10).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("dmpzdhgl")){
-                sheet.getRow(11).getCell(index).setCellValue(Double.valueOf(datum.get("dmpzdhgl").toString()));
-            }else {
-                sheet.getRow(11).getCell(index).setCellValue(Double.valueOf(0));
-            }
+                if (datum.containsKey("dmpzdjcds")){
+                    sheet.getRow(9).createCell(index).setCellValue(Double.valueOf(datum.get("dmpzdjcds").toString()));
+                }else {
+                    sheet.getRow(9).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("dmpzdhgds")){
+                    sheet.getRow(10).createCell(index).setCellValue(Double.valueOf(datum.get("dmpzdhgds").toString()));
+                }else {
+                    sheet.getRow(10).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("dmpzdhgl")){
+                    sheet.getRow(11).createCell(index).setCellValue(Double.valueOf(datum.get("dmpzdhgl").toString()));
+                }else {
+                    sheet.getRow(11).createCell(index).setCellValue(Double.valueOf(0));
+                }
 
-            if (datum.containsKey("kdjcds")){
-                sheet.getRow(12).getCell(index).setCellValue(Double.valueOf(datum.get("kdjcds").toString()));
-            }else {
-                sheet.getRow(12).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("kdhgds")){
-                sheet.getRow(13).getCell(index).setCellValue(Double.valueOf(datum.get("kdhgds").toString()));
-            }else {
-                sheet.getRow(13).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("kdhgl")){
-                sheet.getRow(14).getCell(index).setCellValue(Double.valueOf(datum.get("kdhgl").toString()));
-            }else {
-                sheet.getRow(14).getCell(index).setCellValue(Double.valueOf(0));
-            }
+                if (datum.containsKey("kdjcds")){
+                    sheet.getRow(12).createCell(index).setCellValue(Double.valueOf(datum.get("kdjcds").toString()));
+                }else {
+                    sheet.getRow(12).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("kdhgds")){
+                    sheet.getRow(13).createCell(index).setCellValue(Double.valueOf(datum.get("kdhgds").toString()));
+                }else {
+                    sheet.getRow(13).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("kdhgl")){
+                    sheet.getRow(14).createCell(index).setCellValue(Double.valueOf(datum.get("kdhgl").toString()));
+                }else {
+                    sheet.getRow(14).createCell(index).setCellValue(Double.valueOf(0));
+                }
             /*if (datum.containsKey("cqhdjcds")){
-                sheet.getRow(15).getCell(index).setCellValue(Double.valueOf(datum.get("cqhdjcds").toString()));
+                sheet.getRow(15).createCell(index).setCellValue(Double.valueOf(datum.get("cqhdjcds").toString()));
             }else {
-                sheet.getRow(15).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(15).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("cqhdhgds")){
-                sheet.getRow(16).getCell(index).setCellValue(Double.valueOf(datum.get("cqhdhgds").toString()));
+                sheet.getRow(16).createCell(index).setCellValue(Double.valueOf(datum.get("cqhdhgds").toString()));
             }else {
-                sheet.getRow(16).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(16).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("cqhdhgl")){
-                sheet.getRow(17).getCell(index).setCellValue(Double.valueOf(datum.get("cqhdhgl").toString()));
+                sheet.getRow(17).createCell(index).setCellValue(Double.valueOf(datum.get("cqhdhgl").toString()));
             }else {
-                sheet.getRow(17).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(17).createCell(index).setCellValue(Double.valueOf(0));
             }*/
 
-            if (datum.containsKey("ysdjcds")){
-                sheet.getRow(18).getCell(index).setCellValue(Double.valueOf(datum.get("ysdjcds").toString()));
-            }else {
-                sheet.getRow(18).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("ysdhgds")){
-                sheet.getRow(19).getCell(index).setCellValue(Double.valueOf(datum.get("ysdhgds").toString()));
-            }else {
-                sheet.getRow(19).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("ysdhgl")){
-                sheet.getRow(20).getCell(index).setCellValue(Double.valueOf(datum.get("ysdhgl").toString()));
-            }else {
-                sheet.getRow(20).getCell(index).setCellValue(Double.valueOf(0));
-            }
+                if (datum.containsKey("ysdjcds")){
+                    sheet.getRow(18).createCell(index).setCellValue(Double.valueOf(datum.get("ysdjcds").toString()));
+                }else {
+                    sheet.getRow(18).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("ysdhgds")){
+                    sheet.getRow(19).createCell(index).setCellValue(Double.valueOf(datum.get("ysdhgds").toString()));
+                }else {
+                    sheet.getRow(19).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("ysdhgl")){
+                    sheet.getRow(20).createCell(index).setCellValue(Double.valueOf(datum.get("ysdhgl").toString()));
+                }else {
+                    sheet.getRow(20).createCell(index).setCellValue(Double.valueOf(0));
+                }
 
-            //车辙
+                //车辙
            /* if (datum.containsKey("cqhdjcds")){
-                sheet.getRow(21).getCell(index).setCellValue(Double.valueOf(datum.get("cqhdjcds").toString()));
+                sheet.getRow(21).createCell(index).setCellValue(Double.valueOf(datum.get("cqhdjcds").toString()));
             }else {
-                sheet.getRow(21).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(21).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("cqhdhgds")){
-                sheet.getRow(22).getCell(index).setCellValue(Double.valueOf(datum.get("cqhdhgds").toString()));
+                sheet.getRow(22).createCell(index).setCellValue(Double.valueOf(datum.get("cqhdhgds").toString()));
             }else {
-                sheet.getRow(22).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(22).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("cqhdhgl")){
-                sheet.getRow(23).getCell(index).setCellValue(Double.valueOf(datum.get("cqhdhgl").toString()));
+                sheet.getRow(23).createCell(index).setCellValue(Double.valueOf(datum.get("cqhdhgl").toString()));
             }else {
-                sheet.getRow(23).getCell(index).setCellValue(Double.valueOf(0));
+                sheet.getRow(23).createCell(index).setCellValue(Double.valueOf(0));
             }*/
 
-            if (datum.containsKey("xsjcds")){
-                sheet.getRow(24).getCell(index).setCellValue(Double.valueOf(datum.get("xsjcds").toString()));
-            }else {
-                sheet.getRow(24).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("xshgds")){
-                sheet.getRow(25).getCell(index).setCellValue(Double.valueOf(datum.get("xshgds").toString()));
-            }else {
-                sheet.getRow(25).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("xshgl")){
-                sheet.getRow(26).getCell(index).setCellValue(Double.valueOf(datum.get("xshgl").toString()));
-            }else {
-                sheet.getRow(26).getCell(index).setCellValue(Double.valueOf(0));
+                if (datum.containsKey("xsjcds")){
+                    sheet.getRow(24).createCell(index).setCellValue(Double.valueOf(datum.get("xsjcds").toString()));
+                }else {
+                    sheet.getRow(24).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("xshgds")){
+                    sheet.getRow(25).createCell(index).setCellValue(Double.valueOf(datum.get("xshgds").toString()));
+                }else {
+                    sheet.getRow(25).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("xshgl")){
+                    sheet.getRow(26).createCell(index).setCellValue(Double.valueOf(datum.get("xshgl").toString()));
+                }else {
+                    sheet.getRow(26).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("qdjcds")){
+                    sheet.getRow(27).createCell(index).setCellValue(Double.valueOf(datum.get("qdjcds").toString()));
+                }else {
+                    sheet.getRow(27).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("qdhgds")){
+                    sheet.getRow(28).createCell(index).setCellValue(Double.valueOf(datum.get("qdhgds").toString()));
+                }else {
+                    sheet.getRow(28).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("qdhgl")){
+                    sheet.getRow(29).createCell(index).setCellValue(Double.valueOf(datum.get("qdhgl").toString()));
+                }else {
+                    sheet.getRow(29).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("gcjcds")){
+                    sheet.getRow(30).createCell(index).setCellValue(Double.valueOf(datum.get("gcjcds").toString()));
+                }else {
+                    sheet.getRow(30).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("gchgds")){
+                    sheet.getRow(31).createCell(index).setCellValue(Double.valueOf(datum.get("gchgds").toString()));
+                }else {
+                    sheet.getRow(31).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("gchgl")){
+                    sheet.getRow(32).createCell(index).setCellValue(Double.valueOf(datum.get("gchgl").toString()));
+                }else {
+                    sheet.getRow(32).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("hdjcds")){
+                    sheet.getRow(39).createCell(index).setCellValue(Double.valueOf(datum.get("hdjcds").toString()));
+                }else {
+                    sheet.getRow(39).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("hdhgds")){
+                    sheet.getRow(40).createCell(index).setCellValue(Double.valueOf(datum.get("hdhgds").toString()));
+                }else {
+                    sheet.getRow(40).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("hdhgl")){
+                    sheet.getRow(41).createCell(index).setCellValue(Double.valueOf(datum.get("hdhgl").toString()));
+                }else {
+                    sheet.getRow(41).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("hpjcds")){
+                    sheet.getRow(42).createCell(index).setCellValue(Double.valueOf(datum.get("hpjcds").toString()));
+                }else {
+                    sheet.getRow(42).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("hphgds")){
+                    sheet.getRow(43).createCell(index).setCellValue(Double.valueOf(datum.get("hphgds").toString()));
+                }else {
+                    sheet.getRow(43).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("hphgl")){
+                    sheet.getRow(44).createCell(index).setCellValue(Double.valueOf(datum.get("hphgl").toString()));
+                }else {
+                    sheet.getRow(44).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                index++;
             }
 
-            if (datum.containsKey("qdjcds")){
-                sheet.getRow(27).getCell(index).setCellValue(Double.valueOf(datum.get("qdjcds").toString()));
-            }else {
-                sheet.getRow(27).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("qdhgds")){
-                sheet.getRow(28).getCell(index).setCellValue(Double.valueOf(datum.get("qdhgds").toString()));
-            }else {
-                sheet.getRow(28).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("qdhgl")){
-                sheet.getRow(29).getCell(index).setCellValue(Double.valueOf(datum.get("qdhgl").toString()));
-            }else {
-                sheet.getRow(29).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("gcjcds")){
-                sheet.getRow(30).getCell(index).setCellValue(Double.valueOf(datum.get("gcjcds").toString()));
-            }else {
-                sheet.getRow(30).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("gchgds")){
-                sheet.getRow(31).getCell(index).setCellValue(Double.valueOf(datum.get("gchgds").toString()));
-            }else {
-                sheet.getRow(31).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("gchgl")){
-                sheet.getRow(32).getCell(index).setCellValue(Double.valueOf(datum.get("gchgl").toString()));
-            }else {
-                sheet.getRow(32).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("hdjcds")){
-                sheet.getRow(39).getCell(index).setCellValue(Double.valueOf(datum.get("hdjcds").toString()));
-            }else {
-                sheet.getRow(39).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("hdhgds")){
-                sheet.getRow(40).getCell(index).setCellValue(Double.valueOf(datum.get("hdhgds").toString()));
-            }else {
-                sheet.getRow(40).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("hdhgl")){
-                sheet.getRow(41).getCell(index).setCellValue(Double.valueOf(datum.get("hdhgl").toString()));
-            }else {
-                sheet.getRow(41).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("hpjcds")){
-                sheet.getRow(42).getCell(index).setCellValue(Double.valueOf(datum.get("hpjcds").toString()));
-            }else {
-                sheet.getRow(42).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("hphgds")){
-                sheet.getRow(43).getCell(index).setCellValue(Double.valueOf(datum.get("hphgds").toString()));
-            }else {
-                sheet.getRow(43).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("hphgl")){
-                sheet.getRow(44).getCell(index).setCellValue(Double.valueOf(datum.get("hphgl").toString()));
-            }else {
-                sheet.getRow(44).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            index++;
         }
     }
 
@@ -4321,118 +4339,118 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         XSSFSheet sheet = wb.getSheet("表4.1.4-3");
         int index = 3;
         for (Map<String, Object> datum : data) {
-            sheet.getRow(index).getCell(0).setCellValue(datum.get("htd").toString());
+            sheet.getRow(index).createCell(0).setCellValue(datum.get("htd").toString());
 
             if (datum.containsKey("ysdjcds")){
-                sheet.getRow(index).getCell(1).setCellValue(Double.valueOf(datum.get("ysdjcds").toString()));
+                sheet.getRow(index).createCell(1).setCellValue(Double.valueOf(datum.get("ysdjcds").toString()));
             }else {
-                sheet.getRow(index).getCell(1).setCellValue(0);
+                sheet.getRow(index).createCell(1).setCellValue(0);
             }
             if (datum.containsKey("ysdhgds")){
-                sheet.getRow(index).getCell(2).setCellValue(Double.valueOf(datum.get("ysdhgds").toString()));
+                sheet.getRow(index).createCell(2).setCellValue(Double.valueOf(datum.get("ysdhgds").toString()));
             }else {
-                sheet.getRow(index).getCell(2).setCellValue(Double.valueOf(0));
+                sheet.getRow(index).createCell(2).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("ysdhgl")){
-                sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(datum.get("ysdhgl").toString()));
+                sheet.getRow(index).createCell(3).setCellValue(Double.valueOf(datum.get("ysdhgl").toString()));
             }else {
-                sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(0));
+                sheet.getRow(index).createCell(3).setCellValue(Double.valueOf(0));
             }
 
             //车辙
            /* if (datum.containsKey("cqhdjcds")){
-                sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(datum.get("cqhdjcds").toString()));
+                sheet.getRow(index).createCell(4).setCellValue(Double.valueOf(datum.get("cqhdjcds").toString()));
             }else {
-                sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(0));
+                sheet.getRow(index).createCell(4).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("cqhdhgds")){
-                sheet.getRow(index).getCell(5).setCellValue(Double.valueOf(datum.get("cqhdhgds").toString()));
+                sheet.getRow(index).createCell(5).setCellValue(Double.valueOf(datum.get("cqhdhgds").toString()));
             }else {
-                sheet.getRow(index).getCell(5).setCellValue(Double.valueOf(0));
+                sheet.getRow(index).createCell(5).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("cqhdhgl")){
-                sheet.getRow(index).getCell(6).setCellValue(Double.valueOf(datum.get("cqhdhgl").toString()));
+                sheet.getRow(index).createCell(6).setCellValue(Double.valueOf(datum.get("cqhdhgl").toString()));
             }else {
-                sheet.getRow(index).getCell(6).setCellValue(Double.valueOf(0));
+                sheet.getRow(index).createCell(6).setCellValue(Double.valueOf(0));
             }*/
 
             if (datum.containsKey("xsjcds")){
-                sheet.getRow(index).getCell(7).setCellValue(Double.valueOf(datum.get("xsjcds").toString()));
+                sheet.getRow(index).createCell(7).setCellValue(Double.valueOf(datum.get("xsjcds").toString()));
             }else {
-                sheet.getRow(index).getCell(7).setCellValue(Double.valueOf(0));
+                sheet.getRow(index).createCell(7).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("xshgds")){
-                sheet.getRow(index).getCell(8).setCellValue(Double.valueOf(datum.get("xshgds").toString()));
+                sheet.getRow(index).createCell(8).setCellValue(Double.valueOf(datum.get("xshgds").toString()));
             }else {
-                sheet.getRow(index).getCell(8).setCellValue(Double.valueOf(0));
+                sheet.getRow(index).createCell(8).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("xshgl")){
-                sheet.getRow(index).getCell(9).setCellValue(Double.valueOf(datum.get("xshgl").toString()));
+                sheet.getRow(index).createCell(9).setCellValue(Double.valueOf(datum.get("xshgl").toString()));
             }else {
-                sheet.getRow(index).getCell(9).setCellValue(Double.valueOf(0));
+                sheet.getRow(index).createCell(9).setCellValue(Double.valueOf(0));
             }
 
             if (datum.containsKey("qdjcds")){
-                sheet.getRow(index).getCell(10).setCellValue(Double.valueOf(datum.get("qdjcds").toString()));
+                sheet.getRow(index).createCell(10).setCellValue(Double.valueOf(datum.get("qdjcds").toString()));
             }else {
-                sheet.getRow(index).getCell(10).setCellValue(Double.valueOf(0));
+                sheet.getRow(index).createCell(10).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("qdhgds")){
-                sheet.getRow(index).getCell(11).setCellValue(Double.valueOf(datum.get("qdhgds").toString()));
+                sheet.getRow(index).createCell(11).setCellValue(Double.valueOf(datum.get("qdhgds").toString()));
             }else {
-                sheet.getRow(index).getCell(11).setCellValue(Double.valueOf(0));
+                sheet.getRow(index).createCell(11).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("qdhgl")){
-                sheet.getRow(index).getCell(12).setCellValue(Double.valueOf(datum.get("qdhgl").toString()));
+                sheet.getRow(index).createCell(12).setCellValue(Double.valueOf(datum.get("qdhgl").toString()));
             }else {
-                sheet.getRow(index).getCell(12).setCellValue(Double.valueOf(0));
+                sheet.getRow(index).createCell(12).setCellValue(Double.valueOf(0));
             }
 
             if (datum.containsKey("gcjcds")){
-                sheet.getRow(index).getCell(13).setCellValue(Double.valueOf(datum.get("gcjcds").toString()));
+                sheet.getRow(index).createCell(13).setCellValue(Double.valueOf(datum.get("gcjcds").toString()));
             }else {
-                sheet.getRow(index).getCell(13).setCellValue(Double.valueOf(0));
+                sheet.getRow(index).createCell(13).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("gchgds")){
-                sheet.getRow(index).getCell(14).setCellValue(Double.valueOf(datum.get("gchgds").toString()));
+                sheet.getRow(index).createCell(14).setCellValue(Double.valueOf(datum.get("gchgds").toString()));
             }else {
-                sheet.getRow(index).getCell(14).setCellValue(Double.valueOf(0));
+                sheet.getRow(index).createCell(14).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("gchgl")){
-                sheet.getRow(index).getCell(15).setCellValue(Double.valueOf(datum.get("gchgl").toString()));
+                sheet.getRow(index).createCell(15).setCellValue(Double.valueOf(datum.get("gchgl").toString()));
             }else {
-                sheet.getRow(index).getCell(15).setCellValue(Double.valueOf(0));
+                sheet.getRow(index).createCell(15).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("hdjcds")){
-                sheet.getRow(index).getCell(22).setCellValue(Double.valueOf(datum.get("hdjcds").toString()));
+                sheet.getRow(index).createCell(22).setCellValue(Double.valueOf(datum.get("hdjcds").toString()));
             }else {
-                sheet.getRow(index).getCell(22).setCellValue(Double.valueOf(0));
+                sheet.getRow(index).createCell(22).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("hdhgds")){
-                sheet.getRow(index).getCell(23).setCellValue(Double.valueOf(datum.get("hdhgds").toString()));
+                sheet.getRow(index).createCell(23).setCellValue(Double.valueOf(datum.get("hdhgds").toString()));
             }else {
-                sheet.getRow(index).getCell(23).setCellValue(Double.valueOf(0));
+                sheet.getRow(index).createCell(23).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("hdhgl")){
-                sheet.getRow(index).getCell(24).setCellValue(Double.valueOf(datum.get("hdhgl").toString()));
+                sheet.getRow(index).createCell(24).setCellValue(Double.valueOf(datum.get("hdhgl").toString()));
             }else {
-                sheet.getRow(index).getCell(24).setCellValue(Double.valueOf(0));
+                sheet.getRow(index).createCell(24).setCellValue(Double.valueOf(0));
             }
 
             if (datum.containsKey("hpjcds")){
-                sheet.getRow(index).getCell(25).setCellValue(Double.valueOf(datum.get("hpjcds").toString()));
+                sheet.getRow(index).createCell(25).setCellValue(Double.valueOf(datum.get("hpjcds").toString()));
             }else {
-                sheet.getRow(index).getCell(25).setCellValue(Double.valueOf(0));
+                sheet.getRow(index).createCell(25).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("hphgds")){
-                sheet.getRow(index).getCell(26).setCellValue(Double.valueOf(datum.get("hphgds").toString()));
+                sheet.getRow(index).createCell(26).setCellValue(Double.valueOf(datum.get("hphgds").toString()));
             }else {
-                sheet.getRow(index).getCell(26).setCellValue(Double.valueOf(0));
+                sheet.getRow(index).createCell(26).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("hphgl")){
-                sheet.getRow(index).getCell(27).setCellValue(Double.valueOf(datum.get("hphgl").toString()));
+                sheet.getRow(index).createCell(27).setCellValue(Double.valueOf(datum.get("hphgl").toString()));
             }else {
-                sheet.getRow(index).getCell(27).setCellValue(Double.valueOf(0));
+                sheet.getRow(index).createCell(27).setCellValue(Double.valueOf(0));
             }
             index++;
         }
@@ -4491,55 +4509,58 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         XSSFSheet sheet = wb.getSheet("表4.1.4-1");
         int index = 3;
         for (Map<String, Object> datum : data) {
-            sheet.getRow(index).getCell(0).setCellValue(datum.get("htd").toString());
-            if (datum.containsKey("cqqdjcds")){
-                sheet.getRow(index).getCell(1).setCellValue(Double.valueOf(datum.get("cqqdjcds").toString()));
-            }else {
-                sheet.getRow(index).getCell(1).setCellValue(0);
-            }
-            if (datum.containsKey("cqqdhgds")){
-                sheet.getRow(index).getCell(2).setCellValue(Double.valueOf(datum.get("cqqdhgds").toString()));
-            }else {
-                sheet.getRow(index).getCell(2).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("cqqdhgl")){
-                sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(datum.get("cqqdhgl").toString()));
-            }else {
-                sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(0));
+            if (datum.size()>0){
+                sheet.getRow(index).getCell(0).setCellValue(datum.get("htd").toString());
+                if (datum.containsKey("cqqdjcds")){
+                    sheet.getRow(index).getCell(1).setCellValue(Double.valueOf(datum.get("cqqdjcds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(1).setCellValue(0);
+                }
+                if (datum.containsKey("cqqdhgds")){
+                    sheet.getRow(index).getCell(2).setCellValue(Double.valueOf(datum.get("cqqdhgds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(2).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("cqqdhgl")){
+                    sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(datum.get("cqqdhgl").toString()));
+                }else {
+                    sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("cqhdjcds")){
+                    sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(datum.get("cqhdjcds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("cqhdhgds")){
+                    sheet.getRow(index).getCell(5).setCellValue(Double.valueOf(datum.get("cqhdhgds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(5).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("cqhdhgl")){
+                    sheet.getRow(index).getCell(6).setCellValue(Double.valueOf(datum.get("cqhdhgl").toString()));
+                }else {
+                    sheet.getRow(index).getCell(6).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("dmpzdjcds")){
+                    sheet.getRow(index).getCell(7).setCellValue(Double.valueOf(datum.get("dmpzdjcds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(7).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("dmpzdhgds")){
+                    sheet.getRow(index).getCell(8).setCellValue(Double.valueOf(datum.get("dmpzdhgds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(8).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("dmpzdhgl")){
+                    sheet.getRow(index).getCell(9).setCellValue(Double.valueOf(datum.get("dmpzdhgl").toString()));
+                }else {
+                    sheet.getRow(index).getCell(9).setCellValue(Double.valueOf(0));
+                }
+                index++;
             }
 
-            if (datum.containsKey("cqhdjcds")){
-                sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(datum.get("cqhdjcds").toString()));
-            }else {
-                sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("cqhdhgds")){
-                sheet.getRow(index).getCell(5).setCellValue(Double.valueOf(datum.get("cqhdhgds").toString()));
-            }else {
-                sheet.getRow(index).getCell(5).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("cqhdhgl")){
-                sheet.getRow(index).getCell(6).setCellValue(Double.valueOf(datum.get("cqhdhgl").toString()));
-            }else {
-                sheet.getRow(index).getCell(6).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("dmpzdjcds")){
-                sheet.getRow(index).getCell(7).setCellValue(Double.valueOf(datum.get("dmpzdjcds").toString()));
-            }else {
-                sheet.getRow(index).getCell(7).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("dmpzdhgds")){
-                sheet.getRow(index).getCell(8).setCellValue(Double.valueOf(datum.get("dmpzdhgds").toString()));
-            }else {
-                sheet.getRow(index).getCell(8).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("dmpzdhgl")){
-                sheet.getRow(index).getCell(9).setCellValue(Double.valueOf(datum.get("dmpzdhgl").toString()));
-            }else {
-                sheet.getRow(index).getCell(9).setCellValue(Double.valueOf(0));
-            }
-            index++;
         }
     }
 
@@ -4552,149 +4573,152 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         XSSFSheet sheet = wb.getSheet("表4.1.3-4");
         int index = 3;
         for (Map<String, Object> datum : data) {
-            sheet.getRow(2).getCell(index).setCellValue(datum.get("htd").toString());
+            if (datum.size()>0){
+                sheet.getRow(2).createCell(index).setCellValue(datum.get("htd").toString());
 
-            if (datum.containsKey("tqdjcds")) {
-                sheet.getRow(3).getCell(index).setCellValue(Double.valueOf(datum.get("tqdjcds").toString()));
-            } else {
-                sheet.getRow(3).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("tqdhgds")) {
-                sheet.getRow(4).getCell(index).setCellValue(Double.valueOf(datum.get("tqdhgds").toString()));
-            } else {
-                sheet.getRow(4).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("tqdhgl")) {
-                sheet.getRow(5).getCell(index).setCellValue(Double.valueOf(datum.get("tqdhgl").toString()));
-            } else {
-                sheet.getRow(5).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("jgccjcds")) {
-                sheet.getRow(6).getCell(index).setCellValue(Double.valueOf(datum.get("jgccjcds").toString()));
-            } else {
-                sheet.getRow(6).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("jgcchgds")) {
-                sheet.getRow(7).getCell(index).setCellValue(Double.valueOf(datum.get("jgcchgds").toString()));
-            } else {
-                sheet.getRow(7).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("jgcchgl")) {
-                sheet.getRow(8).getCell(index).setCellValue(Double.valueOf(datum.get("jgcchgl").toString()));
-            } else {
-                sheet.getRow(8).getCell(index).setCellValue(0);
+                if (datum.containsKey("tqdjcds")) {
+                    sheet.getRow(3).createCell(index).setCellValue(Double.valueOf(datum.get("tqdjcds").toString()));
+                } else {
+                    sheet.getRow(3).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("tqdhgds")) {
+                    sheet.getRow(4).createCell(index).setCellValue(Double.valueOf(datum.get("tqdhgds").toString()));
+                } else {
+                    sheet.getRow(4).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("tqdhgl")) {
+                    sheet.getRow(5).createCell(index).setCellValue(Double.valueOf(datum.get("tqdhgl").toString()));
+                } else {
+                    sheet.getRow(5).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("jgccjcds")) {
+                    sheet.getRow(6).createCell(index).setCellValue(Double.valueOf(datum.get("jgccjcds").toString()));
+                } else {
+                    sheet.getRow(6).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("jgcchgds")) {
+                    sheet.getRow(7).createCell(index).setCellValue(Double.valueOf(datum.get("jgcchgds").toString()));
+                } else {
+                    sheet.getRow(7).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("jgcchgl")) {
+                    sheet.getRow(8).createCell(index).setCellValue(Double.valueOf(datum.get("jgcchgl").toString()));
+                } else {
+                    sheet.getRow(8).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("bhchdjcds")) {
+                    sheet.getRow(9).createCell(index).setCellValue(Double.valueOf(datum.get("bhchdjcds").toString()));
+                } else {
+                    sheet.getRow(9).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("bhchdhgds")) {
+                    sheet.getRow(10).createCell(index).setCellValue(Double.valueOf(datum.get("bhchdhgds").toString()));
+                } else {
+                    sheet.getRow(10).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("bhchdhgl")) {
+                    sheet.getRow(11).createCell(index).setCellValue(Double.valueOf(datum.get("bhchdhgl").toString()));
+                } else {
+                    sheet.getRow(11).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("szdjcds")) {
+                    sheet.getRow(12).createCell(index).setCellValue(Double.valueOf(datum.get("szdjcds").toString()));
+                } else {
+                    sheet.getRow(12).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("szdhgds")) {
+                    sheet.getRow(13).createCell(index).setCellValue(Double.valueOf(datum.get("szdhgds").toString()));
+                } else {
+                    sheet.getRow(13).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("szdhgl")) {
+                    sheet.getRow(14).createCell(index).setCellValue(Double.valueOf(datum.get("szdhgl").toString()));
+                } else {
+                    sheet.getRow(14).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("qlsbqdjcds")) {
+                    sheet.getRow(15).createCell(index).setCellValue(Double.valueOf(datum.get("qlsbqdjcds").toString()));
+                } else {
+                    sheet.getRow(15).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("qlsbqdhgds")) {
+                    sheet.getRow(16).createCell(index).setCellValue(Double.valueOf(datum.get("qlsbqdhgds").toString()));
+                } else {
+                    sheet.getRow(16).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("qlsbqdhgl")) {
+                    sheet.getRow(17).createCell(index).setCellValue(Double.valueOf(datum.get("qlsbqdhgl").toString()));
+                } else {
+                    sheet.getRow(17).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("qlsbjgccjcds")) {
+                    sheet.getRow(18).createCell(index).setCellValue(Double.valueOf(datum.get("qlsbjgccjcds").toString()));
+                } else {
+                    sheet.getRow(18).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("qlsbjgcchgds")) {
+                    sheet.getRow(19).createCell(index).setCellValue(Double.valueOf(datum.get("qlsbjgcchgds").toString()));
+                } else {
+                    sheet.getRow(19).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("qlsbjgcchgl")) {
+                    sheet.getRow(20).createCell(index).setCellValue(Double.valueOf(datum.get("qlsbjgcchgl").toString()));
+                } else {
+                    sheet.getRow(20).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("qlsbbhchdjcds")){
+                    sheet.getRow(21).createCell(index).setCellValue(Double.valueOf(datum.get("qlsbbhchdjcds").toString()));
+                }else {
+                    sheet.getRow(21).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("qlsbbhchdhgds")){
+                    sheet.getRow(22).createCell(index).setCellValue(Double.valueOf(datum.get("qlsbbhchdhgds").toString()));
+                }else {
+                    sheet.getRow(22).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("qlsbbhchdhgl")){
+                    sheet.getRow(23).createCell(index).setCellValue(Double.valueOf(datum.get("qlsbbhchdhgl").toString()));
+                }else {
+                    sheet.getRow(23).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("qmhpzds")){
+                    sheet.getRow(27).createCell(index).setCellValue(Double.valueOf(datum.get("qmhpzds").toString()));
+                }else {
+                    sheet.getRow(27).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("qmhphgds")){
+                    sheet.getRow(28).createCell(index).setCellValue(Double.valueOf(datum.get("qmhphgds").toString()));
+                }else {
+                    sheet.getRow(28).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("qmhphgl")){
+                    sheet.getRow(29).createCell(index).setCellValue(Double.valueOf(datum.get("qmhphgl").toString()));
+                }else {
+                    sheet.getRow(29).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("qmkhgzsdzds")){
+                    sheet.getRow(30).createCell(index).setCellValue(Double.valueOf(datum.get("qmkhgzsdzds").toString()));
+                }else {
+                    sheet.getRow(30).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("qmkhgzsdhgds")){
+                    sheet.getRow(31).createCell(index).setCellValue(Double.valueOf(datum.get("qmkhgzsdhgds").toString()));
+                }else {
+                    sheet.getRow(31).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("qmkhgzsdhgl")){
+                    sheet.getRow(32).createCell(index).setCellValue(Double.valueOf(datum.get("qmkhgzsdhgl").toString()));
+                }else {
+                    sheet.getRow(32).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                index++;
             }
 
-            if (datum.containsKey("bhchdjcds")) {
-                sheet.getRow(9).getCell(index).setCellValue(Double.valueOf(datum.get("bhchdjcds").toString()));
-            } else {
-                sheet.getRow(9).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("bhchdhgds")) {
-                sheet.getRow(10).getCell(index).setCellValue(Double.valueOf(datum.get("bhchdhgds").toString()));
-            } else {
-                sheet.getRow(10).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("bhchdhgl")) {
-                sheet.getRow(11).getCell(index).setCellValue(Double.valueOf(datum.get("bhchdhgl").toString()));
-            } else {
-                sheet.getRow(11).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("szdjcds")) {
-                sheet.getRow(12).getCell(index).setCellValue(Double.valueOf(datum.get("szdjcds").toString()));
-            } else {
-                sheet.getRow(12).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("szdhgds")) {
-                sheet.getRow(13).getCell(index).setCellValue(Double.valueOf(datum.get("szdhgds").toString()));
-            } else {
-                sheet.getRow(13).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("szdhgl")) {
-                sheet.getRow(14).getCell(index).setCellValue(Double.valueOf(datum.get("szdhgl").toString()));
-            } else {
-                sheet.getRow(14).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("qlsbqdjcds")) {
-                sheet.getRow(15).getCell(index).setCellValue(Double.valueOf(datum.get("qlsbqdjcds").toString()));
-            } else {
-                sheet.getRow(15).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("qlsbqdhgds")) {
-                sheet.getRow(16).getCell(index).setCellValue(Double.valueOf(datum.get("qlsbqdhgds").toString()));
-            } else {
-                sheet.getRow(16).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("qlsbqdhgl")) {
-                sheet.getRow(17).getCell(index).setCellValue(Double.valueOf(datum.get("qlsbqdhgl").toString()));
-            } else {
-                sheet.getRow(17).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("qlsbjgccjcds")) {
-                sheet.getRow(18).getCell(index).setCellValue(Double.valueOf(datum.get("qlsbjgccjcds").toString()));
-            } else {
-                sheet.getRow(18).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("qlsbjgcchgds")) {
-                sheet.getRow(19).getCell(index).setCellValue(Double.valueOf(datum.get("qlsbjgcchgds").toString()));
-            } else {
-                sheet.getRow(19).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("qlsbjgcchgl")) {
-                sheet.getRow(20).getCell(index).setCellValue(Double.valueOf(datum.get("qlsbjgcchgl").toString()));
-            } else {
-                sheet.getRow(20).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("qlsbbhchdjcds")){
-                sheet.getRow(21).getCell(index).setCellValue(Double.valueOf(datum.get("qlsbbhchdjcds").toString()));
-            }else {
-                sheet.getRow(21).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("qlsbbhchdhgds")){
-                sheet.getRow(22).getCell(index).setCellValue(Double.valueOf(datum.get("qlsbbhchdhgds").toString()));
-            }else {
-                sheet.getRow(22).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("qlsbbhchdhgl")){
-                sheet.getRow(23).getCell(index).setCellValue(Double.valueOf(datum.get("qlsbbhchdhgl").toString()));
-            }else {
-                sheet.getRow(23).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("qmhpzds")){
-                sheet.getRow(27).getCell(index).setCellValue(Double.valueOf(datum.get("qmhpzds").toString()));
-            }else {
-                sheet.getRow(27).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("qmhphgds")){
-                sheet.getRow(28).getCell(index).setCellValue(Double.valueOf(datum.get("qmhphgds").toString()));
-            }else {
-                sheet.getRow(28).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("qmhphgl")){
-                sheet.getRow(29).getCell(index).setCellValue(Double.valueOf(datum.get("qmhphgl").toString()));
-            }else {
-                sheet.getRow(29).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("qmkhgzsdzds")){
-                sheet.getRow(30).getCell(index).setCellValue(Double.valueOf(datum.get("qmkhgzsdzds").toString()));
-            }else {
-                sheet.getRow(30).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("qmkhgzsdhgds")){
-                sheet.getRow(31).getCell(index).setCellValue(Double.valueOf(datum.get("qmkhgzsdhgds").toString()));
-            }else {
-                sheet.getRow(31).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("qmkhgzsdhgl")){
-                sheet.getRow(32).getCell(index).setCellValue(Double.valueOf(datum.get("qmkhgzsdhgl").toString()));
-            }else {
-                sheet.getRow(32).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            index++;
         }
     }
 
@@ -4707,56 +4731,59 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         XSSFSheet sheet = wb.getSheet("表4.1.3-3");
         int index = 3;
         for (Map<String, Object> datum : data) {
-            sheet.getRow(index).getCell(0).setCellValue(datum.get("htd").toString());
+            if (datum.size()>0){
+                sheet.getRow(index).getCell(0).setCellValue(datum.get("htd").toString());
 
-            /*if (datum.containsKey("qlsbqdjcds")){
-                sheet.getRow(index).getCell(1).setCellValue(datum.get("qlsbqdjcds").toString());
-            }else {
-                sheet.getRow(index).getCell(1).setCellValue(0);
-            }
-            if (datum.containsKey("qlsbqdhgds")){
-                sheet.getRow(index).getCell(2).setCellValue(Double.valueOf(datum.get("qlsbqdhgds").toString()));
-            }else {
-                sheet.getRow(index).getCell(2).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("qlsbqdhgl")){
-                sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(datum.get("qlsbqdhgl").toString()));
-            }else {
-                sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(0));
-            }*/
+                if (datum.containsKey("qmpzdzds")){
+                    sheet.getRow(index).getCell(1).setCellValue(Double.valueOf(datum.get("qmpzdzds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(1).setCellValue(0);
+                }
+                if (datum.containsKey("qmpzdhgds")){
+                    sheet.getRow(index).getCell(2).setCellValue(Double.valueOf(datum.get("qmpzdhgds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(2).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("qmpzdhgl")){
+                    sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(datum.get("qmpzdhgl").toString()));
+                }else {
+                    sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(0));
+                }
 
-            if (datum.containsKey("qmhpzds")){
-                sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(datum.get("qmhpzds").toString()));
-            }else {
-                sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("qmhphgds")){
-                sheet.getRow(index).getCell(5).setCellValue(Double.valueOf(datum.get("qmhphgds").toString()));
-            }else {
-                sheet.getRow(index).getCell(5).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("qmhphgl")){
-                sheet.getRow(index).getCell(6).setCellValue(Double.valueOf(datum.get("qmhphgl").toString()));
-            }else {
-                sheet.getRow(index).getCell(6).setCellValue(Double.valueOf(0));
+                if (datum.containsKey("qmhpzds")){
+                    sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(datum.get("qmhpzds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("qmhphgds")){
+                    sheet.getRow(index).getCell(5).setCellValue(Double.valueOf(datum.get("qmhphgds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(5).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("qmhphgl")){
+                    sheet.getRow(index).getCell(6).setCellValue(Double.valueOf(datum.get("qmhphgl").toString()));
+                }else {
+                    sheet.getRow(index).getCell(6).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("qmkhgzsdzds")){
+                    sheet.getRow(index).getCell(7).setCellValue(Double.valueOf(datum.get("qmkhgzsdzds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(7).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("qmkhgzsdhgds")){
+                    sheet.getRow(index).getCell(8).setCellValue(Double.valueOf(datum.get("qmkhgzsdhgds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(8).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("qmkhgzsdhgl")){
+                    sheet.getRow(index).getCell(9).setCellValue(Double.valueOf(datum.get("qmkhgzsdhgl").toString()));
+                }else {
+                    sheet.getRow(index).getCell(9).setCellValue(Double.valueOf(0));
+                }
+                index++;
             }
 
-            if (datum.containsKey("qmkhgzsdzds")){
-                sheet.getRow(index).getCell(7).setCellValue(Double.valueOf(datum.get("qmkhgzsdzds").toString()));
-            }else {
-                sheet.getRow(index).getCell(7).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("qmkhgzsdhgds")){
-                sheet.getRow(index).getCell(8).setCellValue(Double.valueOf(datum.get("qmkhgzsdhgds").toString()));
-            }else {
-                sheet.getRow(index).getCell(8).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("qmkhgzsdhgl")){
-                sheet.getRow(index).getCell(9).setCellValue(Double.valueOf(datum.get("qmkhgzsdhgl").toString()));
-            }else {
-                sheet.getRow(index).getCell(9).setCellValue(Double.valueOf(0));
-            }
-            index++;
         }
     }
 
@@ -4766,59 +4793,62 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
      * @param data
      */
     private void DBExcelqlsbData(XSSFWorkbook wb, List<Map<String, Object>> data) {
-        createRow(wb,data.size(),"表4.1.3-2");
+        //createRow(wb,data.size(),"表4.1.3-2");
         XSSFSheet sheet = wb.getSheet("表4.1.3-2");
         int index = 3;
         for (Map<String, Object> datum : data) {
-            sheet.getRow(index).getCell(0).setCellValue(datum.get("htd").toString());
-            if (datum.containsKey("qlsbqdjcds")){
-                sheet.getRow(index).getCell(1).setCellValue(Double.valueOf(datum.get("qlsbqdjcds").toString()));
-            }else {
-                sheet.getRow(index).getCell(1).setCellValue(0);
-            }
-            if (datum.containsKey("qlsbqdhgds")){
-                sheet.getRow(index).getCell(2).setCellValue(Double.valueOf(datum.get("qlsbqdhgds").toString()));
-            }else {
-                sheet.getRow(index).getCell(2).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("qlsbqdhgl")){
-                sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(datum.get("qlsbqdhgl").toString()));
-            }else {
-                sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(0));
+            if (datum.size()>0){
+                sheet.getRow(index).getCell(0).setCellValue(datum.get("htd").toString());
+                if (datum.containsKey("qlsbqdjcds")){
+                    sheet.getRow(index).getCell(1).setCellValue(Double.valueOf(datum.get("qlsbqdjcds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(1).setCellValue(0);
+                }
+                if (datum.containsKey("qlsbqdhgds")){
+                    sheet.getRow(index).getCell(2).setCellValue(Double.valueOf(datum.get("qlsbqdhgds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(2).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("qlsbqdhgl")){
+                    sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(datum.get("qlsbqdhgl").toString()));
+                }else {
+                    sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("qlsbjgccjcds")){
+                    sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(datum.get("qlsbjgccjcds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("qlsbjgcchgds")){
+                    sheet.getRow(index).getCell(5).setCellValue(Double.valueOf(datum.get("qlsbjgcchgds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(5).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("qlsbjgcchgl")){
+                    sheet.getRow(index).getCell(6).setCellValue(Double.valueOf(datum.get("qlsbjgcchgl").toString()));
+                }else {
+                    sheet.getRow(index).getCell(6).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("qlsbbhchdjcds")){
+                    sheet.getRow(index).getCell(7).setCellValue(Double.valueOf(datum.get("qlsbbhchdjcds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(7).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("qlsbbhchdhgds")){
+                    sheet.getRow(index).getCell(8).setCellValue(Double.valueOf(datum.get("qlsbbhchdhgds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(8).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("qlsbbhchdhgl")){
+                    sheet.getRow(index).getCell(9).setCellValue(Double.valueOf(datum.get("qlsbbhchdhgl").toString()));
+                }else {
+                    sheet.getRow(index).getCell(9).setCellValue(Double.valueOf(0));
+                }
+                index++;
             }
 
-            if (datum.containsKey("qlsbjgccjcds")){
-                sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(datum.get("qlsbjgccjcds").toString()));
-            }else {
-                sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("qlsbjgcchgds")){
-                sheet.getRow(index).getCell(5).setCellValue(Double.valueOf(datum.get("qlsbjgcchgds").toString()));
-            }else {
-                sheet.getRow(index).getCell(5).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("qlsbjgcchgl")){
-                sheet.getRow(index).getCell(6).setCellValue(Double.valueOf(datum.get("qlsbjgcchgl").toString()));
-            }else {
-                sheet.getRow(index).getCell(6).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("qlsbbhchdjcds")){
-                sheet.getRow(index).getCell(7).setCellValue(Double.valueOf(datum.get("qlsbbhchdjcds").toString()));
-            }else {
-                sheet.getRow(index).getCell(7).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("qlsbbhchdhgds")){
-                sheet.getRow(index).getCell(8).setCellValue(Double.valueOf(datum.get("qlsbbhchdhgds").toString()));
-            }else {
-                sheet.getRow(index).getCell(8).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("qlsbbhchdhgl")){
-                sheet.getRow(index).getCell(9).setCellValue(Double.valueOf(datum.get("qlsbbhchdhgl").toString()));
-            }else {
-                sheet.getRow(index).getCell(9).setCellValue(Double.valueOf(0));
-            }
-            index++;
         }
     }
 
@@ -4828,75 +4858,81 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
      * @param data
      */
     private void DBExcelqlxbData(XSSFWorkbook wb, List<Map<String, Object>> data) {
-        createRow(wb,data.size(),"表4.1.3-1");
+        //createRow(wb,data.size(),"表4.1.3-1");
+        /**
+         * {htd=TJ-1, tqdjcds=74, tqdhgds=74, tqdhgl=100.00, jgccjcds=60, jgcchgds=60, jgcchgl=100.00, bhchdjcds=444, bhchdhgds=345, bhchdhgl=77.70, szdjcds=40, szdhgds=35, szdhgl=87.50}
+         */
         XSSFSheet sheet = wb.getSheet("表4.1.3-1");
         int index = 3;
         for (Map<String, Object> datum : data) {
-            sheet.getRow(index).getCell(0).setCellValue(datum.get("htd").toString());
-            if (datum.containsKey("tqdjcds")){
-                sheet.getRow(index).getCell(1).setCellValue(Double.valueOf(datum.get("tqdjcds").toString()));
-            }else {
-                sheet.getRow(index).getCell(1).setCellValue(0);
-            }
-            if (datum.containsKey("tqdhgds")){
-                sheet.getRow(index).getCell(2).setCellValue(Double.valueOf(datum.get("tqdhgds").toString()));
-            }else {
-                sheet.getRow(index).getCell(2).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("tqdhgl")){
-                sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(datum.get("tqdhgl").toString()));
-            }else {
-                sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(0));
+            if (!datum.isEmpty()){
+                sheet.getRow(index).getCell(0).setCellValue(datum.get("htd").toString());
+                if (datum.containsKey("tqdjcds")){
+                    sheet.getRow(index).getCell(1).setCellValue(Double.valueOf(datum.get("tqdjcds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(1).setCellValue(0);
+                }
+                if (datum.containsKey("tqdhgds")){
+                    sheet.getRow(index).getCell(2).setCellValue(Double.valueOf(datum.get("tqdhgds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(2).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("tqdhgl")){
+                    sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(datum.get("tqdhgl").toString()));
+                }else {
+                    sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("jgccjcds")){
+                    sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(datum.get("jgccjcds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("jgcchgds")){
+                    sheet.getRow(index).getCell(5).setCellValue(Double.valueOf(datum.get("jgcchgds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(5).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("jgcchgl")){
+                    sheet.getRow(index).getCell(6).setCellValue(Double.valueOf(datum.get("jgcchgl").toString()));
+                }else {
+                    sheet.getRow(index).getCell(6).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("bhchdjcds")){
+                    sheet.getRow(index).getCell(7).setCellValue(Double.valueOf(datum.get("bhchdjcds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(7).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("bhchdhgds")){
+                    sheet.getRow(index).getCell(8).setCellValue(Double.valueOf(datum.get("bhchdhgds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(8).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("bhchdhgl")){
+                    sheet.getRow(index).getCell(9).setCellValue(Double.valueOf(datum.get("bhchdhgl").toString()));
+                }else {
+                    sheet.getRow(index).getCell(9).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("szdjcds")){
+                    sheet.getRow(index).getCell(10).setCellValue(Double.valueOf(datum.get("szdjcds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(10).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("szdhgds")){
+                    sheet.getRow(index).getCell(11).setCellValue(Double.valueOf(datum.get("szdhgds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(11).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("szdhgl")){
+                    sheet.getRow(index).getCell(12).setCellValue(Double.valueOf(datum.get("szdhgl").toString()));
+                }else {
+                    sheet.getRow(index).getCell(12).setCellValue(Double.valueOf(0));
+                }
+                index++;
             }
 
-            if (datum.containsKey("jgccjcds")){
-                sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(datum.get("jgccjcds").toString()));
-            }else {
-                sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("jgcchgds")){
-                sheet.getRow(index).getCell(5).setCellValue(Double.valueOf(datum.get("jgcchgds").toString()));
-            }else {
-                sheet.getRow(index).getCell(5).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("jgcchgl")){
-                sheet.getRow(index).getCell(6).setCellValue(Double.valueOf(datum.get("jgcchgl").toString()));
-            }else {
-                sheet.getRow(index).getCell(6).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("bhchdjcds")){
-                sheet.getRow(index).getCell(7).setCellValue(Double.valueOf(datum.get("bhchdjcds").toString()));
-            }else {
-                sheet.getRow(index).getCell(7).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("bhchdhgds")){
-                sheet.getRow(index).getCell(8).setCellValue(Double.valueOf(datum.get("bhchdhgds").toString()));
-            }else {
-                sheet.getRow(index).getCell(8).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("bhchdhgl")){
-                sheet.getRow(index).getCell(9).setCellValue(Double.valueOf(datum.get("bhchdhgl").toString()));
-            }else {
-                sheet.getRow(index).getCell(9).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("szdjcds")){
-                sheet.getRow(index).getCell(10).setCellValue(Double.valueOf(datum.get("szdjcds").toString()));
-            }else {
-                sheet.getRow(index).getCell(10).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("szdhgds")){
-                sheet.getRow(index).getCell(11).setCellValue(Double.valueOf(datum.get("szdhgds").toString()));
-            }else {
-                sheet.getRow(index).getCell(11).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("szdhgl")){
-                sheet.getRow(index).getCell(12).setCellValue(Double.valueOf(datum.get("szdhgl").toString()));
-            }else {
-                sheet.getRow(index).getCell(12).setCellValue(Double.valueOf(0));
-            }
-            index++;
         }
     }
 
@@ -4909,248 +4945,249 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         XSSFSheet sheet = wb.getSheet("表4.1.2-24");
         int index = 4;
         for (Map<String, Object> datum : data) {
-            sheet.getRow(2).getCell(index).setCellValue(datum.get("htd").toString());
+            if (datum.size()>1){
+                sheet.getRow(2).createCell(index).setCellValue(datum.get("htd").toString());
 
-            if (datum.containsKey("ysdzds")) {
-                sheet.getRow(3).getCell(index).setCellValue(Double.valueOf(datum.get("ysdzds").toString()));
-            } else {
-                sheet.getRow(3).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("ysdhgds")) {
-                sheet.getRow(4).getCell(index).setCellValue(Double.valueOf(datum.get("ysdhgds").toString()));
-            } else {
-                sheet.getRow(4).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("ysdhgl")) {
-                sheet.getRow(5).getCell(index).setCellValue(Double.valueOf(datum.get("ysdhgl").toString()));
-            } else {
-                sheet.getRow(5).getCell(index).setCellValue(0);
-            }
+                if (datum.containsKey("ysdzds")) {
+                    sheet.getRow(3).createCell(index).setCellValue(Double.valueOf(datum.get("ysdzds").toString()));
+                } else {
+                    sheet.getRow(3).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("ysdhgds")) {
+                    sheet.getRow(4).createCell(index).setCellValue(Double.valueOf(datum.get("ysdhgds").toString()));
+                } else {
+                    sheet.getRow(4).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("ysdhgl")) {
+                    sheet.getRow(5).createCell(index).setCellValue(Double.valueOf(datum.get("ysdhgl").toString()));
+                } else {
+                    sheet.getRow(5).createCell(index).setCellValue(0);
+                }
 
-            if (datum.containsKey("wczds")) {
-                sheet.getRow(6).getCell(index).setCellValue(Double.valueOf(datum.get("wczds").toString()));
-            } else {
-                sheet.getRow(6).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("wchgds")) {
-                sheet.getRow(7).getCell(index).setCellValue(Double.valueOf(datum.get("wchgds").toString()));
-            } else {
-                sheet.getRow(7).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("wchgl")) {
-                sheet.getRow(8).getCell(index).setCellValue(Double.valueOf(datum.get("wchgl").toString()));
-            } else {
-                sheet.getRow(8).getCell(index).setCellValue(0);
-            }
+                if (datum.containsKey("wczds")) {
+                    sheet.getRow(6).createCell(index).setCellValue(Double.valueOf(datum.get("wczds").toString()));
+                } else {
+                    sheet.getRow(6).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("wchgds")) {
+                    sheet.getRow(7).createCell(index).setCellValue(Double.valueOf(datum.get("wchgds").toString()));
+                } else {
+                    sheet.getRow(7).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("wchgl")) {
+                    sheet.getRow(8).createCell(index).setCellValue(Double.valueOf(datum.get("wchgl").toString()));
+                } else {
+                    sheet.getRow(8).createCell(index).setCellValue(0);
+                }
 
-            if (datum.containsKey("czzds")) {
-                sheet.getRow(9).getCell(index).setCellValue(Double.valueOf(datum.get("czzds").toString()));
-            } else {
-                sheet.getRow(9).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("czhgds")) {
-                sheet.getRow(10).getCell(index).setCellValue(Double.valueOf(datum.get("czhgds").toString()));
-            } else {
-                sheet.getRow(10).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("czhgl")) {
-                sheet.getRow(11).getCell(index).setCellValue(Double.valueOf(datum.get("czhgl").toString()));
-            } else {
-                sheet.getRow(11).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("ssxszds")){
-                sheet.getRow(12).getCell(index).setCellValue(Double.valueOf(datum.get("ssxszds").toString()));
-            }else {
-                sheet.getRow(12).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("ssxshgds")){
-                sheet.getRow(13).getCell(index).setCellValue(Double.valueOf(datum.get("ssxshgds").toString()));
-            }else {
-                sheet.getRow(13).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("ssxshgl")){
-                sheet.getRow(14).getCell(index).setCellValue(Double.valueOf(datum.get("ssxshgl").toString()));
-            }else {
-                sheet.getRow(14).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("lqpzdzds")){
-                sheet.getRow(15).getCell(index).setCellValue(Double.valueOf(datum.get("lqpzdzds").toString()));
-            }else {
-                sheet.getRow(15).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("lqpzdhgds")){
-                sheet.getRow(16).getCell(index).setCellValue(Double.valueOf(datum.get("lqpzdhgds").toString()));
-            }else {
-                sheet.getRow(16).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("lqpzdhgl")){
-                sheet.getRow(17).getCell(index).setCellValue(Double.valueOf(datum.get("lqpzdhgl").toString()));
-            }else {
-                sheet.getRow(17).getCell(index).setCellValue(0);
-            }
+                if (datum.containsKey("czzds")) {
+                    sheet.getRow(9).createCell(index).setCellValue(Double.valueOf(datum.get("czzds").toString()));
+                } else {
+                    sheet.getRow(9).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("czhgds")) {
+                    sheet.getRow(10).createCell(index).setCellValue(Double.valueOf(datum.get("czhgds").toString()));
+                } else {
+                    sheet.getRow(10).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("czhgl")) {
+                    sheet.getRow(11).createCell(index).setCellValue(Double.valueOf(datum.get("czhgl").toString()));
+                } else {
+                    sheet.getRow(11).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("ssxszds")){
+                    sheet.getRow(12).createCell(index).setCellValue(Double.valueOf(datum.get("ssxszds").toString()));
+                }else {
+                    sheet.getRow(12).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("ssxshgds")){
+                    sheet.getRow(13).createCell(index).setCellValue(Double.valueOf(datum.get("ssxshgds").toString()));
+                }else {
+                    sheet.getRow(13).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("ssxshgl")){
+                    sheet.getRow(14).createCell(index).setCellValue(Double.valueOf(datum.get("ssxshgl").toString()));
+                }else {
+                    sheet.getRow(14).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("lqpzdzds")){
+                    sheet.getRow(15).createCell(index).setCellValue(Double.valueOf(datum.get("lqpzdzds").toString()));
+                }else {
+                    sheet.getRow(15).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("lqpzdhgds")){
+                    sheet.getRow(16).createCell(index).setCellValue(Double.valueOf(datum.get("lqpzdhgds").toString()));
+                }else {
+                    sheet.getRow(16).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("lqpzdhgl")){
+                    sheet.getRow(17).createCell(index).setCellValue(Double.valueOf(datum.get("lqpzdhgl").toString()));
+                }else {
+                    sheet.getRow(17).createCell(index).setCellValue(0);
+                }
 
-            if (datum.containsKey("mcxszds")){
-                sheet.getRow(18).getCell(index).setCellValue(Double.valueOf(datum.get("mcxszds").toString()));
-            }else {
-                sheet.getRow(18).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("mcxshgds")){
-                sheet.getRow(19).getCell(index).setCellValue(Double.valueOf(datum.get("mcxshgds").toString()));
-            }else {
-                sheet.getRow(19).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("mcxshgl")){
-                sheet.getRow(20).getCell(index).setCellValue(Double.valueOf(datum.get("mcxshgl").toString()));
-            }else {
-                sheet.getRow(20).getCell(index).setCellValue(0);
-            }
+                if (datum.containsKey("mcxszds")){
+                    sheet.getRow(18).createCell(index).setCellValue(Double.valueOf(datum.get("mcxszds").toString()));
+                }else {
+                    sheet.getRow(18).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("mcxshgds")){
+                    sheet.getRow(19).createCell(index).setCellValue(Double.valueOf(datum.get("mcxshgds").toString()));
+                }else {
+                    sheet.getRow(19).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("mcxshgl")){
+                    sheet.getRow(20).createCell(index).setCellValue(Double.valueOf(datum.get("mcxshgl").toString()));
+                }else {
+                    sheet.getRow(20).createCell(index).setCellValue(0);
+                }
 
-            if (datum.containsKey("gzsdzds")){
-                sheet.getRow(21).getCell(index).setCellValue(Double.valueOf(datum.get("gzsdzds").toString()));
-            }else {
-                sheet.getRow(21).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("gzsdhgds")){
-                sheet.getRow(22).getCell(index).setCellValue(Double.valueOf(datum.get("gzsdhgds").toString()));
-            }else {
-                sheet.getRow(22).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("gzsdhgl")){
-                sheet.getRow(23).getCell(index).setCellValue(Double.valueOf(datum.get("gzsdhgl").toString()));
-            }else {
-                sheet.getRow(23).getCell(index).setCellValue(0);
-            }
+                if (datum.containsKey("gzsdzds")){
+                    sheet.getRow(21).createCell(index).setCellValue(Double.valueOf(datum.get("gzsdzds").toString()));
+                }else {
+                    sheet.getRow(21).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("gzsdhgds")){
+                    sheet.getRow(22).createCell(index).setCellValue(Double.valueOf(datum.get("gzsdhgds").toString()));
+                }else {
+                    sheet.getRow(22).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("gzsdhgl")){
+                    sheet.getRow(23).createCell(index).setCellValue(Double.valueOf(datum.get("gzsdhgl").toString()));
+                }else {
+                    sheet.getRow(23).createCell(index).setCellValue(0);
+                }
 
-            if (datum.containsKey("lqhdzds")){
-                sheet.getRow(24).getCell(index).setCellValue(Double.valueOf(datum.get("lqhdzds").toString()));
-            }else {
-                sheet.getRow(24).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("lqhdhgds")){
-                sheet.getRow(25).getCell(index).setCellValue(Double.valueOf(datum.get("lqhdhgds").toString()));
-            }else {
-                sheet.getRow(25).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("lqhdhgl")){
-                sheet.getRow(26).getCell(index).setCellValue(Double.valueOf(datum.get("lqhdhgl").toString()));
-            }else {
-                sheet.getRow(26).getCell(index).setCellValue(0);
-            }
+                if (datum.containsKey("lqhdzds")){
+                    sheet.getRow(24).createCell(index).setCellValue(Double.valueOf(datum.get("lqhdzds").toString()));
+                }else {
+                    sheet.getRow(24).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("lqhdhgds")){
+                    sheet.getRow(25).createCell(index).setCellValue(Double.valueOf(datum.get("lqhdhgds").toString()));
+                }else {
+                    sheet.getRow(25).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("lqhdhgl")){
+                    sheet.getRow(26).createCell(index).setCellValue(Double.valueOf(datum.get("lqhdhgl").toString()));
+                }else {
+                    sheet.getRow(26).createCell(index).setCellValue(0);
+                }
 
-            if (datum.containsKey("lqhpzds")){
-                sheet.getRow(27).getCell(index).setCellValue(Double.valueOf(datum.get("lqhpzds").toString()));
-            }else {
-                sheet.getRow(27).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("lqhphgds")){
-                sheet.getRow(28).getCell(index).setCellValue(Double.valueOf(datum.get("lqhphgds").toString()));
-            }else {
-                sheet.getRow(28).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("lqhphgl")){
-                sheet.getRow(29).getCell(index).setCellValue(Double.valueOf(datum.get("lqhphgl").toString()));
-            }else {
-                sheet.getRow(29).getCell(index).setCellValue(0);
-            }
+                if (datum.containsKey("lqhpzds")){
+                    sheet.getRow(27).createCell(index).setCellValue(Double.valueOf(datum.get("lqhpzds").toString()));
+                }else {
+                    sheet.getRow(27).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("lqhphgds")){
+                    sheet.getRow(28).createCell(index).setCellValue(Double.valueOf(datum.get("lqhphgds").toString()));
+                }else {
+                    sheet.getRow(28).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("lqhphgl")){
+                    sheet.getRow(29).createCell(index).setCellValue(Double.valueOf(datum.get("lqhphgl").toString()));
+                }else {
+                    sheet.getRow(29).createCell(index).setCellValue(0);
+                }
 
-            if (datum.containsKey("hntqdzds")){
-                sheet.getRow(30).getCell(index).setCellValue(Double.valueOf(datum.get("hntqdzds").toString()));
-            }else {
-                sheet.getRow(30).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("hntqdhgds")){
-                sheet.getRow(31).getCell(index).setCellValue(Double.valueOf(datum.get("hntqdhgds").toString()));
-            }else {
-                sheet.getRow(31).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("hntqdhgl")){
-                sheet.getRow(32).getCell(index).setCellValue(Double.valueOf(datum.get("hntqdhgl").toString()));
-            }else {
-                sheet.getRow(32).getCell(index).setCellValue(0);
-            }
+                if (datum.containsKey("hntqdzds")){
+                    sheet.getRow(30).createCell(index).setCellValue(Double.valueOf(datum.get("hntqdzds").toString()));
+                }else {
+                    sheet.getRow(30).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("hntqdhgds")){
+                    sheet.getRow(31).createCell(index).setCellValue(Double.valueOf(datum.get("hntqdhgds").toString()));
+                }else {
+                    sheet.getRow(31).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("hntqdhgl")){
+                    sheet.getRow(32).createCell(index).setCellValue(Double.valueOf(datum.get("hntqdhgl").toString()));
+                }else {
+                    sheet.getRow(32).createCell(index).setCellValue(0);
+                }
 
-            if (datum.containsKey("tlmxlbgczds")){
-                sheet.getRow(33).getCell(index).setCellValue(Double.valueOf(datum.get("tlmxlbgczds").toString()));
-            }else {
-                sheet.getRow(33).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("tlmxlbgchgds")){
-                sheet.getRow(34).getCell(index).setCellValue(Double.valueOf(datum.get("tlmxlbgchgds").toString()));
-            }else {
-                sheet.getRow(34).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("tlmxlbgchgl")){
-                sheet.getRow(35).getCell(index).setCellValue(Double.valueOf(datum.get("tlmxlbgchgl").toString()));
-            }else {
-                sheet.getRow(35).getCell(index).setCellValue(0);
-            }
+                if (datum.containsKey("tlmxlbgczds")){
+                    sheet.getRow(33).createCell(index).setCellValue(Double.valueOf(datum.get("tlmxlbgczds").toString()));
+                }else {
+                    sheet.getRow(33).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("tlmxlbgchgds")){
+                    sheet.getRow(34).createCell(index).setCellValue(Double.valueOf(datum.get("tlmxlbgchgds").toString()));
+                }else {
+                    sheet.getRow(34).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("tlmxlbgchgl")){
+                    sheet.getRow(35).createCell(index).setCellValue(Double.valueOf(datum.get("tlmxlbgchgl").toString()));
+                }else {
+                    sheet.getRow(35).createCell(index).setCellValue(0);
+                }
 
-            if (datum.containsKey("hntpzdzds")){
-                sheet.getRow(36).getCell(index).setCellValue(Double.valueOf(datum.get("hntpzdzds").toString()));
-            }else {
-                sheet.getRow(36).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("hntpzdhgds")){
-                sheet.getRow(37).getCell(index).setCellValue(Double.valueOf(datum.get("hntpzdhgds").toString()));
-            }else {
-                sheet.getRow(37).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("hntpzdhgl")){
-                sheet.getRow(38).getCell(index).setCellValue(Double.valueOf(datum.get("hntpzdhgl").toString()));
-            }else {
-                sheet.getRow(38).getCell(index).setCellValue(0);
-            }
+                if (datum.containsKey("hntpzdzds")){
+                    sheet.getRow(36).createCell(index).setCellValue(Double.valueOf(datum.get("hntpzdzds").toString()));
+                }else {
+                    sheet.getRow(36).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("hntpzdhgds")){
+                    sheet.getRow(37).createCell(index).setCellValue(Double.valueOf(datum.get("hntpzdhgds").toString()));
+                }else {
+                    sheet.getRow(37).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("hntpzdhgl")){
+                    sheet.getRow(38).createCell(index).setCellValue(Double.valueOf(datum.get("hntpzdhgl").toString()));
+                }else {
+                    sheet.getRow(38).createCell(index).setCellValue(0);
+                }
 
-            if (datum.containsKey("khzds")){
-                sheet.getRow(39).getCell(index).setCellValue(Double.valueOf(datum.get("khzds").toString()));
-            }else {
-                sheet.getRow(39).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("khhgds")){
-                sheet.getRow(40).getCell(index).setCellValue(Double.valueOf(datum.get("khhgds").toString()));
-            }else {
-                sheet.getRow(40).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("khhgl")){
-                sheet.getRow(41).getCell(index).setCellValue(Double.valueOf(datum.get("khhgl").toString()));
-            }else {
-                sheet.getRow(41).getCell(index).setCellValue(0);
-            }
+                if (datum.containsKey("khzds")){
+                    sheet.getRow(39).createCell(index).setCellValue(Double.valueOf(datum.get("khzds").toString()));
+                }else {
+                    sheet.getRow(39).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("khhgds")){
+                    sheet.getRow(40).createCell(index).setCellValue(Double.valueOf(datum.get("khhgds").toString()));
+                }else {
+                    sheet.getRow(40).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("khhgl")){
+                    sheet.getRow(41).createCell(index).setCellValue(Double.valueOf(datum.get("khhgl").toString()));
+                }else {
+                    sheet.getRow(41).createCell(index).setCellValue(0);
+                }
 
-            if (datum.containsKey("hnthdzds") && datum.get("hnthdzds") !=null){
-                sheet.getRow(42).getCell(index).setCellValue(Double.valueOf(datum.get("hnthdzds").toString()));
-            }else {
-                sheet.getRow(42).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("hnthgds")&& datum.get("hnthgds") !=null){
-                sheet.getRow(43).getCell(index).setCellValue(Double.valueOf(datum.get("hnthgds").toString()));
-            }else {
-                sheet.getRow(43).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("hnthgl")&& datum.get("hnthgl") !=null){
-                sheet.getRow(44).getCell(index).setCellValue(Double.valueOf(datum.get("hnthgl").toString()));
-            }else {
-                sheet.getRow(44).getCell(index).setCellValue(0);
-            }
+                if (datum.containsKey("hnthdzds") && datum.get("hnthdzds") !=null){
+                    sheet.getRow(42).createCell(index).setCellValue(Double.valueOf(datum.get("hnthdzds").toString()));
+                }else {
+                    sheet.getRow(42).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("hnthgds")&& datum.get("hnthgds") !=null){
+                    sheet.getRow(43).createCell(index).setCellValue(Double.valueOf(datum.get("hnthgds").toString()));
+                }else {
+                    sheet.getRow(43).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("hnthgl")&& datum.get("hnthgl") !=null){
+                    sheet.getRow(44).createCell(index).setCellValue(Double.valueOf(datum.get("hnthgl").toString()));
+                }else {
+                    sheet.getRow(44).createCell(index).setCellValue(0);
+                }
 
 
-            if (datum.containsKey("hnthpzds")){
-                sheet.getRow(45).getCell(index).setCellValue(Double.valueOf(datum.get("hnthpzds").toString()));
-            }else {
-                sheet.getRow(45).getCell(index).setCellValue(0);
+                if (datum.containsKey("hnthpzds")){
+                    sheet.getRow(45).createCell(index).setCellValue(Double.valueOf(datum.get("hnthpzds").toString()));
+                }else {
+                    sheet.getRow(45).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("hnthphgds")){
+                    sheet.getRow(46).createCell(index).setCellValue(Double.valueOf(datum.get("hnthphgds").toString()));
+                }else {
+                    sheet.getRow(46).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("hnthphdl")){
+                    sheet.getRow(47).createCell(index).setCellValue(Double.valueOf(datum.get("hnthphdl").toString()));
+                }else {
+                    sheet.getRow(47).createCell(index).setCellValue(0);
+                }
+                index++;
             }
-            if (datum.containsKey("hnthphgds")){
-                sheet.getRow(46).getCell(index).setCellValue(Double.valueOf(datum.get("hnthphgds").toString()));
-            }else {
-                sheet.getRow(46).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("hnthphdl")){
-                sheet.getRow(47).getCell(index).setCellValue(Double.valueOf(datum.get("hnthphdl").toString()));
-            }else {
-                sheet.getRow(47).getCell(index).setCellValue(0);
-            }
-            index++;
-
         }
     }
 
@@ -5160,215 +5197,219 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
      * @param data
      */
     private void DBExcelsdlmhzData(XSSFWorkbook wb, List<Map<String, Object>> data) {
+        System.out.println(data);
         XSSFSheet sheet = wb.getSheet("表4.1.2-23");
         int index = 4;
         for (Map<String, Object> datum : data) {
-            sheet.getRow(2).getCell(index).setCellValue(datum.get("htd").toString());
-            if (datum.containsKey("ysdzs")){
-                sheet.getRow(3).getCell(index).setCellValue(Double.valueOf(datum.get("ysdzs").toString()));
-            }else {
-                sheet.getRow(3).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("ysdhgs")){
-                sheet.getRow(4).getCell(index).setCellValue(Double.valueOf(datum.get("ysdhgs").toString()));
-            }else {
-                sheet.getRow(4).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("ysdhgl")){
-                sheet.getRow(5).getCell(index).setCellValue(Double.valueOf(datum.get("ysdhgl").toString()));
-            }else {
-                sheet.getRow(5).getCell(index).setCellValue(0);
+            if (datum.size()>0){
+                sheet.getRow(2).createCell(index).setCellValue(datum.get("htd").toString());
+                if (datum.containsKey("ysdzs")){
+                    sheet.getRow(3).createCell(index).setCellValue(Double.valueOf(datum.get("ysdzs").toString()));
+                }else {
+                    sheet.getRow(3).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("ysdhgs")){
+                    sheet.getRow(4).createCell(index).setCellValue(Double.valueOf(datum.get("ysdhgs").toString()));
+                }else {
+                    sheet.getRow(4).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("ysdhgl")){
+                    sheet.getRow(5).createCell(index).setCellValue(Double.valueOf(datum.get("ysdhgl").toString()));
+                }else {
+                    sheet.getRow(5).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("sdczjcds")){
+                    sheet.getRow(6).createCell(index).setCellValue(Double.valueOf(datum.get("sdczjcds").toString()));
+                }else {
+                    sheet.getRow(6).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("sdczhgds")){
+                    sheet.getRow(7).createCell(index).setCellValue(Double.valueOf(datum.get("sdczhgds").toString()));
+                }else {
+                    sheet.getRow(7).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("sdczhgl")){
+                    sheet.getRow(8).createCell(index).setCellValue(Double.valueOf(datum.get("sdczhgl").toString()));
+                }else {
+                    sheet.getRow(8).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("sdssxsjcds")){
+                    sheet.getRow(9).createCell(index).setCellValue(Double.valueOf(datum.get("sdssxsjcds").toString()));
+                }else {
+                    sheet.getRow(9).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("sdssxshgds")){
+                    sheet.getRow(10).createCell(index).setCellValue(Double.valueOf(datum.get("sdssxshgds").toString()));
+                }else {
+                    sheet.getRow(10).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("sdssxshgl")){
+                    sheet.getRow(11).createCell(index).setCellValue(Double.valueOf(datum.get("sdssxshgl").toString()));
+                }else {
+                    sheet.getRow(11).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("sdpzdlqjcds")){
+                    sheet.getRow(12).createCell(index).setCellValue(Double.valueOf(datum.get("sdpzdlqjcds").toString()));
+                }else {
+                    sheet.getRow(12).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("sdpzdlqhgds")){
+                    sheet.getRow(13).createCell(index).setCellValue(Double.valueOf(datum.get("sdpzdlqhgds").toString()));
+                }else {
+                    sheet.getRow(13).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("sdpzdlqhgl")){
+                    sheet.getRow(14).createCell(index).setCellValue(Double.valueOf(datum.get("sdpzdlqhgl").toString()));
+                }else {
+                    sheet.getRow(14).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("khlqmcxsjcds")){
+                    sheet.getRow(15).createCell(index).setCellValue(Double.valueOf(datum.get("khlqmcxsjcds").toString()));
+                }else {
+                    sheet.getRow(15).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("khlqmcxshgds")){
+                    sheet.getRow(16).createCell(index).setCellValue(Double.valueOf(datum.get("khlqmcxshgds").toString()));
+                }else {
+                    sheet.getRow(16).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("khlqmcxshgl")){
+                    sheet.getRow(17).createCell(index).setCellValue(Double.valueOf(datum.get("khlqmcxshgl").toString()));
+                }else {
+                    sheet.getRow(17).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("khlqgzsdjcds")){
+                    sheet.getRow(18).createCell(index).setCellValue(Double.valueOf(datum.get("khlqgzsdjcds").toString()));
+                }else {
+                    sheet.getRow(18).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("khlqgzsdhgds")){
+                    sheet.getRow(19).createCell(index).setCellValue(Double.valueOf(datum.get("khlqgzsdhgds").toString()));
+                }else {
+                    sheet.getRow(19).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("khlqgzsdhgl")){
+                    sheet.getRow(20).createCell(index).setCellValue(Double.valueOf(datum.get("khlqgzsdhgl").toString()));
+                }else {
+                    sheet.getRow(20).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("hdlqzds")){
+                    sheet.getRow(21).createCell(index).setCellValue(Double.valueOf(datum.get("hdlqzds").toString()));
+                }else {
+                    sheet.getRow(21).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("hdlqhgds")){
+                    sheet.getRow(22).createCell(index).setCellValue(Double.valueOf(datum.get("hdlqhgds").toString()));
+                }else {
+                    sheet.getRow(22).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("hdlqhgl")){
+                    sheet.getRow(23).createCell(index).setCellValue(Double.valueOf(datum.get("hdlqhgl").toString()));
+                }else {
+                    sheet.getRow(23).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("hplqzds")){
+                    sheet.getRow(24).createCell(index).setCellValue(Double.valueOf(datum.get("hplqzds").toString()));
+                }else {
+                    sheet.getRow(24).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("hplqhgds")){
+                    sheet.getRow(25).createCell(index).setCellValue(Double.valueOf(datum.get("hplqhgds").toString()));
+                }else {
+                    sheet.getRow(25).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("hplqhgl")){
+                    sheet.getRow(26).createCell(index).setCellValue(Double.valueOf(datum.get("hplqhgl").toString()));
+                }else {
+                    sheet.getRow(26).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("sdpzdhntjcds")){
+                    sheet.getRow(33).createCell(index).setCellValue(Double.valueOf(datum.get("sdpzdhntjcds").toString()));
+                }else {
+                    sheet.getRow(33).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("sdpzdhnthgds")){
+                    sheet.getRow(34).createCell(index).setCellValue(Double.valueOf(datum.get("sdpzdhnthgds").toString()));
+                }else {
+                    sheet.getRow(34).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("sdpzdhnthgl")){
+                    sheet.getRow(35).createCell(index).setCellValue(Double.valueOf(datum.get("sdpzdhnthgl").toString()));
+                }else {
+                    sheet.getRow(35).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("khhntmcxsjcds")){
+                    sheet.getRow(36).createCell(index).setCellValue(Double.valueOf(datum.get("khhntmcxsjcds").toString()));
+                }else {
+                    sheet.getRow(36).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("khhntmcxshgds")){
+                    sheet.getRow(37).createCell(index).setCellValue(Double.valueOf(datum.get("khhntmcxshgds").toString()));
+                }else {
+                    sheet.getRow(37).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("khhntmcxshgl")){
+                    sheet.getRow(38).createCell(index).setCellValue(Double.valueOf(datum.get("khhntmcxshgl").toString()));
+                }else {
+                    sheet.getRow(38).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("khhntgzsdjcds")){
+                    sheet.getRow(39).createCell(index).setCellValue(Double.valueOf(datum.get("khhntgzsdjcds").toString()));
+                }else {
+                    sheet.getRow(39).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("khhntgzsdhgds")){
+                    sheet.getRow(40).createCell(index).setCellValue(Double.valueOf(datum.get("khhntgzsdhgds").toString()));
+                }else {
+                    sheet.getRow(40).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("khhntgzsdhgl")){
+                    sheet.getRow(41).createCell(index).setCellValue(Double.valueOf(datum.get("khhntgzsdhgl").toString()));
+                }else {
+                    sheet.getRow(41).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("hdhntzds")){
+                    sheet.getRow(42).createCell(index).setCellValue(Double.valueOf(datum.get("hdhntzds").toString()));
+                }else {
+                    sheet.getRow(42).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("hdhnthgds")){
+                    sheet.getRow(43).createCell(index).setCellValue(Double.valueOf(datum.get("hdhnthgds").toString()));
+                }else {
+                    sheet.getRow(43).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("hdhnthgl")){
+                    sheet.getRow(44).createCell(index).setCellValue(Double.valueOf(datum.get("hdhnthgl").toString()));
+                }else {
+                    sheet.getRow(44).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("hphntzds")){
+                    sheet.getRow(45).createCell(index).setCellValue(Double.valueOf(datum.get("hphntzds").toString()));
+                }else {
+                    sheet.getRow(45).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("hphnthgds")){
+                    sheet.getRow(46).createCell(index).setCellValue(Double.valueOf(datum.get("hphnthgds").toString()));
+                }else {
+                    sheet.getRow(46).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("hphnthgl")){
+                    sheet.getRow(47).createCell(index).setCellValue(Double.valueOf(datum.get("hphnthgl").toString()));
+                }else {
+                    sheet.getRow(47).createCell(index).setCellValue(0);
+                }
+                index++;
             }
 
-            if (datum.containsKey("sdczjcds")){
-                sheet.getRow(6).getCell(index).setCellValue(Double.valueOf(datum.get("sdczjcds").toString()));
-            }else {
-                sheet.getRow(6).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("sdczhgds")){
-                sheet.getRow(7).getCell(index).setCellValue(Double.valueOf(datum.get("sdczhgds").toString()));
-            }else {
-                sheet.getRow(7).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("sdczhgl")){
-                sheet.getRow(8).getCell(index).setCellValue(Double.valueOf(datum.get("sdczhgl").toString()));
-            }else {
-                sheet.getRow(8).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("sdssxsjcds")){
-                sheet.getRow(9).getCell(index).setCellValue(Double.valueOf(datum.get("sdssxsjcds").toString()));
-            }else {
-                sheet.getRow(9).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("sdssxshgds")){
-                sheet.getRow(10).getCell(index).setCellValue(Double.valueOf(datum.get("sdssxshgds").toString()));
-            }else {
-                sheet.getRow(10).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("sdssxshgl")){
-                sheet.getRow(11).getCell(index).setCellValue(Double.valueOf(datum.get("sdssxshgl").toString()));
-            }else {
-                sheet.getRow(11).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("sdpzdlqjcds")){
-                sheet.getRow(12).getCell(index).setCellValue(Double.valueOf(datum.get("sdpzdlqjcds").toString()));
-            }else {
-                sheet.getRow(12).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("sdpzdlqhgds")){
-                sheet.getRow(13).getCell(index).setCellValue(Double.valueOf(datum.get("sdpzdlqhgds").toString()));
-            }else {
-                sheet.getRow(13).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("sdpzdlqhgl")){
-                sheet.getRow(14).getCell(index).setCellValue(Double.valueOf(datum.get("sdpzdlqhgl").toString()));
-            }else {
-                sheet.getRow(14).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("khlqmcxsjcds")){
-                sheet.getRow(15).getCell(index).setCellValue(Double.valueOf(datum.get("khlqmcxsjcds").toString()));
-            }else {
-                sheet.getRow(15).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("khlqmcxshgds")){
-                sheet.getRow(16).getCell(index).setCellValue(Double.valueOf(datum.get("khlqmcxshgds").toString()));
-            }else {
-                sheet.getRow(16).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("khlqmcxshgl")){
-                sheet.getRow(17).getCell(index).setCellValue(Double.valueOf(datum.get("khlqmcxshgl").toString()));
-            }else {
-                sheet.getRow(17).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("khlqgzsdjcds")){
-                sheet.getRow(18).getCell(index).setCellValue(Double.valueOf(datum.get("khlqgzsdjcds").toString()));
-            }else {
-                sheet.getRow(18).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("khlqgzsdhgds")){
-                sheet.getRow(19).getCell(index).setCellValue(Double.valueOf(datum.get("khlqgzsdhgds").toString()));
-            }else {
-                sheet.getRow(19).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("khlqgzsdhgl")){
-                sheet.getRow(20).getCell(index).setCellValue(Double.valueOf(datum.get("khlqgzsdhgl").toString()));
-            }else {
-                sheet.getRow(20).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("hdlqzds")){
-                sheet.getRow(21).getCell(index).setCellValue(Double.valueOf(datum.get("hdlqzds").toString()));
-            }else {
-                sheet.getRow(21).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("hdlqhgds")){
-                sheet.getRow(22).getCell(index).setCellValue(Double.valueOf(datum.get("hdlqhgds").toString()));
-            }else {
-                sheet.getRow(22).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("hdlqhgl")){
-                sheet.getRow(23).getCell(index).setCellValue(Double.valueOf(datum.get("hdlqhgl").toString()));
-            }else {
-                sheet.getRow(23).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("hplqzds")){
-                sheet.getRow(24).getCell(index).setCellValue(Double.valueOf(datum.get("hplqzds").toString()));
-            }else {
-                sheet.getRow(24).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("hplqhgds")){
-                sheet.getRow(25).getCell(index).setCellValue(Double.valueOf(datum.get("hplqhgds").toString()));
-            }else {
-                sheet.getRow(25).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("hplqhgl")){
-                sheet.getRow(26).getCell(index).setCellValue(Double.valueOf(datum.get("hplqhgl").toString()));
-            }else {
-                sheet.getRow(26).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("sdpzdhntjcds")){
-                sheet.getRow(33).getCell(index).setCellValue(Double.valueOf(datum.get("sdpzdhntjcds").toString()));
-            }else {
-                sheet.getRow(33).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("sdpzdhnthgds")){
-                sheet.getRow(34).getCell(index).setCellValue(Double.valueOf(datum.get("sdpzdhnthgds").toString()));
-            }else {
-                sheet.getRow(34).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("sdpzdhnthgl")){
-                sheet.getRow(35).getCell(index).setCellValue(Double.valueOf(datum.get("sdpzdhnthgl").toString()));
-            }else {
-                sheet.getRow(35).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("khhntmcxsjcds")){
-                sheet.getRow(36).getCell(index).setCellValue(Double.valueOf(datum.get("khhntmcxsjcds").toString()));
-            }else {
-                sheet.getRow(36).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("khhntmcxshgds")){
-                sheet.getRow(37).getCell(index).setCellValue(Double.valueOf(datum.get("khhntmcxshgds").toString()));
-            }else {
-                sheet.getRow(37).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("khhntmcxshgl")){
-                sheet.getRow(38).getCell(index).setCellValue(Double.valueOf(datum.get("khhntmcxshgl").toString()));
-            }else {
-                sheet.getRow(38).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("khhntgzsdjcds")){
-                sheet.getRow(39).getCell(index).setCellValue(Double.valueOf(datum.get("khhntgzsdjcds").toString()));
-            }else {
-                sheet.getRow(39).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("khhntgzsdhgds")){
-                sheet.getRow(40).getCell(index).setCellValue(Double.valueOf(datum.get("khhntgzsdhgds").toString()));
-            }else {
-                sheet.getRow(40).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("khhntgzsdhgl")){
-                sheet.getRow(41).getCell(index).setCellValue(Double.valueOf(datum.get("khhntgzsdhgl").toString()));
-            }else {
-                sheet.getRow(41).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("hdhntzds")){
-                sheet.getRow(42).getCell(index).setCellValue(Double.valueOf(datum.get("hdhntzds").toString()));
-            }else {
-                sheet.getRow(42).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("hdhnthgds")){
-                sheet.getRow(43).getCell(index).setCellValue(Double.valueOf(datum.get("hdhnthgds").toString()));
-            }else {
-                sheet.getRow(43).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("hdhnthgl")){
-                sheet.getRow(44).getCell(index).setCellValue(Double.valueOf(datum.get("hdhnthgl").toString()));
-            }else {
-                sheet.getRow(44).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("hphntzds")){
-                sheet.getRow(45).getCell(index).setCellValue(Double.valueOf(datum.get("hphntzds").toString()));
-            }else {
-                sheet.getRow(45).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("hphnthgds")){
-                sheet.getRow(46).getCell(index).setCellValue(Double.valueOf(datum.get("hphnthgds").toString()));
-            }else {
-                sheet.getRow(46).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("hphnthgl")){
-                sheet.getRow(47).getCell(index).setCellValue(Double.valueOf(datum.get("hphnthgl").toString()));
-            }else {
-                sheet.getRow(47).getCell(index).setCellValue(0);
-            }
-            index++;
         }
     }
 
@@ -5558,7 +5599,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
      * @param data
      */
     private void DBExcelsdkhData(XSSFWorkbook wb, List<Map<String, Object>> data) {
-        createRow(wb,data.size(),"表4.1.2-20");
+        //createRow(wb,data.size(),"表4.1.2-20");
         XSSFSheet sheet = wb.getSheet("表4.1.2-20");
         int index = 3;
         for (Map<String, Object> datum : data) {
@@ -5566,8 +5607,8 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
             if (datum.containsKey("sdkhlmlx")){
                 sheet.getRow(index).getCell(1).setCellValue(datum.get("sdkhlmlx").toString());
             }
-            if (datum.containsKey("sdkhkpzb")){
-                sheet.getRow(index).getCell(2).setCellValue(datum.get("sdkhkpzb").toString());
+            if (datum.containsKey("sdkhzb")){
+                sheet.getRow(index).getCell(2).setCellValue(datum.get("sdkhzb").toString());
             }
             if (datum.containsKey("sdkhsjz")){
                 sheet.getRow(index).getCell(3).setCellValue(datum.get("sdkhsjz").toString());
@@ -5688,18 +5729,18 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                 sheet.getRow(index).getCell(3).setCellValue(0);
             }
 
-            if (datum.containsKey("sdssxsssjcds")){
-                sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(datum.get("sdssxsssjcds").toString()));
+            if (datum.containsKey("sdssxsjcds")){
+                sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(datum.get("sdssxsjcds").toString()));
             }else {
                 sheet.getRow(index).getCell(4).setCellValue(0);
             }
-            if (datum.containsKey("sdssxssshgds")){
-                sheet.getRow(index).getCell(5).setCellValue(Double.valueOf(datum.get("sdssxssshgds").toString()));
+            if (datum.containsKey("sdssxshgds")){
+                sheet.getRow(index).getCell(5).setCellValue(Double.valueOf(datum.get("sdssxshgds").toString()));
             }else {
                 sheet.getRow(index).getCell(5).setCellValue(0);
             }
-            if (datum.containsKey("sdssxssshgl")){
-                sheet.getRow(index).getCell(6).setCellValue(Double.valueOf(datum.get("sdssxssshgl").toString()));
+            if (datum.containsKey("sdssxshgl")){
+                sheet.getRow(index).getCell(6).setCellValue(Double.valueOf(datum.get("sdssxshgl").toString()));
             }else {
                 sheet.getRow(index).getCell(6).setCellValue(0);
             }
@@ -5758,8 +5799,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
      * @param data
      */
     private void DBExcelsdysdData(XSSFWorkbook wb, List<Map<String, Object>> data) {
-        System.out.println(data);
-        createRow(wb,data.size(),"表4.1.2-15");
+        //createRow(wb,data.size(),"表4.1.2-15");
         XSSFSheet sheet = wb.getSheet("表4.1.2-15");
         int index = 3;
         for (Map<String, Object> datum : data) {
@@ -5815,73 +5855,78 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
      * @param data
      */
     private void DBExcelqmxhzData(XSSFWorkbook wb, List<Map<String, Object>> data) {
+        System.out.println(data);
         XSSFSheet sheet = wb.getSheet("表4.1.2-14");
         int index = 3;
         for (Map<String, Object> datum : data) {
-            sheet.getRow(2).getCell(index).setCellValue(datum.get("htd").toString());
-            if (datum.containsKey("qmpzdjcds")){
-                sheet.getRow(3).getCell(index).setCellValue(Double.valueOf(datum.get("qmpzdjcds").toString()));
-            }else {
-                sheet.getRow(3).getCell(index).setCellValue(0);
+            if (datum.size()>0){
+                sheet.getRow(2).createCell(index).setCellValue(datum.get("htd").toString());
+                if (datum.containsKey("qmpzdjcds")){
+                    sheet.getRow(3).createCell(index).setCellValue(Double.valueOf(datum.get("qmpzdjcds").toString()));
+                }else {
+                    sheet.getRow(3).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("qmpzdhgds")){
+                    sheet.getRow(4).createCell(index).setCellValue(Double.valueOf(datum.get("qmpzdhgds").toString()));
+                }else {
+                    sheet.getRow(4).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("qmpzdhgl")){
+                    sheet.getRow(5).createCell(index).setCellValue(Double.valueOf(datum.get("qmpzdhgl").toString()));
+                }else {
+                    sheet.getRow(5).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("qmhpzds")){
+                    sheet.getRow(6).createCell(index).setCellValue(Double.valueOf(datum.get("qmhpzds").toString()));
+                }else {
+                    sheet.getRow(6).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("qmhphgds")){
+                    sheet.getRow(7).createCell(index).setCellValue(Double.valueOf(datum.get("qmhphgds").toString()));
+                }else {
+                    sheet.getRow(7).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("qmhphgl")){
+                    sheet.getRow(8).createCell(index).setCellValue(Double.valueOf(datum.get("qmhphgl").toString()));
+                }else {
+                    sheet.getRow(8).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("mcxszds")){
+                    sheet.getRow(9).createCell(index).setCellValue(Double.valueOf(datum.get("mcxszds").toString()));
+                }else {
+                    sheet.getRow(9).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("mcxshgds")){
+                    sheet.getRow(10).createCell(index).setCellValue(Double.valueOf(datum.get("mcxshgds").toString()));
+                }else {
+                    sheet.getRow(10).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("mcxshgl")){
+                    sheet.getRow(11).createCell(index).setCellValue(Double.valueOf(datum.get("mcxshgl").toString()));
+                }else {
+                    sheet.getRow(11).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("gzsdzds")){
+                    sheet.getRow(12).createCell(index).setCellValue(Double.valueOf(datum.get("gzsdzds").toString()));
+                }else {
+                    sheet.getRow(12).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("gzsdhgds")){
+                    sheet.getRow(13).createCell(index).setCellValue(Double.valueOf(datum.get("gzsdhgds").toString()));
+                }else {
+                    sheet.getRow(13).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("gzsdhgl")){
+                    sheet.getRow(14).createCell(index).setCellValue(Double.valueOf(datum.get("gzsdhgl").toString()));
+                }else {
+                    sheet.getRow(14).createCell(index).setCellValue(0);
+                }
+                index++;
             }
 
-            if (datum.containsKey("qmpzdhgds")){
-                sheet.getRow(4).getCell(index).setCellValue(Double.valueOf(datum.get("qmpzdhgds").toString()));
-            }else {
-                sheet.getRow(4).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("qmpzdhgl")){
-                sheet.getRow(5).getCell(index).setCellValue(Double.valueOf(datum.get("qmpzdhgl").toString()));
-            }else {
-                sheet.getRow(5).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("qmhpzds")){
-                sheet.getRow(6).getCell(index).setCellValue(Double.valueOf(datum.get("qmhpzds").toString()));
-            }else {
-                sheet.getRow(6).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("qmhphgds")){
-                sheet.getRow(7).getCell(index).setCellValue(Double.valueOf(datum.get("qmhphgds").toString()));
-            }else {
-                sheet.getRow(7).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("qmhphgl")){
-                sheet.getRow(8).getCell(index).setCellValue(Double.valueOf(datum.get("qmhphgl").toString()));
-            }else {
-                sheet.getRow(8).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("mcxszds")){
-                sheet.getRow(9).getCell(index).setCellValue(Double.valueOf(datum.get("mcxszds").toString()));
-            }else {
-                sheet.getRow(9).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("mcxshgds")){
-                sheet.getRow(10).getCell(index).setCellValue(Double.valueOf(datum.get("mcxshgds").toString()));
-            }else {
-                sheet.getRow(10).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("mcxshgl")){
-                sheet.getRow(11).getCell(index).setCellValue(Double.valueOf(datum.get("mcxshgl").toString()));
-            }else {
-                sheet.getRow(11).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("gzsdzds")){
-                sheet.getRow(12).getCell(index).setCellValue(Double.valueOf(datum.get("gzsdzds").toString()));
-            }else {
-                sheet.getRow(12).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("gzsdhgds")){
-                sheet.getRow(13).getCell(index).setCellValue(Double.valueOf(datum.get("gzsdhgds").toString()));
-            }else {
-                sheet.getRow(13).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("gzsdhgl")){
-                sheet.getRow(14).getCell(index).setCellValue(Double.valueOf(datum.get("gzsdhgl").toString()));
-            }else {
-                sheet.getRow(14).getCell(index).setCellValue(0);
-            }
         }
     }
 
@@ -5980,33 +6025,33 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                 sheet.getRow(index).getCell(1).setCellValue(datum.get("qmpzdzb").toString());
             }
             if (datum.containsKey("qmpzdlmlx")){
-                sheet.getRow(index).getCell(1).setCellValue(datum.get("qmpzdlmlx").toString());
+                sheet.getRow(index).getCell(2).setCellValue(datum.get("qmpzdlmlx").toString());
             }
             if (datum.containsKey("qmpzdgdz")){
-                sheet.getRow(index).getCell(2).setCellValue(Double.valueOf(datum.get("qmpzdgdz").toString()));
+                sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(datum.get("qmpzdgdz").toString()));
             }else {
-                sheet.getRow(index).getCell(2).setCellValue(0);
+                sheet.getRow(index).getCell(3).setCellValue(0);
             }
             if (datum.containsKey("qmpzdbhfw")){
-                sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(datum.get("qmpzdbhfw").toString()));
+                sheet.getRow(index).getCell(4).setCellValue(datum.get("qmpzdbhfw").toString());
             }
 
             if (datum.containsKey("qmpzdjcds")){
-                sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(datum.get("qmpzdjcds").toString()));
-            }else {
-                sheet.getRow(index).getCell(4).setCellValue(0);
-            }
-
-            if (datum.containsKey("qmpzdhgds")){
-                sheet.getRow(index).getCell(5).setCellValue(Double.valueOf(datum.get("qmpzdhgds").toString()));
+                sheet.getRow(index).getCell(5).setCellValue(Double.valueOf(datum.get("qmpzdjcds").toString()));
             }else {
                 sheet.getRow(index).getCell(5).setCellValue(0);
             }
 
-            if (datum.containsKey("qmpzdhgl")){
-                sheet.getRow(index).getCell(6).setCellValue(Double.valueOf(datum.get("qmpzdhgl").toString()));
+            if (datum.containsKey("qmpzdhgds")){
+                sheet.getRow(index).getCell(6).setCellValue(Double.valueOf(datum.get("qmpzdhgds").toString()));
             }else {
                 sheet.getRow(index).getCell(6).setCellValue(0);
+            }
+
+            if (datum.containsKey("qmpzdhgl")){
+                sheet.getRow(index).getCell(7).setCellValue(Double.valueOf(datum.get("qmpzdhgl").toString()));
+            }else {
+                sheet.getRow(index).getCell(7).setCellValue(0);
             }
             index++;
         }
@@ -6021,281 +6066,285 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         XSSFSheet sheet = wb.getSheet("表4.1.2-10");
         int index = 4;
         for (Map<String, Object> datum : data) {
-            sheet.getRow(2).getCell(index).setCellValue(datum.get("htd").toString());
-            if (datum.containsKey("ysdzds")){
-                sheet.getRow(3).getCell(index).setCellValue(Double.valueOf(datum.get("ysdzds").toString()));
-            }else {
-                sheet.getRow(3).getCell(index).setCellValue(Double.valueOf(0));
+            if (datum.size()>0){
+                sheet.getRow(2).createCell(index).setCellValue(datum.get("htd").toString());
+                //sheet.getRow(2).getCell(index).setCellValue(datum.get("htd").toString());
+                if (datum.containsKey("ysdzds")){
+                    sheet.getRow(3).createCell(index).setCellValue(Double.valueOf(datum.get("ysdzds").toString()));
+                }else {
+                    sheet.getRow(3).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("ysdhgds")){
+                    sheet.getRow(4).createCell(index).setCellValue(Double.valueOf(datum.get("ysdhgds").toString()));
+                }else {
+                    sheet.getRow(4).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("ysdhgl")){
+                    sheet.getRow(5).createCell(index).setCellValue(Double.valueOf(datum.get("ysdhgl").toString()));
+                }else {
+                    sheet.getRow(5).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("lmwczds")){
+                    sheet.getRow(6).createCell(index).setCellValue(Double.valueOf(datum.get("lmwczds").toString()));
+                }else {
+                    sheet.getRow(6).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("lmwchgds")){
+                    sheet.getRow(7).createCell(index).setCellValue(Double.valueOf(datum.get("lmwchgds").toString()));
+                }else {
+                    sheet.getRow(7).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("lmwchgl")){
+                    sheet.getRow(8).createCell(index).setCellValue(Double.valueOf(datum.get("lmwchgl").toString()));
+                }else {
+                    sheet.getRow(8).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("czzds")){
+                    sheet.getRow(9).createCell(index).setCellValue(Double.valueOf(datum.get("czzds").toString()));
+                }else {
+                    sheet.getRow(9).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("czhgds")){
+                    sheet.getRow(10).createCell(index).setCellValue(Double.valueOf(datum.get("czhgds").toString()));
+                }else {
+                    sheet.getRow(10).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("czhgl")){
+                    sheet.getRow(11).createCell(index).setCellValue(Double.valueOf(datum.get("czhgl").toString()));
+                }else {
+                    sheet.getRow(11).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("lmssxsssjcds")){
+                    sheet.getRow(12).createCell(index).setCellValue(Double.valueOf(datum.get("lmssxsssjcds").toString()));
+                }else {
+                    sheet.getRow(12).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("lmssxssshgds")){
+                    sheet.getRow(13).createCell(index).setCellValue(Double.valueOf(datum.get("lmssxssshgds").toString()));
+                }else {
+                    sheet.getRow(13).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("lmssxssshgl")){
+                    sheet.getRow(14).createCell(index).setCellValue(Double.valueOf(datum.get("lmssxssshgl").toString()));
+                }else {
+                    sheet.getRow(14).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("pzdlqjcds")){
+                    sheet.getRow(15).createCell(index).setCellValue(Double.valueOf(datum.get("pzdlqjcds").toString()));
+                }else {
+                    sheet.getRow(15).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("pzdlqhgds")){
+                    sheet.getRow(16).createCell(index).setCellValue(Double.valueOf(datum.get("pzdlqhgds").toString()));
+                }else {
+                    sheet.getRow(16).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("pzdlqhgl")){
+                    sheet.getRow(17).createCell(index).setCellValue(Double.valueOf(datum.get("pzdlqhgl").toString()));
+                }else {
+                    sheet.getRow(17).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("khlqmcxsjcds")){
+                    sheet.getRow(18).createCell(index).setCellValue(Double.valueOf(datum.get("khlqmcxsjcds").toString()));
+                }else {
+                    sheet.getRow(18).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("khlqmcxshgds")){
+                    sheet.getRow(19).createCell(index).setCellValue(Double.valueOf(datum.get("khlqmcxshgds").toString()));
+                }else {
+                    sheet.getRow(19).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("khlqmcxshgl")){
+                    sheet.getRow(20).createCell(index).setCellValue(Double.valueOf(datum.get("khlqmcxshgl").toString()));
+                }else {
+                    sheet.getRow(20).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("khlqgzsdjcds")){
+                    sheet.getRow(21).createCell(index).setCellValue(Double.valueOf(datum.get("khlqgzsdjcds").toString()));
+                }else {
+                    sheet.getRow(21).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("khlqgzsdhgds")){
+                    sheet.getRow(22).createCell(index).setCellValue(Double.valueOf(datum.get("khlqgzsdhgds").toString()));
+                }else {
+                    sheet.getRow(22).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("khlqgzsdhgl")){
+                    sheet.getRow(23).createCell(index).setCellValue(Double.valueOf(datum.get("khlqgzsdhgl").toString()));
+                }else {
+                    sheet.getRow(23).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("lmhdlqjcds")){
+                    sheet.getRow(24).createCell(index).setCellValue(Double.valueOf(datum.get("lmhdlqjcds").toString()));
+                }else {
+                    sheet.getRow(24).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("lmhdlqhgs")){
+                    sheet.getRow(25).createCell(index).setCellValue(Double.valueOf(datum.get("lmhdlqhgs").toString()));
+                }else {
+                    sheet.getRow(25).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("lmhdlqhgl")){
+                    sheet.getRow(26).createCell(index).setCellValue(Double.valueOf(datum.get("lmhdlqhgl").toString()));
+                }else {
+                    sheet.getRow(26).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("hplqzds")){
+                    sheet.getRow(27).createCell(index).setCellValue(Double.valueOf(datum.get("hplqzds").toString()));
+                }else {
+                    sheet.getRow(27).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("hplqhgds")){
+                    sheet.getRow(28).createCell(index).setCellValue(Double.valueOf(datum.get("hplqhgds").toString()));
+                }else {
+                    sheet.getRow(28).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("hplqhgl")){
+                    sheet.getRow(29).createCell(index).setCellValue(Double.valueOf(datum.get("hplqhgl").toString()));
+                }else {
+                    sheet.getRow(29).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("hntqdzds")){
+                    sheet.getRow(30).createCell(index).setCellValue(Double.valueOf(datum.get("hntqdzds").toString()));
+                }else {
+                    sheet.getRow(30).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("hntqdhgds")){
+                    sheet.getRow(31).createCell(index).setCellValue(Double.valueOf(datum.get("hntqdhgds").toString()));
+                }else {
+                    sheet.getRow(31).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("hntqdhgl")){
+                    sheet.getRow(32).createCell(index).setCellValue(Double.valueOf(datum.get("hntqdhgl").toString()));
+                }else {
+                    sheet.getRow(32).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("hntxlbgczds")){
+                    sheet.getRow(33).createCell(index).setCellValue(Double.valueOf(datum.get("hntxlbgczds").toString()));
+                }else {
+                    sheet.getRow(33).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("hntxlbgchgds")){
+                    sheet.getRow(34).createCell(index).setCellValue(Double.valueOf(datum.get("hntxlbgchgds").toString()));
+                }else {
+                    sheet.getRow(34).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("hntxlbgchgl")){
+                    sheet.getRow(35).createCell(index).setCellValue(Double.valueOf(datum.get("hntxlbgchgl").toString()));
+                }else {
+                    sheet.getRow(35).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("pzdhntjcds")){
+                    sheet.getRow(36).createCell(index).setCellValue(Double.valueOf(datum.get("pzdhntjcds").toString()));
+                }else {
+                    sheet.getRow(36).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("pzdhnthgds")){
+                    sheet.getRow(37).createCell(index).setCellValue(Double.valueOf(datum.get("pzdhnthgds").toString()));
+                }else {
+                    sheet.getRow(37).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("pzdhnthgl")){
+                    sheet.getRow(38).createCell(index).setCellValue(Double.valueOf(datum.get("pzdhnthgl").toString()));
+                }else {
+                    sheet.getRow(38).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("khhntmcxsjcds")){
+                    sheet.getRow(39).createCell(index).setCellValue(Double.valueOf(datum.get("khhntmcxsjcds").toString()));
+                }else {
+                    sheet.getRow(39).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("khhntmcxshgds")){
+                    sheet.getRow(40).createCell(index).setCellValue(Double.valueOf(datum.get("khhntmcxshgds").toString()));
+                }else {
+                    sheet.getRow(40).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("khhntmcxshgl")){
+                    sheet.getRow(41).createCell(index).setCellValue(Double.valueOf(datum.get("khhntmcxshgl").toString()));
+                }else {
+                    sheet.getRow(41).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("khhntgzsdjcds")){
+                    sheet.getRow(42).createCell(index).setCellValue(Double.valueOf(datum.get("khhntgzsdjcds").toString()));
+                }else {
+                    sheet.getRow(42).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("khhntgzsdhgds")){
+                    sheet.getRow(43).createCell(index).setCellValue(Double.valueOf(datum.get("khhntgzsdhgds").toString()));
+                }else {
+                    sheet.getRow(43).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("khhntgzsdhgl")){
+                    sheet.getRow(44).createCell(index).setCellValue(Double.valueOf(datum.get("khhntgzsdhgl").toString()));
+                }else {
+                    sheet.getRow(44).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("lmhdhntjcds")){
+                    sheet.getRow(45).createCell(index).setCellValue(Double.valueOf(datum.get("lmhdhntjcds").toString()));
+                }else {
+                    sheet.getRow(45).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("lmhdhnthgs")){
+                    sheet.getRow(46).createCell(index).setCellValue(Double.valueOf(datum.get("lmhdhnthgs").toString()));
+                }else {
+                    sheet.getRow(46).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("lmhdhnthgl")){
+                    sheet.getRow(47).createCell(index).setCellValue(Double.valueOf(datum.get("lmhdhnthgl").toString()));
+                }else {
+                    sheet.getRow(47).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("hphntzds")){
+                    sheet.getRow(48).createCell(index).setCellValue(Double.valueOf(datum.get("hphntzds").toString()));
+                }else {
+                    sheet.getRow(48).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
+                if (datum.containsKey("hphnthgds")){
+                    sheet.getRow(49).createCell(index).setCellValue(Double.valueOf(datum.get("hphnthgds").toString()));
+                }else {
+                    sheet.getRow(49).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("hphnthgl")){
+                    sheet.getRow(50).createCell(index).setCellValue(Double.valueOf(datum.get("hphnthgl").toString()));
+                }else {
+                    sheet.getRow(50).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                index++;
             }
 
-            if (datum.containsKey("ysdhgds")){
-                sheet.getRow(4).getCell(index).setCellValue(Double.valueOf(datum.get("ysdhgds").toString()));
-            }else {
-                sheet.getRow(4).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("ysdhgl")){
-                sheet.getRow(5).getCell(index).setCellValue(Double.valueOf(datum.get("ysdhgl").toString()));
-            }else {
-                sheet.getRow(5).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("lmwczds")){
-                sheet.getRow(6).getCell(index).setCellValue(Double.valueOf(datum.get("lmwczds").toString()));
-            }else {
-                sheet.getRow(6).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("lmwchgds")){
-                sheet.getRow(7).getCell(index).setCellValue(Double.valueOf(datum.get("lmwchgds").toString()));
-            }else {
-                sheet.getRow(7).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("lmwchgl")){
-                sheet.getRow(8).getCell(index).setCellValue(Double.valueOf(datum.get("lmwchgl").toString()));
-            }else {
-                sheet.getRow(8).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("czzds")){
-                sheet.getRow(9).getCell(index).setCellValue(Double.valueOf(datum.get("czzds").toString()));
-            }else {
-                sheet.getRow(9).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("czhgds")){
-                sheet.getRow(10).getCell(index).setCellValue(Double.valueOf(datum.get("czhgds").toString()));
-            }else {
-                sheet.getRow(10).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("czhgl")){
-                sheet.getRow(11).getCell(index).setCellValue(Double.valueOf(datum.get("czhgl").toString()));
-            }else {
-                sheet.getRow(11).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("lmssxsssjcds")){
-                sheet.getRow(12).getCell(index).setCellValue(Double.valueOf(datum.get("lmssxsssjcds").toString()));
-            }else {
-                sheet.getRow(12).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("lmssxssshgds")){
-                sheet.getRow(13).getCell(index).setCellValue(Double.valueOf(datum.get("lmssxssshgds").toString()));
-            }else {
-                sheet.getRow(13).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("lmssxssshgl")){
-                sheet.getRow(14).getCell(index).setCellValue(Double.valueOf(datum.get("lmssxssshgl").toString()));
-            }else {
-                sheet.getRow(14).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("pzdlqjcds")){
-                sheet.getRow(15).getCell(index).setCellValue(Double.valueOf(datum.get("pzdlqjcds").toString()));
-            }else {
-                sheet.getRow(15).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("pzdlqhgds")){
-                sheet.getRow(16).getCell(index).setCellValue(Double.valueOf(datum.get("pzdlqhgds").toString()));
-            }else {
-                sheet.getRow(16).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("pzdlqhgl")){
-                sheet.getRow(17).getCell(index).setCellValue(Double.valueOf(datum.get("pzdlqhgds").toString()));
-            }else {
-                sheet.getRow(17).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("khlqmcxsjcds")){
-                sheet.getRow(18).getCell(index).setCellValue(Double.valueOf(datum.get("khlqmcxsjcds").toString()));
-            }else {
-                sheet.getRow(18).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("khlqmcxshgds")){
-                sheet.getRow(19).getCell(index).setCellValue(Double.valueOf(datum.get("khlqmcxshgds").toString()));
-            }else {
-                sheet.getRow(19).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("khlqmcxshgl")){
-                sheet.getRow(20).getCell(index).setCellValue(Double.valueOf(datum.get("khlqmcxshgl").toString()));
-            }else {
-                sheet.getRow(20).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("khlqgzsdjcds")){
-                sheet.getRow(21).getCell(index).setCellValue(Double.valueOf(datum.get("khlqgzsdjcds").toString()));
-            }else {
-                sheet.getRow(21).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("khlqgzsdhgds")){
-                sheet.getRow(22).getCell(index).setCellValue(Double.valueOf(datum.get("khlqgzsdhgds").toString()));
-            }else {
-                sheet.getRow(22).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("khlqgzsdhgl")){
-                sheet.getRow(23).getCell(index).setCellValue(Double.valueOf(datum.get("khlqgzsdhgl").toString()));
-            }else {
-                sheet.getRow(23).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("lmhdlqjcds")){
-                sheet.getRow(24).getCell(index).setCellValue(Double.valueOf(datum.get("lmhdlqjcds").toString()));
-            }else {
-                sheet.getRow(24).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("lmhdlqhgs")){
-                sheet.getRow(25).getCell(index).setCellValue(Double.valueOf(datum.get("lmhdlqhgs").toString()));
-            }else {
-                sheet.getRow(25).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("lmhdlqhgl")){
-                sheet.getRow(26).getCell(index).setCellValue(Double.valueOf(datum.get("lmhdlqhgl").toString()));
-            }else {
-                sheet.getRow(26).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("hplqzds")){
-                sheet.getRow(27).getCell(index).setCellValue(Double.valueOf(datum.get("hplqzds").toString()));
-            }else {
-                sheet.getRow(27).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("hplqhgds")){
-                sheet.getRow(28).getCell(index).setCellValue(Double.valueOf(datum.get("hplqhgds").toString()));
-            }else {
-                sheet.getRow(28).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("hplqhgl")){
-                sheet.getRow(29).getCell(index).setCellValue(Double.valueOf(datum.get("hplqhgl").toString()));
-            }else {
-                sheet.getRow(29).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("hntqdzds")){
-                sheet.getRow(30).getCell(index).setCellValue(Double.valueOf(datum.get("hntqdzds").toString()));
-            }else {
-                sheet.getRow(30).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("hntqdhgds")){
-                sheet.getRow(31).getCell(index).setCellValue(Double.valueOf(datum.get("hntqdhgds").toString()));
-            }else {
-                sheet.getRow(31).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("hntqdhgl")){
-                sheet.getRow(32).getCell(index).setCellValue(Double.valueOf(datum.get("hntqdhgl").toString()));
-            }else {
-                sheet.getRow(32).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("hntxlbgczds")){
-                sheet.getRow(33).getCell(index).setCellValue(Double.valueOf(datum.get("hntxlbgczds").toString()));
-            }else {
-                sheet.getRow(33).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("hntxlbgchgds")){
-                sheet.getRow(34).getCell(index).setCellValue(Double.valueOf(datum.get("hntxlbgchgds").toString()));
-            }else {
-                sheet.getRow(34).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("hntxlbgchgl")){
-                sheet.getRow(35).getCell(index).setCellValue(Double.valueOf(datum.get("hntxlbgchgl").toString()));
-            }else {
-                sheet.getRow(35).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("pzdhntjcds")){
-                sheet.getRow(36).getCell(index).setCellValue(Double.valueOf(datum.get("pzdhntjcds").toString()));
-            }else {
-                sheet.getRow(36).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("pzdhnthgds")){
-                sheet.getRow(37).getCell(index).setCellValue(Double.valueOf(datum.get("pzdhnthgds").toString()));
-            }else {
-                sheet.getRow(37).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("pzdhnthgl")){
-                sheet.getRow(38).getCell(index).setCellValue(Double.valueOf(datum.get("pzdhnthgl").toString()));
-            }else {
-                sheet.getRow(38).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("khhntmcxsjcds")){
-                sheet.getRow(39).getCell(index).setCellValue(Double.valueOf(datum.get("khhntmcxsjcds").toString()));
-            }else {
-                sheet.getRow(39).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("khhntmcxshgds")){
-                sheet.getRow(40).getCell(index).setCellValue(Double.valueOf(datum.get("khhntmcxshgds").toString()));
-            }else {
-                sheet.getRow(40).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("khhntmcxshgl")){
-                sheet.getRow(41).getCell(index).setCellValue(Double.valueOf(datum.get("khhntmcxshgl").toString()));
-            }else {
-                sheet.getRow(41).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("khhntgzsdjcds")){
-                sheet.getRow(42).getCell(index).setCellValue(Double.valueOf(datum.get("khhntgzsdjcds").toString()));
-            }else {
-                sheet.getRow(42).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("khhntgzsdhgds")){
-                sheet.getRow(43).getCell(index).setCellValue(Double.valueOf(datum.get("khhntgzsdhgds").toString()));
-            }else {
-                sheet.getRow(43).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("khhntgzsdhgl")){
-                sheet.getRow(44).getCell(index).setCellValue(Double.valueOf(datum.get("khhntgzsdhgl").toString()));
-            }else {
-                sheet.getRow(44).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("lmhdhntjcds")){
-                sheet.getRow(45).getCell(index).setCellValue(Double.valueOf(datum.get("lmhdhntjcds").toString()));
-            }else {
-                sheet.getRow(45).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("lmhdhnthgs")){
-                sheet.getRow(46).getCell(index).setCellValue(Double.valueOf(datum.get("lmhdhnthgs").toString()));
-            }else {
-                sheet.getRow(46).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("lmhdhnthgl")){
-                sheet.getRow(47).getCell(index).setCellValue(Double.valueOf(datum.get("lmhdhnthgl").toString()));
-            }else {
-                sheet.getRow(47).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("hphntzds")){
-                sheet.getRow(48).getCell(index).setCellValue(Double.valueOf(datum.get("hphntzds").toString()));
-            }else {
-                sheet.getRow(48).getCell(index).setCellValue(Double.valueOf(0));
-            }
-
-            if (datum.containsKey("hphnthgds")){
-                sheet.getRow(49).getCell(index).setCellValue(Double.valueOf(datum.get("hphnthgds").toString()));
-            }else {
-                sheet.getRow(49).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("hphnthgl")){
-                sheet.getRow(50).getCell(index).setCellValue(Double.valueOf(datum.get("hphnthgl").toString()));
-            }else {
-                sheet.getRow(50).getCell(index).setCellValue(Double.valueOf(0));
-            }
-            index++;
         }
     }
 
@@ -6305,7 +6354,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
      * @param data
      */
     private void DBExcellmhpData(XSSFWorkbook wb, List<Map<String, Object>> data) {
-        createRow(wb,data.size(),"表4.1.2-9");
+        //createRow(wb,data.size(),"表4.1.2-9");
         XSSFSheet sheet = wb.getSheet("表4.1.2-9");
         int index = 3;
         for (Map<String, Object> datum : data) {
@@ -6340,7 +6389,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
      * @param data
      */
     private void DBExcellmhdData(XSSFWorkbook wb, List<Map<String, Object>> data) {
-        createRow(wb,data.size(),"表4.1.2-8(3)");
+        //createRow(wb,data.size(),"表4.1.2-8(3)");
         XSSFSheet sheet = wb.getSheet("表4.1.2-8(3)");
         int index = 3;
         for (Map<String, Object> datum : data) {
@@ -6376,7 +6425,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
      * @param data
      */
     private void DBExcelldhdData(XSSFWorkbook wb, List<Map<String, Object>> data) {
-        createRow(wb,data.size(),"表4.1.2-8(2)");
+        //createRow(wb,data.size(),"表4.1.2-8(2)");
         XSSFSheet sheet = wb.getSheet("表4.1.2-8(2)");
         int index = 3;
         for (Map<String, Object> datum : data) {
@@ -6484,7 +6533,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
      * @param data
      */
     private void DBExcelkhData(XSSFWorkbook wb, List<Map<String, Object>> data) {
-        createRow(wb,data.size(),"表4.1.2-7");
+        //createRow(wb,data.size(),"表4.1.2-7");
         XSSFSheet sheet = wb.getSheet("表4.1.2-7");
         int index = 3;
         for (Map<String, Object> datum : data) {
@@ -6573,7 +6622,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
      * @param data
      */
     private void DBExcellmhntxlbgcData(XSSFWorkbook wb, List<Map<String, Object>> data) {
-        createRow(wb,data.size(),"表4.1.2-5");
+        //createRow(wb,data.size(),"表4.1.2-5");
         XSSFSheet sheet = wb.getSheet("表4.1.2-5");
         int index = 3;
         for (Map<String, Object> datum : data) {
@@ -6618,7 +6667,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
      * @param data
      */
     private void DBExcellmhntqdData(XSSFWorkbook wb, List<Map<String, Object>> data) {
-        createRow(wb,data.size(),"表4.1.2-4");
+        //(wb,data.size(),"表4.1.2-4");
         XSSFSheet sheet = wb.getSheet("表4.1.2-4");
         int index = 3;
         for (Map<String, Object> datum : data) {
@@ -6668,7 +6717,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
      * @param data
      */
     private void DBExcellmssxsData(XSSFWorkbook wb, List<Map<String, Object>> data) {
-        createRow(wb,data.size(),"表4.1.2-3");
+        //createRow(wb,data.size(),"表4.1.2-3");
         XSSFSheet sheet = wb.getSheet("表4.1.2-3");
         int index = 3;
         for (Map<String, Object> datum : data) {
@@ -6717,7 +6766,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
      * @param data
      */
     private void DBExcellmczData(XSSFWorkbook wb, List<Map<String, Object>> data) {
-        createRow(wb,data.size(),"表4.1.2-2(2)");
+        //createRow(wb,data.size(),"表4.1.2-2(2)");
         XSSFSheet sheet = wb.getSheet("表4.1.2-2(2)");
         int index = 3;
         for (Map<String, Object> datum : data) {
@@ -6763,7 +6812,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
      * @param data
      */
     private void DBExcellmwclcfdData(XSSFWorkbook wb, List<Map<String, Object>> data) {
-        createRow(wb,data.size(),"表4.1.2-21");
+        //createRow(wb,data.size(),"表4.1.2-21");
         XSSFSheet sheet = wb.getSheet("表4.1.2-21");
         int index = 3;
         for (Map<String, Object> datum : data) {
@@ -6810,7 +6859,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
      * @param data
      */
     private void DBExcellmwcdData(XSSFWorkbook wb, List<Map<String, Object>> data) {
-        createRow(wb,data.size(),"表4.1.2-211");
+        //createRow(wb,data.size(),"表4.1.2-211");
         XSSFSheet sheet = wb.getSheet("表4.1.2-211");
         int index = 3;
         for (Map<String, Object> datum : data) {
@@ -6861,56 +6910,62 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
      * @param data
      */
     private void DBExcellmysdData(XSSFWorkbook wb, List<Map<String, Object>> data) {
-        createRow(wb,data.size(),"表4.1.2-1");
         XSSFSheet sheet = wb.getSheet("表4.1.2-1");
         int index = 3;
         for (Map<String, Object> datum : data) {
-            sheet.getRow(index).getCell(0).setCellValue(datum.get("htd").toString());
-            if (datum.containsKey("ysdlx")){
+            if (datum.size()>0){
+                sheet.getRow(index).getCell(0).setCellValue(datum.get("htd").toString());
                 sheet.getRow(index).getCell(1).setCellValue(datum.get("ysdlx").toString());
-            }
-            if (datum.containsKey("ysdsczbh")){
-                sheet.getRow(index).getCell(2).setCellValue(datum.get("ysdsczbh").toString());
-            }
+                sheet.getRow(index).getCell(2).setCellValue(datum.get("bz").toString());
 
-            if (datum.containsKey("ysdzdbz")){
-                sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(datum.get("ysdzdbz").toString()));
-            }else {
-                sheet.getRow(index).getCell(3).setCellValue(0);
-            }
+                if (datum.containsKey("bzsczbhfw")){
+                    sheet.getRow(index).getCell(3).setCellValue(datum.get("bzsczbhfw").toString());
+                }else {
+                    sheet.getRow(index).getCell(3).setCellValue(0);
+                }
 
-            if (datum.containsKey("ysdydbz")){
-                sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(datum.get("ysdydbz").toString()));
-            }else {
-                sheet.getRow(index).getCell(4).setCellValue(0);
-            }
-            if (datum.containsKey("ysdgdz")){
-                sheet.getRow(index).getCell(5).setCellValue(Double.valueOf(datum.get("ysdgdz").toString()));
-            }else {
-                sheet.getRow(index).getCell(5).setCellValue(0);
-            }
+                if (datum.containsKey("zmddbz")){
+                    if (!datum.get("zmddbz").equals("")){
+                        sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(datum.get("zmddbz").toString()));
+                    }else {
+                        sheet.getRow(index).getCell(4).setCellValue(datum.get("zmddbz").toString());
+                    }
 
-            if (datum.containsKey("ysdzs")){
-                sheet.getRow(index).getCell(6).setCellValue(Double.valueOf(datum.get("ysdzs").toString()));
-            }else {
-                sheet.getRow(index).getCell(6).setCellValue(0);
-            }
+                }else {
+                    sheet.getRow(index).getCell(4).setCellValue(0);
+                }
+                if (datum.containsKey("ymddbz")){
+                    sheet.getRow(index).getCell(5).setCellValue(Double.valueOf(datum.get("ymddbz").toString()));
+                }else {
+                    sheet.getRow(index).getCell(5).setCellValue(0);
+                }
 
-            if (datum.containsKey("ysdhgs")){
-                sheet.getRow(index).getCell(7).setCellValue(Double.valueOf(datum.get("ysdhgs").toString()));
-            }else {
-                sheet.getRow(index).getCell(7).setCellValue(0);
-            }
+                if (datum.containsKey("bzmdgdz")){
+                    sheet.getRow(index).getCell(6).setCellValue(Double.valueOf(datum.get("bzmdgdz").toString()));
+                }else {
+                    sheet.getRow(index).getCell(6).setCellValue(0);
+                }
 
-            if (datum.containsKey("ysdhgl")){
-                sheet.getRow(index).getCell(8).setCellValue(Double.valueOf(datum.get("ysdhgl").toString()));
-            }else {
-                sheet.getRow(index).getCell(8).setCellValue(0);
+                if (datum.containsKey("zxbzjcds")){
+                    sheet.getRow(index).getCell(7).setCellValue(Double.valueOf(datum.get("zxbzjcds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(7).setCellValue(0);
+                }
+
+                if (datum.containsKey("zxbzhgds")){
+                    sheet.getRow(index).getCell(8).setCellValue(Double.valueOf(datum.get("zxbzhgds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(8).setCellValue(0);
+                }
+
+                if (datum.containsKey("hgl")){
+                    sheet.getRow(index).getCell(9).setCellValue(Double.valueOf(datum.get("hgl").toString()));
+                }else {
+                    sheet.getRow(index).getCell(9).setCellValue(0);
+                }
+                index ++;
             }
-            index ++;
         }
-
-
     }
 
     /**
@@ -6919,221 +6974,225 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
      * @param data
      */
     private void DBExcelljhzData(XSSFWorkbook wb, List<Map<String, Object>> data) {
+
         XSSFSheet sheet = wb.getSheet("表4.1.1-6");
+        //System.out.println(sheet.getRow(3).getCell(2).getStringCellValue());
         int index = 3;
         for (Map<String, Object> datum : data) {
-            sheet.getRow(2).getCell(index).setCellValue(datum.get("htd").toString());
-            if (datum.containsKey("ysdjcds")){
-                sheet.getRow(3).getCell(index).setCellValue(Double.valueOf(datum.get("ysdjcds").toString()));
-            }else {
-                sheet.getRow(3).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("ysdhgds")){
-                sheet.getRow(4).getCell(index).setCellValue(Double.valueOf(datum.get("ysdhgds").toString()));
-            }else {
-                sheet.getRow(4).getCell(index).setCellValue(0);
+            //System.out.println(sheet.getRow(3).getCell(2).getStringCellValue());
+            if (datum.size()>0){
+                sheet.getRow(2).createCell(index).setCellValue(datum.get("htd").toString());
+                if (datum.containsKey("ysdjcds")){
+                    sheet.getRow(3).createCell(index).setCellValue(Double.valueOf(datum.get("ysdjcds").toString()));
+                }else {
+                    sheet.getRow(3).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("ysdhgds")){
+                    sheet.getRow(4).createCell(index).setCellValue(Double.valueOf(datum.get("ysdhgds").toString()));
+                }else {
+                    sheet.getRow(4).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("ysdhgl")){
+                    sheet.getRow(5).createCell(index).setCellValue(Double.valueOf(datum.get("ysdhgl").toString()));
+                }else {
+                    sheet.getRow(5).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("cjjcds")){
+                    sheet.getRow(6).createCell(index).setCellValue(Double.valueOf(datum.get("cjjcds").toString()));
+                }else {
+                    sheet.getRow(6).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("cjhgds")){
+                    sheet.getRow(7).createCell(index).setCellValue(Double.valueOf(datum.get("cjhgds").toString()));
+                }else {
+                    sheet.getRow(7).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("cjhgl")){
+                    sheet.getRow(8).createCell(index).setCellValue(Double.valueOf(datum.get("cjhgl").toString()));
+                }else {
+                    sheet.getRow(8).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("wcjcds")){
+                    sheet.getRow(9).createCell(index).setCellValue(Double.valueOf(datum.get("wcjcds").toString()));
+                }else {
+                    sheet.getRow(9).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("wchgds")){
+                    sheet.getRow(10).createCell(index).setCellValue(Double.valueOf(datum.get("wchgds").toString()));
+                }else {
+                    sheet.getRow(10).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("wchgl")){
+                    sheet.getRow(11).createCell(index).setCellValue(Double.valueOf(datum.get("wchgl").toString()));
+                }else {
+                    sheet.getRow(11).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("bpjcds")){
+                    sheet.getRow(12).createCell(index).setCellValue(Double.valueOf(datum.get("bpjcds").toString()));
+                }else {
+                    sheet.getRow(12).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("bphgds")){
+                    sheet.getRow(13).createCell(index).setCellValue(Double.valueOf(datum.get("bphgds").toString()));
+                }else {
+                    sheet.getRow(13).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("bphgl")){
+                    sheet.getRow(14).createCell(index).setCellValue(Double.valueOf(datum.get("bphgl").toString()));
+                }else {
+                    sheet.getRow(14).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("psdmccjcds")){
+                    sheet.getRow(15).createCell(index).setCellValue(Double.valueOf(datum.get("psdmccjcds").toString()));
+                }else {
+                    sheet.getRow(15).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("psdmcchgds")){
+                    sheet.getRow(16).createCell(index).setCellValue(Double.valueOf(datum.get("psdmcchgds").toString()));
+                }else {
+                    sheet.getRow(16).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("psdmcchgl")){
+                    sheet.getRow(17).createCell(index).setCellValue(Double.valueOf(datum.get("psdmcchgl").toString()));
+                }else {
+                    sheet.getRow(17).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("pspqhdjcds")){
+                    sheet.getRow(18).createCell(index).setCellValue(Double.valueOf(datum.get("pspqhdjcds").toString()));
+                }else {
+                    sheet.getRow(18).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("pspqhdhgds")){
+                    sheet.getRow(19).createCell(index).setCellValue(Double.valueOf(datum.get("pspqhdhgds").toString()));
+                }else {
+                    sheet.getRow(19).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("pspqhdhgl")){
+                    sheet.getRow(20).createCell(index).setCellValue(Double.valueOf(datum.get("pspqhdhgl").toString()));
+                }else {
+                    sheet.getRow(20).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("xqtqdjcds")){
+                    sheet.getRow(21).createCell(index).setCellValue(Double.valueOf(datum.get("xqtqdjcds").toString()));
+                }else {
+                    sheet.getRow(21).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("xqtqdhgds")){
+                    sheet.getRow(22).createCell(index).setCellValue(Double.valueOf(datum.get("xqtqdhgds").toString()));
+                }else {
+                    sheet.getRow(22).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("xqtqdhgl")){
+                    sheet.getRow(23).createCell(index).setCellValue(Double.valueOf(datum.get("xqtqdhgl").toString()));
+                }else {
+                    sheet.getRow(23).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("xqjgccjcds")){
+                    sheet.getRow(24).createCell(index).setCellValue(Double.valueOf(datum.get("xqjgccjcds").toString()));
+                }else {
+                    sheet.getRow(24).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("xqjgcchgds")){
+                    sheet.getRow(25).createCell(index).setCellValue(Double.valueOf(datum.get("xqjgcchgds").toString()));
+                }else {
+                    sheet.getRow(25).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("xqjgcchgl")){
+                    sheet.getRow(26).createCell(index).setCellValue(Double.valueOf(datum.get("xqjgcchgl").toString()));
+                }else {
+                    sheet.getRow(26).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("hdtqdjcds")){
+                    sheet.getRow(27).createCell(index).setCellValue(Double.valueOf(datum.get("hdtqdjcds").toString()));
+                }else {
+                    sheet.getRow(27).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("hdtqdhgds")){
+                    sheet.getRow(28).createCell(index).setCellValue(Double.valueOf(datum.get("hdtqdhgds").toString()));
+                }else {
+                    sheet.getRow(28).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("hdtqdhgl")){
+                    sheet.getRow(29).createCell(index).setCellValue(Double.valueOf(datum.get("hdtqdhgl").toString()));
+                }else {
+                    sheet.getRow(29).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("hdjgccjcds")){
+                    sheet.getRow(30).createCell(index).setCellValue(Double.valueOf(datum.get("hdjgccjcds").toString()));
+                }else {
+                    sheet.getRow(30).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("hdjgcchgds")){
+                    sheet.getRow(31).createCell(index).setCellValue(Double.valueOf(datum.get("hdjgcchgds").toString()));
+                }else {
+                    sheet.getRow(31).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("hdjgcchgl")){
+                    sheet.getRow(32).createCell(index).setCellValue(Double.valueOf(datum.get("hdjgcchgl").toString()));
+                }else {
+                    sheet.getRow(32).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("zdtqdjcds")){
+                    sheet.getRow(33).createCell(index).setCellValue(Double.valueOf(datum.get("zdtqdjcds").toString()));
+                }else {
+                    sheet.getRow(33).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("zdtqdhgds")){
+                    sheet.getRow(34).createCell(index).setCellValue(Double.valueOf(datum.get("zdtqdhgds").toString()));
+                }else {
+                    sheet.getRow(34).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("zdtqdhgl")){
+                    sheet.getRow(35).createCell(index).setCellValue(Double.valueOf(datum.get("zdtqdhgl").toString()));
+                }else {
+                    sheet.getRow(35).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("zddmccjcds")){
+                    sheet.getRow(36).createCell(index).setCellValue(Double.valueOf(datum.get("zddmccjcds").toString()));
+                }else {
+                    sheet.getRow(36).createCell(index).setCellValue(0);
+                }
+
+                if (datum.containsKey("zddmcchgds")){
+                    sheet.getRow(37).createCell(index).setCellValue(Double.valueOf(datum.get("zddmcchgds").toString()));
+                }else {
+                    sheet.getRow(37).createCell(index).setCellValue(0);
+                }
+                if (datum.containsKey("zddmcchgl")){
+                    sheet.getRow(38).createCell(index).setCellValue(Double.valueOf(datum.get("zddmcchgl").toString()));
+                }else {
+                    sheet.getRow(38).createCell(index).setCellValue(0);
+                }
+                index ++;
             }
 
-            if (datum.containsKey("ysdhgl")){
-                sheet.getRow(5).getCell(index).setCellValue(Double.valueOf(datum.get("ysdhgl").toString()));
-            }else {
-                sheet.getRow(5).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("cjjcds")){
-                sheet.getRow(6).getCell(index).setCellValue(Double.valueOf(datum.get("cjjcds").toString()));
-            }else {
-                sheet.getRow(6).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("cjhgds")){
-                sheet.getRow(7).getCell(index).setCellValue(Double.valueOf(datum.get("cjhgds").toString()));
-            }else {
-                sheet.getRow(7).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("cjhgl")){
-                sheet.getRow(8).getCell(index).setCellValue(Double.valueOf(datum.get("cjhgl").toString()));
-            }else {
-                sheet.getRow(8).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("wcjcds")){
-                sheet.getRow(9).getCell(index).setCellValue(Double.valueOf(datum.get("wcjcds").toString()));
-            }else {
-                sheet.getRow(9).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("wchgds")){
-                sheet.getRow(10).getCell(index).setCellValue(Double.valueOf(datum.get("wchgds").toString()));
-            }else {
-                sheet.getRow(10).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("wchgl")){
-                sheet.getRow(11).getCell(index).setCellValue(Double.valueOf(datum.get("wchgl").toString()));
-            }else {
-                sheet.getRow(11).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("bpjcds")){
-                sheet.getRow(12).getCell(index).setCellValue(Double.valueOf(datum.get("bpjcds").toString()));
-            }else {
-                sheet.getRow(12).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("bphgds")){
-                sheet.getRow(13).getCell(index).setCellValue(Double.valueOf(datum.get("bphgds").toString()));
-            }else {
-                sheet.getRow(13).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("bphgl")){
-                sheet.getRow(14).getCell(index).setCellValue(Double.valueOf(datum.get("bphgl").toString()));
-            }else {
-                sheet.getRow(14).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("psdmccjcds")){
-                sheet.getRow(15).getCell(index).setCellValue(Double.valueOf(datum.get("psdmccjcds").toString()));
-            }else {
-                sheet.getRow(15).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("psdmcchgds")){
-                sheet.getRow(16).getCell(index).setCellValue(Double.valueOf(datum.get("psdmcchgds").toString()));
-            }else {
-                sheet.getRow(16).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("psdmcchgl")){
-                sheet.getRow(17).getCell(index).setCellValue(Double.valueOf(datum.get("psdmcchgl").toString()));
-            }else {
-                sheet.getRow(17).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("pspqhdjcds")){
-                sheet.getRow(18).getCell(index).setCellValue(Double.valueOf(datum.get("pspqhdjcds").toString()));
-            }else {
-                sheet.getRow(18).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("pspqhdhgds")){
-                sheet.getRow(19).getCell(index).setCellValue(Double.valueOf(datum.get("pspqhdhgds").toString()));
-            }else {
-                sheet.getRow(19).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("pspqhdhgl")){
-                sheet.getRow(20).getCell(index).setCellValue(Double.valueOf(datum.get("pspqhdhgl").toString()));
-            }else {
-                sheet.getRow(20).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("xqtqdjcds")){
-                sheet.getRow(21).getCell(index).setCellValue(Double.valueOf(datum.get("xqtqdjcds").toString()));
-            }else {
-                sheet.getRow(21).getCell(index).setCellValue(0);
-            }
-            if (datum.containsKey("xqtqdhgds")){
-                sheet.getRow(22).getCell(index).setCellValue(Double.valueOf(datum.get("xqtqdhgds").toString()));
-            }else {
-                sheet.getRow(22).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("xqtqdhgl")){
-                sheet.getRow(23).getCell(index).setCellValue(Double.valueOf(datum.get("xqtqdhgl").toString()));
-            }else {
-                sheet.getRow(23).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("xqjgccjcds")){
-                sheet.getRow(24).getCell(index).setCellValue(Double.valueOf(datum.get("xqjgccjcds").toString()));
-            }else {
-                sheet.getRow(24).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("xqjgcchgds")){
-                sheet.getRow(25).getCell(index).setCellValue(Double.valueOf(datum.get("xqjgcchgds").toString()));
-            }else {
-                sheet.getRow(25).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("xqjgcchgl")){
-                sheet.getRow(26).getCell(index).setCellValue(Double.valueOf(datum.get("xqjgcchgl").toString()));
-            }else {
-                sheet.getRow(26).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("hdtqdjcds")){
-                sheet.getRow(27).getCell(index).setCellValue(Double.valueOf(datum.get("hdtqdjcds").toString()));
-            }else {
-                sheet.getRow(27).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("hdtqdhgds")){
-                sheet.getRow(28).getCell(index).setCellValue(Double.valueOf(datum.get("hdtqdhgds").toString()));
-            }else {
-                sheet.getRow(28).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("hdtqdhgl")){
-                sheet.getRow(29).getCell(index).setCellValue(Double.valueOf(datum.get("hdtqdhgl").toString()));
-            }else {
-                sheet.getRow(29).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("hdjgccjcds")){
-                sheet.getRow(30).getCell(index).setCellValue(Double.valueOf(datum.get("hdjgccjcds").toString()));
-            }else {
-                sheet.getRow(30).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("hdjgcchgds")){
-                sheet.getRow(31).getCell(index).setCellValue(Double.valueOf(datum.get("hdjgcchgds").toString()));
-            }else {
-                sheet.getRow(31).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("hdjgcchgl")){
-                sheet.getRow(32).getCell(index).setCellValue(Double.valueOf(datum.get("hdjgcchgl").toString()));
-            }else {
-                sheet.getRow(32).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("zdtqdjcds")){
-                sheet.getRow(33).getCell(index).setCellValue(Double.valueOf(datum.get("zdtqdjcds").toString()));
-            }else {
-                sheet.getRow(33).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("zdtqdhgds")){
-                sheet.getRow(34).getCell(index).setCellValue(Double.valueOf(datum.get("zdtqdhgds").toString()));
-            }else {
-                sheet.getRow(34).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("zdtqdhgl")){
-                sheet.getRow(35).getCell(index).setCellValue(Double.valueOf(datum.get("zdtqdhgl").toString()));
-            }else {
-                sheet.getRow(35).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("zddmccjcds")){
-                sheet.getRow(36).getCell(index).setCellValue(Double.valueOf(datum.get("zddmccjcds").toString()));
-            }else {
-                sheet.getRow(36).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("zddmcchgds")){
-                sheet.getRow(37).getCell(index).setCellValue(Double.valueOf(datum.get("zddmcchgds").toString()));
-            }else {
-                sheet.getRow(37).getCell(index).setCellValue(0);
-            }
-
-            if (datum.containsKey("zddmcchgl")){
-                sheet.getRow(38).getCell(index).setCellValue(Double.valueOf(datum.get("zddmcchgl").toString()));
-            }else {
-                sheet.getRow(38).getCell(index).setCellValue(0);
-            }
-            index ++;
         }
-
     }
 
     /**
@@ -7142,7 +7201,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
      * @param data
      */
     private void DBExcelzdData(XSSFWorkbook wb, List<Map<String, Object>> data) {
-        createRow(wb,data.size(),"表4.1.1-5");
+        //createRow(wb,data.size(),"表4.1.1-5");
         XSSFSheet sheet = wb.getSheet("表4.1.1-5");
         int index = 3;
         for (Map<String, Object> datum : data) {
@@ -7195,7 +7254,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
      * @param wb
      */
     private void DBExcelhdData(XSSFWorkbook wb, List<Map<String, Object>> data) {
-        createRow(wb,data.size(),"表4.1.1-4");
+        //createRow(wb,data.size(),"表4.1.1-4");
         XSSFSheet sheet = wb.getSheet("表4.1.1-4");
         int index = 3;
         for (Map<String, Object> datum : data) {
@@ -7245,45 +7304,48 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
      * @param data
      */
     private void DBExcelxqData(XSSFWorkbook wb, List<Map<String, Object>> data) {
-        createRow(wb,data.size(),"表4.1.1-3");
+        //createRow(wb,data.size(),"表4.1.1-3");
         XSSFSheet sheet = wb.getSheet("表4.1.1-3");
         int index = 3;
         for (Map<String, Object> datum : data) {
-            sheet.getRow(index).getCell(0).setCellValue(datum.get("htd").toString());
-            if (datum.containsKey("xqtqdjcds")){
-                sheet.getRow(index).getCell(1).setCellValue(Double.valueOf(datum.get("xqtqdjcds").toString()));
-            }else {
-                sheet.getRow(index).getCell(1).setCellValue(0);
-            }
-            if (datum.containsKey("xqtqdhgds")){
-                sheet.getRow(index).getCell(2).setCellValue(Double.valueOf(datum.get("xqtqdhgds").toString()));
-            }else {
-                sheet.getRow(index).getCell(2).setCellValue(0);
+            if (datum.size()>0){
+                sheet.getRow(index).getCell(0).setCellValue(datum.get("htd").toString());
+                if (datum.containsKey("xqtqdjcds")){
+                    sheet.getRow(index).getCell(1).setCellValue(Double.valueOf(datum.get("xqtqdjcds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(1).setCellValue(0);
+                }
+                if (datum.containsKey("xqtqdhgds")){
+                    sheet.getRow(index).getCell(2).setCellValue(Double.valueOf(datum.get("xqtqdhgds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(2).setCellValue(0);
+                }
+
+                if (datum.containsKey("xqtqdhgl")){
+                    sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(datum.get("xqtqdhgl").toString()));
+                }else {
+                    sheet.getRow(index).getCell(3).setCellValue(0);
+                }
+
+                if (datum.containsKey("xqjgccjcds")){
+                    sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(datum.get("xqjgccjcds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(4).setCellValue(0);
+                }
+
+                if (datum.containsKey("xqjgcchgds")){
+                    sheet.getRow(index).getCell(5).setCellValue(Double.valueOf(datum.get("xqjgcchgds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(5).setCellValue(0);
+                }
+                if (datum.containsKey("xqjgcchgl")){
+                    sheet.getRow(index).getCell(6).setCellValue(Double.valueOf(datum.get("xqjgcchgl").toString()));
+                }else {
+                    sheet.getRow(index).getCell(6).setCellValue(0);
+                }
+                index ++;
             }
 
-            if (datum.containsKey("xqtqdhgl")){
-                sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(datum.get("xqtqdhgl").toString()));
-            }else {
-                sheet.getRow(index).getCell(3).setCellValue(0);
-            }
-
-            if (datum.containsKey("xqjgccjcds")){
-                sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(datum.get("xqjgccjcds").toString()));
-            }else {
-                sheet.getRow(index).getCell(4).setCellValue(0);
-            }
-
-            if (datum.containsKey("xqjgcchgds")){
-                sheet.getRow(index).getCell(5).setCellValue(Double.valueOf(datum.get("xqjgcchgds").toString()));
-            }else {
-                sheet.getRow(index).getCell(5).setCellValue(0);
-            }
-            if (datum.containsKey("xqjgcchgl")){
-                sheet.getRow(index).getCell(6).setCellValue(Double.valueOf(datum.get("xqjgcchgl").toString()));
-            }else {
-                sheet.getRow(index).getCell(6).setCellValue(0);
-            }
-            index ++;
         }
     }
 
@@ -7293,49 +7355,48 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
      * @param data
      */
     private void DBExcelpsData(XSSFWorkbook wb, List<Map<String, Object>> data) {
-        createRow(wb,data.size(),"表4.1.1-2");
+        //createRow(wb,data.size(),"表4.1.1-2");
         XSSFSheet sheet = wb.getSheet("表4.1.1-2");
         int index = 3;
         for (Map<String, Object> datum : data) {
-            sheet.getRow(index).getCell(0).setCellValue(datum.get("htd").toString());
-            if (datum.containsKey("psdmccjcds")){
-                sheet.getRow(index).getCell(1).setCellValue(Double.valueOf(datum.get("psdmccjcds").toString()));
-            }else {
-                sheet.getRow(index).getCell(1).setCellValue(0);
-            }
-            if (datum.containsKey("psdmcchgds")){
-                sheet.getRow(index).getCell(2).setCellValue(Double.valueOf(datum.get("psdmcchgds").toString()));
-            }else {
-                sheet.getRow(index).getCell(2).setCellValue(0);
-            }
-            if (datum.containsKey("psdmcchgl")){
-                sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(datum.get("psdmcchgl").toString()));
-            }else {
-                sheet.getRow(index).getCell(3).setCellValue(0);
-            }
+            if (datum.size()>0){
+                sheet.getRow(index).getCell(0).setCellValue(datum.get("htd").toString());
+                if (datum.containsKey("psdmccjcds")){
+                    sheet.getRow(index).getCell(1).setCellValue(Double.valueOf(datum.get("psdmccjcds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(1).setCellValue(0);
+                }
+                if (datum.containsKey("psdmcchgds")){
+                    sheet.getRow(index).getCell(2).setCellValue(Double.valueOf(datum.get("psdmcchgds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(2).setCellValue(0);
+                }
+                if (datum.containsKey("psdmcchgl")){
+                    sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(datum.get("psdmcchgl").toString()));
+                }else {
+                    sheet.getRow(index).getCell(3).setCellValue(0);
+                }
 
-            if (datum.containsKey("pspqhdjcds")){
-                sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(datum.get("pspqhdjcds").toString()));
-            }else {
-                sheet.getRow(index).getCell(4).setCellValue(0);
-            }
+                if (datum.containsKey("pspqhdjcds")){
+                    sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(datum.get("pspqhdjcds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(4).setCellValue(0);
+                }
 
-            if (datum.containsKey("pspqhdhgds")){
-                sheet.getRow(index).getCell(5).setCellValue(Double.valueOf(datum.get("pspqhdhgds").toString()));
-            }else {
-                sheet.getRow(index).getCell(5).setCellValue(0);
-            }
+                if (datum.containsKey("pspqhdhgds")){
+                    sheet.getRow(index).getCell(5).setCellValue(Double.valueOf(datum.get("pspqhdhgds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(5).setCellValue(0);
+                }
 
-            if (datum.containsKey("pspqhdhgl")){
-                sheet.getRow(index).getCell(6).setCellValue(Double.valueOf(datum.get("pspqhdhgl").toString()));
-            }else {
-                sheet.getRow(index).getCell(6).setCellValue(0);
+                if (datum.containsKey("pspqhdhgl")){
+                    sheet.getRow(index).getCell(6).setCellValue(Double.valueOf(datum.get("pspqhdhgl").toString()));
+                }else {
+                    sheet.getRow(index).getCell(6).setCellValue(0);
+                }
+                index ++;
             }
-
-            index ++;
         }
-
-
     }
 
     /**
@@ -7343,85 +7404,88 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
      * @param wb
      */
     private void DBExceltsfData(XSSFWorkbook wb, List<Map<String, Object>> data) {
-        createRow(wb,data.size(),"表4.1.1-1");
+        //createRow(wb,data.size(),"表4.1.1-1");
         XSSFSheet sheet = wb.getSheet("表4.1.1-1");
         int index = 3;
         for (Map<String, Object> datum : data) {
-            sheet.getRow(index).getCell(0).setCellValue(datum.get("htd").toString());
-            if (datum.containsKey("ysdjcds")){
-                sheet.getRow(index).getCell(1).setCellValue(Double.valueOf(datum.get("ysdjcds").toString()));
-            }else {
-                sheet.getRow(index).getCell(1).setCellValue(0);
+            if (datum.size()>0){
+                sheet.getRow(index).getCell(0).setCellValue(datum.get("htd").toString());
+                if (datum.containsKey("ysdjcds")){
+                    sheet.getRow(index).getCell(1).setCellValue(Double.valueOf(datum.get("ysdjcds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(1).setCellValue(0);
+                }
+
+                if (datum.containsKey("ysdhgds")){
+                    sheet.getRow(index).getCell(2).setCellValue(Double.valueOf(datum.get("ysdhgds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(2).setCellValue(0);
+                }
+
+                if (datum.containsKey("ysdhgl")){
+                    sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(datum.get("ysdhgl").toString()));
+                }else {
+                    sheet.getRow(index).getCell(3).setCellValue(0);
+                }
+
+                if (datum.containsKey("cjjcds")){
+                    sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(datum.get("cjjcds").toString()));
+
+                }else {
+                    sheet.getRow(index).getCell(4).setCellValue(0);
+                }
+                if (datum.containsKey("cjhgds")){
+                    sheet.getRow(index).getCell(5).setCellValue(Double.valueOf(datum.get("cjhgds").toString()));
+
+                }else {
+                    sheet.getRow(index).getCell(5).setCellValue(0);
+                }
+
+                if (datum.containsKey("cjhgl")){
+                    sheet.getRow(index).getCell(6).setCellValue(Double.valueOf(datum.get("cjhgl").toString()));
+                }else {
+                    sheet.getRow(index).getCell(6).setCellValue(0);
+                }
+
+                if (datum.containsKey("wcjcds")){
+                    sheet.getRow(index).getCell(7).setCellValue(Double.valueOf(datum.get("wcjcds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(7).setCellValue(0);
+                }
+
+                if (datum.containsKey("wchgds")){
+                    sheet.getRow(index).getCell(8).setCellValue(Double.valueOf(datum.get("wchgds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(8).setCellValue(0);
+                }
+
+                if (datum.containsKey("wchgl")){
+                    sheet.getRow(index).getCell(9).setCellValue(Double.valueOf(datum.get("wchgl").toString()));
+                }else {
+                    sheet.getRow(index).getCell(9).setCellValue(0);
+
+                }
+
+                if (datum.containsKey("bpjcds")){
+                    sheet.getRow(index).getCell(10).setCellValue(Double.valueOf(datum.get("bpjcds").toString()));
+                }else {
+                    sheet.getRow(index).getCell(10).setCellValue(0);
+                }
+                if (datum.containsKey("bphgds")){
+                    sheet.getRow(index).getCell(11).setCellValue(Double.valueOf(datum.get("bphgds").toString()));
+
+                }else {
+                    sheet.getRow(index).getCell(11).setCellValue(0);
+
+                }
+                if (datum.containsKey("bphgl")){
+                    sheet.getRow(index).getCell(12).setCellValue(Double.valueOf(datum.get("bphgl").toString()));
+                }else {
+                    sheet.getRow(index).getCell(12).setCellValue(0);
+                }
+                index ++;
             }
 
-            if (datum.containsKey("ysdhgds")){
-                sheet.getRow(index).getCell(2).setCellValue(Double.valueOf(datum.get("ysdhgds").toString()));
-            }else {
-                sheet.getRow(index).getCell(2).setCellValue(0);
-            }
-
-            if (datum.containsKey("ysdhgl")){
-                sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(datum.get("ysdhgl").toString()));
-            }else {
-                sheet.getRow(index).getCell(3).setCellValue(0);
-            }
-
-            if (datum.containsKey("cjjcds")){
-                sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(datum.get("cjjcds").toString()));
-
-            }else {
-                sheet.getRow(index).getCell(4).setCellValue(0);
-            }
-            if (datum.containsKey("cjhgds")){
-                sheet.getRow(index).getCell(5).setCellValue(Double.valueOf(datum.get("cjhgds").toString()));
-
-            }else {
-                sheet.getRow(index).getCell(5).setCellValue(0);
-            }
-
-            if (datum.containsKey("cjhgl")){
-                sheet.getRow(index).getCell(6).setCellValue(Double.valueOf(datum.get("cjhgl").toString()));
-            }else {
-                sheet.getRow(index).getCell(6).setCellValue(0);
-            }
-
-            if (datum.containsKey("wcjcds")){
-                sheet.getRow(index).getCell(7).setCellValue(Double.valueOf(datum.get("wcjcds").toString()));
-            }else {
-                sheet.getRow(index).getCell(7).setCellValue(0);
-            }
-
-            if (datum.containsKey("wchgds")){
-                sheet.getRow(index).getCell(8).setCellValue(Double.valueOf(datum.get("wchgds").toString()));
-            }else {
-                sheet.getRow(index).getCell(8).setCellValue(0);
-            }
-
-            if (datum.containsKey("wchgl")){
-                sheet.getRow(index).getCell(9).setCellValue(Double.valueOf(datum.get("wchgl").toString()));
-            }else {
-                sheet.getRow(index).getCell(9).setCellValue(0);
-
-            }
-
-            if (datum.containsKey("bpjcds")){
-                sheet.getRow(index).getCell(10).setCellValue(Double.valueOf(datum.get("bpjcds").toString()));
-            }else {
-                sheet.getRow(index).getCell(10).setCellValue(0);
-            }
-            if (datum.containsKey("bphgds")){
-                sheet.getRow(index).getCell(11).setCellValue(Double.valueOf(datum.get("bphgds").toString()));
-
-            }else {
-                sheet.getRow(index).getCell(11).setCellValue(0);
-
-            }
-            if (datum.containsKey("bphgl")){
-                sheet.getRow(index).getCell(12).setCellValue(Double.valueOf(datum.get("bphgl").toString()));
-            }else {
-                sheet.getRow(index).getCell(12).setCellValue(0);
-            }
-            index ++;
         }
 
     }
@@ -7432,7 +7496,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
      * @param data
      */
     private void DBExcelSdcjData(XSSFWorkbook wb, List<Map<String, Object>> data) {
-        createRow(wb,data.size(),"表3.4.4-1");
+        //createRow(wb,data.size(),"表3.4.4-1");
         XSSFSheet sheet = wb.getSheet("表3.4.4-1");
         int index = 3;
         for (Map<String, Object> datum : data) {
@@ -7516,7 +7580,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
      * @param proname
      */
     private void DBExcelJaData(XSSFWorkbook wb, List<Map<String, Object>> data, String proname) {
-        createRow(wb,data.size(),"表3.4.3-1");
+        //createRow(wb,data.size(),"表3.4.3-1");
         XSSFSheet sheet = wb.getSheet("表3.4.3-1");
         int index = 3;
         for (Map<String, Object> datum : data) {
@@ -7551,7 +7615,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
      */
     private void DBExcelQlData(XSSFWorkbook wb, List<Map<String, Object>> data, String proname) throws IOException {
         if (data.size()>0){
-            createRow(wb,data.size(),"表3.4.2-1");
+            //createRow(wb,data.size(),"表3.4.2-1");
 
             XSSFSheet sheet = wb.getSheet("表3.4.2-1");
 
@@ -7563,13 +7627,13 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                 double tdcjs = 0;
                 if (datum.containsKey("tdcjs")){
                     sheet.getRow(index).getCell(1).setCellValue(Double.valueOf(datum.get("tdcjs").toString()));
-                    tdccs = Double.valueOf(datum.get("tdccs").toString());
+                    tdccs = Double.valueOf(datum.get("tdcjs").toString());
                 }else {
                     sheet.getRow(index).getCell(1).setCellValue(Double.valueOf(0));
                 }
                 if (datum.containsKey("tdccs")){
                     sheet.getRow(index).getCell(2).setCellValue(Double.valueOf(datum.get("tdccs").toString()));
-                    tdcjs = Double.valueOf(datum.get("tdcjs").toString());
+                    tdcjs = Double.valueOf(datum.get("tdccs").toString());
                 }else {
                     sheet.getRow(index).getCell(2).setCellValue(Double.valueOf(0));
                 }
@@ -7642,7 +7706,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
      */
     private void DBExcelData(XSSFWorkbook wb, List<Map<String, Object>> data, String proname) throws IOException {
         if (data.size()>0){
-            createRow(wb,data.size(),"表3.4.1-1");
+            //createRow(wb,data.size(),"表3.4.1-1");
             XSSFSheet sheet = wb.getSheet("表3.4.1-1");
             int index = 3;
             for (Map<String, Object> datum : data) {
@@ -7836,7 +7900,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         DecimalFormat decf = new DecimalFormat("0.##");
         List<Map<String, Object>> resultList = new ArrayList<>();
         List<Map<String, Object>> cqhd = jjgFbgcSdgcCqhdService.lookJdbjg(commonInfoVo);//[{合格点数=96, 检测总点数=96, 检测项目=李家湾隧道左线, 合格率=100.00}, {合格点数=96, 检测总点数=96, 检测项目=李家湾隧道右线, 合格率=100.00}]
-        if (cqhd.size()>0){
+        if (cqhd!=null && cqhd.size()>0){
             for (Map<String, Object> map : cqhd) {
                 map.put("htd",commonInfoVo.getHtd());
                 String sdmc = map.get("检测项目").toString();
@@ -7857,7 +7921,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
     private List<Map<String, Object>> getqlszdfxbData(CommonInfoVo commonInfoVo) throws IOException {
         List<Map<String, Object>> resultList = new ArrayList<>();
         List<Map<String, Object>> szd = jjgFbgcQlgcXbSzdService.lookJdbjg(commonInfoVo);
-        if (szd.size()>0){
+        if (szd!=null && szd.size()>0){
             String[] valus = szd.get(0).get("yxpc").toString().replace("[", "").replace("]", "").split(",");
             for (int i =0; i< valus.length;i++){
                 Map map = new HashMap<>();
@@ -7887,7 +7951,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
 
         List<Map<String, Object>> list1 = jjgFbgcLjgcLjtsfysdHtService.lookJdbjg(commonInfoVo);
         //[{合格点数=7, 压实度值=[96.5, 98.2, 97.0, 95.5, 98.3, 99.1, 97.0], 检测点数=7, 平均值=97.37, 规定值=96, 结果=合格, 压实度项目=灰土, 合格率=100.00, 标准差=1.230, 代表值=96.70}]
-        if (list1.size()>0){
+        if (list1!=null && list1.size()>0){
             Map map = new HashMap<>();
             map.put("htd",commonInfoVo.getHtd());
             map.put("bzz",list1.get(0).get("规定值"));
@@ -7953,7 +8017,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         List<Map<String, Object>> list1 = jjgFbgcJtaqssJathlqdService.lookJdbjg(commonInfoVo);
         Map map = new LinkedHashMap();
         map.put("htd",commonInfoVo.getHtd());
-        if (list1.size()>0){
+        if (list1!=null && list1.size()>0){
             map.put("qdzds",list1.get(0).get("总点数"));
             map.put("qdhgs",list1.get(0).get("合格点数"));
             map.put("qdhgl",list1.get(0).get("合格率"));
@@ -7961,7 +8025,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         }
 
         List<Map<String, Object>> list2 = jjgFbgcJtaqssJathldmccService.lookJdbjg(commonInfoVo);
-        if (list2.size()>0){
+        if (list2!=null && list2.size()>0){
             map.put("cczds",list1.get(0).get("总点数"));
             map.put("cchgs",list1.get(0).get("合格点数"));
             map.put("cchgl",list1.get(0).get("合格率"));
@@ -7985,7 +8049,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         // {不合格点数=2, 合格点数=2, 总点数=2, 检测项目=波形梁钢护栏立柱壁厚, 合格率=100.00, 规定值或允许偏差=方柱6.0},
         // {不合格点数=0, 合格点数=0, 总点数=6, 检测项目=波形梁钢护栏横梁中心高度, 合格率=0.00, 规定值或允许偏差=三波板600±20},
         // {不合格点数=2, 合格点数=2, 总点数=2, 检测项目=波形梁钢护栏立柱埋入深度, 合格率=100.00, 规定值或允许偏差=方柱≥1650.0}]
-        if (list.size()>0){
+        if (list!=null && list.size()>0){
             Map resultmap = new LinkedHashMap<>();
             resultmap.put("htd",commonInfoVo.getHtd());
             for (Map<String, Object> map : list) {
@@ -8030,7 +8094,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         List<Map<String, Object>> list = jjgFbgcJtaqssJabxService.lookJdbjg(commonInfoVo);
         //[{不合格点数=33, 合格点数=897, 总点数=930, 检测项目=交安标线厚度, 合格率=96.45, 规定值或允许偏差=白、黄线2+0.5,-0.1白、黄线7+10},
         // {不合格点数=11, 合格点数=919, 总点数=930, 检测项目=交安标线白线逆反射系数, 合格率=98.82, 规定值或允许偏差=震动≥150;双组分≥350;热熔≥150}]
-        if (list.size()>0){
+        if (list!=null && list.size()>0){
             Map resultmap = new LinkedHashMap<>();
             resultmap.put("htd",commonInfoVo.getHtd());
             double zds = 0.0;
@@ -8066,7 +8130,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         DecimalFormat df = new DecimalFormat("0.00");
         DecimalFormat decf = new DecimalFormat("0.##");
         List<Map<String, Object>> bz = jjgFbgcJtaqssJabzService.lookJdbjg(commonInfoVo);
-        if (bz.size()>0){
+        if (bz!=null && bz.size()>0){
             Map resultmap = new LinkedHashMap<>();
             resultmap.put("htd",commonInfoVo.getHtd());
             double zds = 0.0;
@@ -8149,11 +8213,13 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         DecimalFormat df = new DecimalFormat("0.00");
         DecimalFormat decf = new DecimalFormat("0.##");
         List<Map<String, Object>> resultList = new ArrayList<>();
+        boolean a =false,b =false,c =false,d =false,e =false,f =false;
         Map map = new LinkedHashMap();
-        map.put("htd",commonInfoVo.getHtd());
+
         //沥青路面压实度
         List<Map<String, Object>> list1 = jjgFbgcSdgcSdlqlmysdService.lookJdbjg(commonInfoVo);
-        if (list1.size()>0){
+        if (list1!=null && list1.size()>0){
+            a = true;
             double zds = 0;
             double hgds = 0;
             for (Map<String, Object> objectMap : list1) {
@@ -8163,17 +8229,14 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
             map.put("ysdjcds",decf.format(zds));
             map.put("ysdhgds",decf.format(hgds));
             map.put("ysdhgl",zds!=0 ? df.format(hgds/zds*100) : 0);
-        }else {
-            map.put("ysdjcds",0);
-            map.put("ysdhgds",0);
-            map.put("ysdhgl",0);
         }
 
         //沥青路面车辙
 
         //沥青路面渗水系数
         List<Map<String, Object>> list2 = jjgFbgcSdgcLmssxsService.lookJdbjg(commonInfoVo);
-        if (list2.size()>0){
+        if (list2!=null && list2.size()>0){
+            b = true;
             double zds = 0;
             double hgds = 0;
             for (Map<String, Object> objectMap : list2) {
@@ -8183,15 +8246,12 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
             map.put("xsjcds",decf.format(zds));
             map.put("xshgds",decf.format(hgds));
             map.put("xshgl",zds!=0 ? df.format(hgds/zds*100) : 0);
-        }else {
-            map.put("xsjcds",0);
-            map.put("xshgds",0);
-            map.put("xshgl",0);
         }
 
         //砼路面面强度
         List<Map<String, Object>> list3 = jjgFbgcSdgcHntlmqdService.lookJdbjg(commonInfoVo);
-        if (list3.size()>0){
+        if (list3!=null && list3.size()>0){
+            c = true;
             double zds = 0;
             double hgds = 0;
             for (Map<String, Object> objectMap : list3) {
@@ -8201,16 +8261,12 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
             map.put("qdjcds",decf.format(zds));
             map.put("qdhgds",decf.format(hgds));
             map.put("qdhgl",zds!=0 ? df.format(hgds/zds*100) : 0);
-        }else {
-            map.put("qdjcds",0);
-            map.put("qdhgds",0);
-            map.put("qdhgl",0);
-
         }
 
         //砼路面相邻板高差
         List<Map<String, Object>> list4 = jjgFbgcSdgcTlmxlbgcService.lookJdbjg(commonInfoVo);
-        if (list4.size()>0){
+        if (list4!=null && list4.size()>0){
+            d = true;
             double zds = 0;
             double hgds = 0;
             for (Map<String, Object> objectMap : list4) {
@@ -8220,10 +8276,6 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
             map.put("gcjcds",decf.format(zds));
             map.put("gchgds",decf.format(hgds));
             map.put("gchgl",zds!=0 ? df.format(hgds/zds*100) : 0);
-        }else {
-            map.put("gcjcds",0);
-            map.put("gchgds",0);
-            map.put("gchgl",0);
         }
 
         //平整度
@@ -8234,7 +8286,8 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         List<Map<String, Object>> list5 = jjgFbgcSdgcSdhntlmhdzxfService.lookJdbjg(commonInfoVo);
         double hzds = 0;
         double hhgds = 0;
-        if (list5.size()>0){
+        if (list5!=null && list5.size()>0){
+            e = true;
 
             for (Map<String, Object> objectMap : list5) {
                 hzds += Double.valueOf(objectMap.get("检测点数").toString());
@@ -8245,7 +8298,8 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
             map.put("hdhgl",hzds!=0 ? df.format(hhgds/hzds*100) : 0);
         }
         List<Map<String, Object>> list6 = jjgFbgcSdgcGssdlqlmhdzxfService.lookJdbjg(commonInfoVo);
-        if (list6.size()>0){
+        if (list6!=null && list6.size()>0){
+            e = true;
             for (Map<String, Object> objectMap : list6) {
                 hzds += Double.valueOf(objectMap.get("上面层厚度检测点数").toString());
                 hhgds += Double.valueOf(objectMap.get("上面层厚度合格点数").toString());
@@ -8255,7 +8309,8 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
 
         //横坡
         List<Map<String, Object>> list7 = jjgFbgcSdgcSdhpService.lookJdbjg(commonInfoVo);
-        if (list7.size()>0){
+        if (list7!=null && list7.size()>0){
+            f = true;
             double zds = 0;
             double hgds = 0;
             for (Map<String, Object> objectMap : list7) {
@@ -8265,12 +8320,11 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
             map.put("hpjcds",decf.format(zds));
             map.put("hphgds",decf.format(hgds));
             map.put("hphgl",zds!=0 ? df.format(hgds/zds*100) : 0);
-        }else {
-            map.put("hpjcds",0);
-            map.put("hphgds",0);
-            map.put("hphgl",0);
         }
-        resultList.add(map);
+        if (a || b || c || d || e || f){
+            map.put("htd",commonInfoVo.getHtd());
+            resultList.add(map);
+        }
         return resultList;
 
     }
@@ -8286,18 +8340,16 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
     private List<Map<String, Object>> getztData(CommonInfoVo commonInfoVo) throws IOException {
         List<Map<String, Object>> resultList = new ArrayList<>();
         List<Map<String, Object>> list = jjgFbgcSdgcZtkdService.lookJdbjg(commonInfoVo);
-        Map map = new LinkedHashMap();
-        map.put("htd",commonInfoVo.getHtd());
-        if (list.size()>0){
+
+        if (list!=null && list.size()>0){
+            Map map = new LinkedHashMap();
+            map.put("htd",commonInfoVo.getHtd());
             map.put("kdjcds",list.get(0).get("总点数"));
             map.put("kdhgds",list.get(0).get("合格点数"));
             map.put("kdhgl",list.get(0).get("合格率"));
-        }else {
-            map.put("kdjcds",0);
-            map.put("kdhgds",0);
-            map.put("kdhgl",0);
+            resultList.add(map);
         }
-        resultList.add(map);
+
         return resultList;
 
     }
@@ -8320,44 +8372,42 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
 
         List<Map<String, Object>> dmpzd = jjgFbgcSdgcDmpzdService.lookJdbjg(commonInfoVo);
 
-        Map map = new LinkedHashMap();
-        map.put("htd",commonInfoVo.getHtd());
-        if (cqqd.size()>0){
+        Map remap = new HashMap();
+
+
+        if (cqqd!=null && cqqd.size()>0){
+            Map map = new LinkedHashMap();
+            map.put("htd",commonInfoVo.getHtd());
             map.put("cqqdjcds",cqqd.get(0).get("总点数"));
             map.put("cqqdhgds",cqqd.get(0).get("合格点数"));
             map.put("cqqdhgl",cqqd.get(0).get("合格率"));
-        }else {
-            map.put("cqqdjcds",0);
-            map.put("cqqdhgds",0);
-            map.put("cqqdhgl",0);
+            remap.putAll(map);
         }
 
 
-        if (cqhd.size()>0){
+        if (cqhd!=null && cqhd.size()>0){
             double zds = 0;
             double hgds = 0;
             for (Map<String, Object> stringObjectMap : cqhd) {
                 zds += Double.valueOf(stringObjectMap.get("检测总点数").toString());
                 hgds += Double.valueOf(stringObjectMap.get("合格点数").toString());
             }
+            Map map = new LinkedHashMap();
+            map.put("htd",commonInfoVo.getHtd());
             map.put("cqhdjcds",decf.format(zds));
             map.put("cqhdhgds",decf.format(hgds));
             map.put("cqhdhgl",zds!=0 ? df.format(hgds/zds*100) : 0);
-        }else {
-            map.put("cqhdjcds",0);
-            map.put("cqhdhgds",0);
-            map.put("cqhdhgl",0);
+            remap.putAll(map);
         }
-        if (dmpzd.size()>0){
+        if (dmpzd!=null && dmpzd.size()>0){
+            Map map = new LinkedHashMap();
+            map.put("htd",commonInfoVo.getHtd());
             map.put("dmpzdjcds",dmpzd.get(0).get("总点数"));
             map.put("dmpzdhgds",dmpzd.get(0).get("合格点数"));
             map.put("dmpzdhgl",dmpzd.get(0).get("合格率"));
-        }else {
-            map.put("dmpzdjcds",0);
-            map.put("dmpzdhgds",0);
-            map.put("dmpzdhgl",0);
+            remap.putAll(map);
         }
-        resultList.add(map);
+        resultList.add(remap);
         return resultList;
 
     }
@@ -8401,15 +8451,32 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         DecimalFormat df = new DecimalFormat("0.00");
         DecimalFormat decf = new DecimalFormat("0.##");
         List<Map<String, Object>> resultList = new ArrayList<>();
+        boolean a = false, b =false,c = false;
         Map resultmap = new LinkedHashMap();
-        resultmap.put("htd",commonInfoVo.getHtd());
+
         //平整度
+        List<Map<String, Object>> list = jjgFbgcQlgcQmpzdService.lookJdbjg(commonInfoVo);
+        if (CollectionUtils.isNotEmpty(list)){
+            double zds = 0;
+            double hgds = 0;
+            c = true;
+
+            for (Map<String, Object> map : list) {
+                zds += Double.valueOf(map.get("检测点数").toString());
+                hgds += Double.valueOf(map.get("合格点数").toString());
+            }
+            resultmap.put("qmpzdzds",decf.format(zds));
+            resultmap.put("qmpzdhgds",decf.format(hgds));
+            resultmap.put("qmpzdhgl",zds!=0 ? df.format(hgds/zds*100) : 0);
+
+        }
 
         //横坡
         List<Map<String, Object>> list2 = jjgFbgcQlgcQmhpService.lookJdbjg(commonInfoVo);
         if (CollectionUtils.isNotEmpty(list2)){
             double zds = 0;
             double hgds = 0;
+            a = true;
 
             for (Map<String, Object> map : list2) {
                 zds += Double.valueOf(map.get("总点数").toString());
@@ -8425,6 +8492,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         if (CollectionUtils.isNotEmpty(list3)){
             double zds = 0;
             double hgds = 0;
+            b = true;
 
             for (Map<String, Object> map : list3) {
                 zds += Double.valueOf(map.get("检测点数").toString());
@@ -8434,7 +8502,12 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
             resultmap.put("qmkhgzsdhgds",decf.format(hgds));
             resultmap.put("qmkhgzsdhgl",zds!=0 ? df.format(hgds/zds*100) : 0);
         }
-        resultList.add(resultmap);
+        if (a || b || c){
+            resultmap.put("htd",commonInfoVo.getHtd());
+            resultList.add(resultmap);
+
+        }
+
         return resultList;
 
     }
@@ -8457,39 +8530,36 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         //钢筋保护层厚度
         List<Map<String, Object>> list3 = jjgFbgcQlgcSbBhchdService.lookJdbjg(commonInfoVo);
 
-        Map map = new LinkedHashMap();
-        map.put("htd",commonInfoVo.getHtd());
-        if (list1.size()>0){
+        Map remap = new HashMap();
+
+        if (list1!=null && list1.size()>0){
+            Map map = new LinkedHashMap();
+            map.put("htd",commonInfoVo.getHtd());
             map.put("qlsbqdjcds",list1.get(0).get("总点数"));
             map.put("qlsbqdhgds",list1.get(0).get("合格点数"));
             map.put("qlsbqdhgl",list1.get(0).get("合格率"));
+            remap.putAll(map);
 
-        }else {
-            map.put("qlsbqdjcds",0);
-            map.put("qlsbqdhgds",0);
-            map.put("qlsbqdhgl",0);
         }
-        if (list2.size()>0){
+        if (list2!=null && list2.size()>0){
+            Map map = new LinkedHashMap();
+            map.put("htd",commonInfoVo.getHtd());
             map.put("qlsbjgccjcds",list2.get(0).get("总点数"));
             map.put("qlsbjgcchgds",list2.get(0).get("合格点数"));
             map.put("qlsbjgcchgl",list2.get(0).get("合格率"));
-        }else {
-            map.put("qlsbjgccjcds",0);
-            map.put("qlsbjgcchgds",0);
-            map.put("qlsbjgcchgl",0);
+            remap.putAll(map);
         }
 
-        if (list3.size()>0){
+        if (list3!=null && list3.size()>0){
+            Map map = new LinkedHashMap();
+            map.put("htd",commonInfoVo.getHtd());
             map.put("qlsbbhchdjcds",list3.get(0).get("总点数"));
             map.put("qlsbbhchdhgds",list3.get(0).get("合格点数"));
             map.put("qlsbbhchdhgl",list3.get(0).get("合格率"));
-        }else {
-            map.put("qlsbbhchdjcds",0);
-            map.put("qlsbbhchdhgds",0);
-            map.put("qlsbbhchdhgl",0);
+            remap.putAll(map);
         }
 
-        resultList.add(map);
+        resultList.add(remap);
         return resultList;
     }
 
@@ -8513,48 +8583,47 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
 
         //墩台垂直度
         List<Map<String, Object>> szd = jjgFbgcQlgcXbSzdService.lookJdbjg(commonInfoVo);
-        Map map = new LinkedHashMap();
-        map.put("htd",commonInfoVo.getHtd());
-        if (tqd.size()>0){
+
+        Map remap = new HashMap();
+        if (tqd!=null && tqd.size()>0){
+            Map map = new LinkedHashMap();
             map.put("tqdjcds",tqd.get(0).get("总点数"));
             map.put("tqdhgds",tqd.get(0).get("合格点数"));
             map.put("tqdhgl",tqd.get(0).get("合格率"));
-        }else {
-            map.put("tqdjcds",0);
-            map.put("tqdhgds",0);
-            map.put("tqdhgl",0);
+            map.put("htd",commonInfoVo.getHtd());
+            remap.putAll(map);
         }
 
-        if (jgcc.size()>0){
+        if (jgcc!=null && jgcc.size()>0){
+            Map map = new LinkedHashMap();
             map.put("jgccjcds",jgcc.get(0).get("总点数"));
             map.put("jgcchgds",jgcc.get(0).get("合格点数"));
             map.put("jgcchgl",jgcc.get(0).get("合格率"));
-        }else {
-            map.put("jgccjcds",0);
-            map.put("jgcchgds",0);
-            map.put("jgcchgl",0);
+            map.put("htd",commonInfoVo.getHtd());
+            remap.putAll(map);
+
+
         }
 
-        if (bhchd.size()>0){
+        if (bhchd!=null && bhchd.size()>0){
+            Map map = new LinkedHashMap();
             map.put("bhchdjcds",bhchd.get(0).get("总点数"));
             map.put("bhchdhgds",bhchd.get(0).get("合格点数"));
             map.put("bhchdhgl",bhchd.get(0).get("合格率"));
-        }else {
-            map.put("bhchdjcds",0);
-            map.put("bhchdhgds",0);
-            map.put("bhchdhgl",0);
+            map.put("htd",commonInfoVo.getHtd());
+            remap.putAll(map);
         }
-        if (szd.size()>0){
+        if (szd!=null && szd.size()>0){
+            Map map = new LinkedHashMap();
+            map.put("htd",commonInfoVo.getHtd());
             map.put("szdjcds",szd.get(0).get("总点数"));
             map.put("szdhgds",szd.get(0).get("合格点数"));
             map.put("szdhgl",szd.get(0).get("合格率"));
-        }else {
-            map.put("szdjcds",0);
-            map.put("szdhgds",0);
-            map.put("szdhgl",0);
+            remap.putAll(map);
+
         }
 
-        resultList.add(map);
+        resultList.add(remap);
 
         return resultList;
 
@@ -8844,7 +8913,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         List<Map<String, Object>> list7 = getsdkhData(commonInfoVo);
         if (CollectionUtils.isNotEmpty(list7)){
             for (Map<String, Object> map : list7) {
-                String hplmlx = map.get("khlmlx").toString();
+                String hplmlx = map.get("sdkhlmlx").toString();
                 if (hplmlx.equals("隧道路面")){
                     String khkpzb = map.get("sdkhzb").toString();
                     if (khkpzb.equals("摩擦系数")){
@@ -8892,11 +8961,11 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         if (CollectionUtils.isNotEmpty(list11)){
             for (Map<String, Object> map : list11) {
                 String hplmlx = map.get("sdhplmlx").toString();
-                if (hplmlx.equals("沥青路面")){
+                if (hplmlx.contains("沥青")){
                     resultmap.put("hplqzds",map.get("sdhpzds"));
                     resultmap.put("hplqhgds",map.get("sdhphgds"));
                     resultmap.put("hplqhgl",map.get("sdhphgl"));
-                }else if (hplmlx.equals("混凝土路面")){
+                }else if (hplmlx.equals("混凝土")){
                     resultmap.put("hphntzds",map.get("sdhpzds"));
                     resultmap.put("hphnthgds",map.get("sdhphgds"));
                     resultmap.put("hphnthgl",map.get("sdhphgl"));
@@ -8922,7 +8991,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         DecimalFormat decf = new DecimalFormat("0.##");
         List<Map<String, Object>> resultList = new ArrayList<>();
         List<Map<String, String>> list = jjgFbgcLmgcLmhpService.lookJdbjg(commonInfoVo);
-        if (list.size()>0){
+        if (list!=null && list.size()>0){
             double lmzds = 0.0;
             double lmhgds = 0.0;
 
@@ -8978,7 +9047,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         List<Map<String, Object>> resultList = new ArrayList<>();
         //沥青
         List<Map<String, Object>> list = jjgFbgcLmgcGslqlmhdzxfService.lookJdbjg(commonInfoVo);
-        if (list.size()>0){
+        if (list!=null && list.size()>0){
             double jcds = 0;
             double hgds = 0;
             boolean a = false;
@@ -9021,7 +9090,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         Double sdMin = Double.MAX_VALUE;
         double jcds = 0;
         double hgs = 0;
-        if (list.size()>0){
+        if (list!=null && list.size()>0){
             boolean a = false;
             for (Map<String, Object> map : list) {
                 String lmlx = map.get("路面类型").toString();
@@ -9067,7 +9136,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         List<Map<String, Object>> resultList = new ArrayList<>();
         //沥青
         List<Map<String, Object>> list = jjgFbgcLmgcGslqlmhdzxfService.lookJdbjg(commonInfoVo);
-        if (list.size()>0){
+        if (list!=null && list.size()>0){
             Double sMax = 0.0;
             Double sMin = Double.MAX_VALUE;
             Double zMax = 0.0;
@@ -9148,7 +9217,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         }
         //混凝土
         List<Map<String, Object>> list1 = jjgFbgcSdgcSdhntlmhdzxfService.lookJdbjg(commonInfoVo);
-        if (list1.size()>0){
+        if (list1!=null && list1.size()>0){
             double jcds = 0;
             double hgds = 0;
             Double lmMax = 0.0;
@@ -9203,7 +9272,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         double jcds = 0.0;
         double hgds = 0.0;
 
-        if (list.size()>0){
+        if (list!=null && list.size()>0){
             boolean a = false;
             Double lmMax = 0.0;
             Double lmMin = Double.MAX_VALUE;
@@ -9237,7 +9306,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         }
 
         List<Map<String, Object>> list1 = jjgFbgcLmgcLmgzsdsgpsfService.lookJdbjg(commonInfoVo);//手工铺沙法
-        if (list1.size()>0){
+        if (list1!=null && list1.size()>0){
             String gdz = "";
             double szds = 0;
             double shgs = 0;
@@ -9265,7 +9334,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                 Map map1 = new HashMap();
                 map1.put("htd",commonInfoVo.getHtd());
                 map1.put("sdkhlmlx","混凝土隧道");
-                map1.put("sdkhkpzb","构造深度");
+                map1.put("sdkhzb","构造深度");
                 map1.put("sdkhsjz",gdz);
                 map1.put("sdkhbhfw",lmMin+"~"+lmMax);
                 map1.put("sdkhjcds",decf.format(szds));
@@ -9276,7 +9345,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
 
         }
         List<Map<String, Object>> list2 = jjgZdhMcxsService.lookJdbjg(commonInfoVo);
-        if (list2.size()>0){
+        if (list2!=null && list2.size()>0){
             boolean a = false;
             Double lmMax = 0.0;
             Double lmMin = Double.MAX_VALUE;
@@ -9327,7 +9396,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
     private List<Map<String, Object>> getsdpzdData(CommonInfoVo commonInfoVo) throws IOException {
         List<Map<String, Object>> resultList = new ArrayList<>();
         List<Map<String, Object>> list = jjgZdhPzdService.lookJdbjg(commonInfoVo);
-        if (list.size()>0){
+        if (list!=null && list.size()>0){
             for (Map<String, Object> map : list) {
 
                 String lmlx = map.get("路面类型").toString();
@@ -9469,7 +9538,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         Double lmMax = 0.0;
         Double lmMin = Double.MAX_VALUE;
         boolean a = false;
-        if (list.size()>0){
+        if (list!=null && list.size()>0){
             for (Map<String, Object> map : list) {
                 String lmlx = map.get("检测项目").toString();
                 if (lmlx.contains("隧道路面")){
@@ -9509,7 +9578,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
     private List<Map<String, Object>> getsdczData(CommonInfoVo commonInfoVo) throws IOException {
         List<Map<String, Object>> resultList = new ArrayList<>();
         List<Map<String, Object>> list = jjgZdhCzService.lookJdbjg(commonInfoVo);
-        if (list.size()>0){
+        if (list!=null && list.size()>0){
             for (Map<String, Object> map : list) {
                 Map map1 = new HashMap();
                 String lmlx = map.get("路面类型").toString();
@@ -9550,7 +9619,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         Double hgds = 0.0;
         boolean a= false;
         //还有连接线隧道
-        if (list.size()>0){
+        if (list!=null && list.size()>0){
             for (Map<String, Object> map : list) {
                 String lx = map.get("路面类型").toString();
                 if (lx.contains("隧道")){
@@ -9603,9 +9672,11 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         DecimalFormat decf = new DecimalFormat("0.##");
         List<Map<String, Object>> resultList = new ArrayList<>();
         Map resultmap = new HashMap();
-        resultmap.put("htd",commonInfoVo.getHtd());
+
+        boolean a = false,b = false,c = false;
         List<Map<String, Object>> list1 = getqmpzdData(commonInfoVo);
         if (CollectionUtils.isNotEmpty(list1)){
+            a = true;
             double qmpzdjcds = 0;
             double qmpzdhgds = 0;
             for (Map<String, Object> map : list1) {
@@ -9618,6 +9689,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         }
         List<Map<String, Object>> list2 = getqmhpData(commonInfoVo);
         if (CollectionUtils.isNotEmpty(list2)){
+            b =true;
             double zds = 0;
             double hgds = 0;
             for (Map<String, Object> map : list2) {
@@ -9630,6 +9702,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         }
         List<Map<String, Object>> list3 = getqmkhData(commonInfoVo);
         if (CollectionUtils.isNotEmpty(list3)){
+            c = true;
             double mcxszds = 0;
             double mcxshgds = 0;
             double gzsdzds = 0;
@@ -9652,7 +9725,11 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
             resultmap.put("gzsdhgds", decf.format(gzsdhgds));
             resultmap.put("gzsdhgl",gzsdzds!=0 ? df.format(gzsdhgds/gzsdzds*100) : 0);
         }
-        resultList.add(resultmap);
+        if (a || b || c){
+            resultmap.put("htd",commonInfoVo.getHtd());
+            resultList.add(resultmap);
+        }
+        System.out.println(resultList);
         return resultList;
     }
 
@@ -9671,7 +9748,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         double jcds = 0.0;
         double hgds = 0.0;
 
-        if (list.size()>0){
+        if (list!=null && list.size()>0){
             Double lmMax = 0.0;
             Double lmMin = Double.MAX_VALUE;
             boolean a = false;
@@ -9705,14 +9782,14 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         }
 
         List<Map<String, Object>> list1 = jjgFbgcLmgcLmgzsdsgpsfService.lookJdbjg(commonInfoVo);//手工铺沙法
-        if (list1.size()>0){
+        if (list1!=null && list1.size()>0){
             String gdz = "";
             double szds = 0;
             double shgs = 0;
             Double lmMax = 0.0;
             Double lmMin = Double.MAX_VALUE;
             boolean a = false;
-            for (Map<String, Object> map : list) {
+            for (Map<String, Object> map : list1) {
                 String lmlx = map.get("路面类型").toString();
                 if (lmlx.contains("桥")){
                     a = true;
@@ -9745,7 +9822,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
 
         }
         List<Map<String, Object>> list2 = jjgZdhMcxsService.lookJdbjg(commonInfoVo);
-        if (list2.size()>0){
+        if (list2!=null && list2.size()>0){
             Double lmMax = 0.0;
             Double lmMin = Double.MAX_VALUE;
             double zds = 0;
@@ -9798,7 +9875,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         List<Map<String, Object>> resultList = new ArrayList<>();
         List<Map<String, String>> list = jjgFbgcLmgcLmhpService.lookJdbjg(commonInfoVo);
 
-        if (list.size()>0){
+        if (list!=null && list.size()>0){
             double lmzds = 0.0;
             double lmhgds = 0.0;
 
@@ -9894,23 +9971,21 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         List<Map<String, Object>> resultList = new ArrayList<>();
         Map resultmap = new HashMap<>();
         //处理一下list1，将所有的检测点数和合格点数相加，算合格率
-        List<Map<String, Object>> list1 = getlmysdData(commonInfoVo);
-        //List<Map<String, Object>> ysd = new ArrayList<>();
+        //List<Map<String, Object>> list1 = getlmysdData(commonInfoVo);
+        List<Map<String, Object>> list1 = jjgFbgcLmgcLqlmysdService.lookJdbjg(commonInfoVo);
         if (CollectionUtils.isNotEmpty(list1)){
-            Map mapysd = new HashMap<>();
             double zds = 0;
             double hgds = 0;
             for (Map<String, Object> map : list1) {
-                zds += Double.valueOf(map.get("ysdzs").toString());
-                hgds += Double.valueOf(map.get("ysdhgs").toString());
+                zds += Double.valueOf(map.get("检测点数").toString());
+                hgds += Double.valueOf(map.get("合格点数").toString());
 
             }
             resultmap.put("ysdzds",decf.format(zds));
             resultmap.put("ysdhgds",decf.format(hgds));
             resultmap.put("ysdhgl",zds!=0 ? df.format(hgds/zds*100) : 0);
             resultmap.put("htd",list1.get(0).get("htd"));
-            //ysd.add(mapysd);
-            //resultList.add(mapysd);
+
         }
         //弯沉的话，待确认
         List<Map<String, Object>> list2 = getlmwcData(commonInfoVo);
@@ -10053,7 +10128,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         List<Map<String, Object>> resultList = new ArrayList<>();
         //沥青
         List<Map<String, Object>> list = jjgFbgcLmgcGslqlmhdzxfService.lookJdbjg(commonInfoVo);
-        if (list.size()>0){
+        if (list!=null && list.size()>0){
             double jcds = 0;
             double hgds = 0;
             for (Map<String, Object> map : list) {
@@ -10076,7 +10151,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         }
         //混凝土
         List<Map<String, Object>> list1 = jjgFbgcLmgcHntlmhdzxfService.lookJdbjg(commonInfoVo);
-        if (list1.size()>0){
+        if (list1!=null && list1.size()>0){
             Map map2 = new HashMap();
             map2.put("htd",commonInfoVo.getHtd());
             map2.put("lmhdlmlx","混凝土路面");
@@ -10223,7 +10298,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
 
         //混凝土
         List<Map<String, Object>> list1 = jjgFbgcLmgcHntlmhdzxfService.lookJdbjg(commonInfoVo);
-        if (list1.size()>0){
+        if (list1!=null && list1.size()>0){
             Map map2 = new HashMap();
             map2.put("htd",commonInfoVo.getHtd());
             map2.put("zxfhdlmlx","混凝土路面");
@@ -10256,7 +10331,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         Double sdMin = Double.MAX_VALUE;
         double jcds = 0;
         double hgs = 0;
-        if (list.size()>0){
+        if (list!=null && list.size()>0){
             for (Map<String, Object> map : list) {
 
                 String lmlx = map.get("路面类型").toString();
@@ -10305,7 +10380,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
 
         double lmzds1 = 0.0;
         double lmhgds1 = 0.0;
-        if (list.size()>0){
+        if (list!=null && list.size()>0){
             boolean a = false;
             boolean b = false;
             for (Map<String, String> map : list) {
@@ -10361,7 +10436,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         double jcds = 0.0;
         double hgds = 0.0;
 
-        if (list.size()>0){
+        if (list!=null && list.size()>0){
             boolean a = false;
             Double lmMax = 0.0;
             Double lmMin = Double.MAX_VALUE;
@@ -10395,7 +10470,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         }
 
         List<Map<String, Object>> list1 = jjgFbgcLmgcLmgzsdsgpsfService.lookJdbjg(commonInfoVo);//手工铺沙法
-        if (list1.size()>0){
+        if (list1!=null && list1.size()>0){
             String gdz = "";
             double szds = 0;
             double shgs = 0;
@@ -10434,7 +10509,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
 
         }
         List<Map<String, Object>> list2 = jjgZdhMcxsService.lookJdbjg(commonInfoVo);
-        if (list2.size()>0){
+        if (list2!=null && list2.size()>0){
             boolean a = false;
             Double lmMax = 0.0;
             Double lmMin = Double.MAX_VALUE;
@@ -10484,7 +10559,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
     private List<Map<String, Object>> getpzdData(CommonInfoVo commonInfoVo) throws IOException {
         List<Map<String, Object>> resultList = new ArrayList<>();
         List<Map<String, Object>> list = jjgZdhPzdService.lookJdbjg(commonInfoVo);
-        if (list.size()>0){
+        if (list!=null && list.size()>0){
             for (Map<String, Object> map : list) {
                 String lmlx = map.get("路面类型").toString();
                 if (lmlx.equals("沥青路面")){
@@ -10512,17 +10587,6 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                     resultList.add(map1);
                 }
             }
-        }else {
-            Map map1 = new HashMap();
-            map1.put("htd",commonInfoVo.getHtd());
-            map1.put("pzdzb","IRI");
-            map1.put("pzdlmlx","混凝土路面");
-            map1.put("pzdgdz",0);
-            map1.put("pzdjcds",0);
-            map1.put("pzdhgds",0);
-            map1.put("pzdhgl",0);
-            map1.put("pzdbhfw",0);
-            resultList.add(map1);
         }
         return resultList;
     }
@@ -10536,7 +10600,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
     private List<Map<String, Object>> gethntxlbgcData(CommonInfoVo commonInfoVo) throws IOException {
         List<Map<String, Object>> resultList = new ArrayList<>();
         List<Map<String, Object>> list = jjgFbgcLmgcTlmxlbgcService.lookJdbjg(commonInfoVo);
-        if (list.size()>0){
+        if (list!=null && list.size()>0){
             for (Map<String, Object> map : list) {
                 map.put("htd",commonInfoVo.getHtd());
                 map.put("hntxlbgczds",map.get("总点数"));
@@ -10560,7 +10624,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
     private List<Map<String, Object>> gethntqdData(CommonInfoVo commonInfoVo) throws IOException {
         List<Map<String, Object>> resultList = new ArrayList<>();
         List<Map<String, Object>> list = jjgFbgcLmgcHntlmqdService.lookJdbjg(commonInfoVo);
-        if (list.size()>0){
+        if (list!=null && list.size()>0){
             for (Map<String, Object> map : list) {
                 map.put("htd",commonInfoVo.getHtd());
                 map.put("hntqdzds",map.get("总点数"));
@@ -10593,7 +10657,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         Double lmMax = 0.0;
         Double lmMin = Double.MAX_VALUE;
         boolean a= false;
-        if (list.size()>0){
+        if (list!=null && list.size()>0){
             for (Map<String, Object> map : list) {
                 String lmlx = map.get("检测项目").toString();
                 if (lmlx.contains("沥青路面")){
@@ -10636,7 +10700,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         DecimalFormat decf = new DecimalFormat("0.##");
         List<Map<String, Object>> resultList = new ArrayList<>();
         List<Map<String, Object>> list = jjgZdhCzService.lookJdbjg(commonInfoVo);
-        if (list.size()>0){
+        if (list!=null && list.size()>0){
             double zds =0.0;
             double hgds =0.0;
             Double lmMax = 0.0;
@@ -10666,17 +10730,6 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
             map1.put("czhgds",decf.format(hgds));
             map1.put("czhgl",zds!=0 ? df.format(hgds/zds*100) : 0);
             resultList.add(map1);
-        }else {
-            Map map1 = new HashMap();
-            map1.put("htd",commonInfoVo.getHtd());
-            map1.put("czzb","MTD");
-            map1.put("czlmlx","沥青路面");
-            map1.put("czgdz",0);
-            map1.put("czbhfw",0);
-            map1.put("czzds",0);
-            map1.put("czhgds",0);
-            map1.put("czhgl",0);
-            resultList.add(map1);
         }
         return resultList;
     }
@@ -10691,7 +10744,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
 
         List<Map<String, Object>> resultList = new ArrayList<>();
         List<Map<String, Object>> list = jjgFbgcLmgcLmwcLcfService.lookJdbjg(commonInfoVo);
-        if (list.size()>0){
+        if (list!=null && list.size()>0){
             Map map = new HashMap();
             map.put("htd",commonInfoVo.getHtd());
             map.put("lmwclcfdbz",list.get(0).get("规定值"));
@@ -10716,7 +10769,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
     private List<Map<String, Object>> getlmwcData(CommonInfoVo commonInfoVo) throws IOException {
         List<Map<String, Object>> resultList = new ArrayList<>();
         List<Map<String, Object>> list = jjgFbgcLmgcLmwcService.lookJdbjg(commonInfoVo);
-        if (list.size()>0){
+        if (list!=null && list.size()>0){
             Map map = new HashMap();
             map.put("htd",commonInfoVo.getHtd());
             map.put("lmwcdbz",list.get(0).get("规定值"));
@@ -10771,7 +10824,177 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         DecimalFormat df = new DecimalFormat("0.00");
         DecimalFormat decf = new DecimalFormat("0.##");
         List<Map<String, Object>> list = jjgFbgcLmgcLqlmysdService.lookJdbjg(commonInfoVo);
-        Double lmMax = 0.0;
+        System.out.println(list);
+
+        /**
+         [
+         {密度规定值=95.0, 标准=标准密度, 合格点数=10, 实测值变化范围=98.4~99.9, 检测点数=10, 密度代表值=98.8, 合格率=100.00, 路面类型=沥青路面压实度右幅-上面层},
+         {密度规定值=91.0, 标准=最大理论密度, 合格点数=10, 实测值变化范围=94.0~96.8, 检测点数=10, 密度代表值=94.8, 合格率=100.00, 路面类型=沥青路面压实度右幅-上面层},
+         {密度规定值=95.0, 标准=标准密度, 合格点数=15, 实测值变化范围=97.6~99.9, 检测点数=15, 密度代表值=98.5, 合格率=100.00, 路面类型=沥青路面压实度右幅-中下面层},
+         {密度规定值=91.0, 标准=最大理论密度, 合格点数=15, 实测值变化范围=93.1~96.2, 检测点数=15, 密度代表值=94.4, 合格率=100.00, 路面类型=沥青路面压实度右幅-中下面层},
+         {密度规定值=95.0, 标准=标准密度, 合格点数=10, 实测值变化范围=97.3~99.7, 检测点数=10, 密度代表值=98.3, 合格率=100.00, 路面类型=沥青路面压实度左幅-上面层},
+         {密度规定值=91.0, 标准=最大理论密度, 合格点数=10, 实测值变化范围=93.9~96.1, 检测点数=10, 密度代表值=94.5, 合格率=100.00, 路面类型=沥青路面压实度左幅-上面层},
+         {密度规定值=95.0, 标准=标准密度, 合格点数=15, 实测值变化范围=98.1~99.9, 检测点数=15, 密度代表值=98.7, 合格率=100.00, 路面类型=沥青路面压实度左幅-中下面层},
+         {密度规定值=91.0, 标准=最大理论密度, 合格点数=15, 实测值变化范围=94.0~96.2, 检测点数=15, 密度代表值=94.5, 合格率=100.00, 路面类型=沥青路面压实度左幅-中下面层}
+         ]
+         */
+
+        if (list!=null && list.size()>0){
+            double zxbzjcds = 0,zxbzhgds = 0,zxzdjcds = 0,zxzdhgds = 0;
+            String bzmdgdz = "",bzsczbhfw="",zmddbz="",ymddbz="",zdmdgdz = "",zdsczbhfw="",zdzmddbz="",zdymddbz="";
+            boolean a = false ,b = false;
+
+
+            for (Map<String, Object> map : list) {
+                String lx = map.get("路面类型").toString();
+                String bz = map.get("标准").toString();
+                if (bz.equals("标准密度")){
+                    if (lx.contains("沥青路面压实度左幅") || lx.contains("沥青路面压实度右幅")){
+                        a  = true;
+                        zxbzjcds += Double.valueOf(map.get("检测点数").toString());
+                        zxbzhgds += Double.valueOf(map.get("合格点数").toString());
+                        bzmdgdz = map.get("密度规定值").toString();
+                        bzsczbhfw = map.get("实测值变化范围").toString();
+                        if (lx.contains("沥青路面压实度左幅")){
+                            zmddbz = map.get("密度代表值").toString();
+
+                        }else if (lx.contains("沥青路面压实度右幅")){
+                            ymddbz = map.get("密度代表值").toString();
+                        }
+                    }else if (lx.equals("沥青路面压实度匝道")){
+                        double zdzxbzjcds = Double.valueOf(map.get("检测点数").toString());
+                        double zdzxbzhgds = Double.valueOf(map.get("合格点数").toString());
+                        double hgl = Double.valueOf(map.get("合格率").toString());
+                        String zdbzmdgdz = map.get("密度规定值").toString();
+                        String zdbzsczbhfw = map.get("实测值变化范围").toString();
+                        String zdmddbz = map.get("密度代表值").toString();
+
+                        Map map2 = new HashMap();
+                        map2.put("htd",commonInfoVo.getHtd());
+                        map2.put("ysdlx","匝道");
+                        map2.put("bz","标准密度");
+                        map2.put("bzsczbhfw",zdbzsczbhfw);
+                        map2.put("zmddbz",zdmddbz);
+                        map2.put("ymddbz",zdmddbz);
+                        map2.put("bzmdgdz",zdbzmdgdz);
+                        map2.put("zxbzjcds",zdzxbzjcds);
+                        map2.put("zxbzhgds",zdzxbzhgds);
+                        map2.put("hgl",hgl);
+                        resultList.add(map2);
+
+                    }else if (lx.contains("连接线")){
+                        double zdzxbzjcds = Double.valueOf(map.get("检测点数").toString());
+                        double zdzxbzhgds = Double.valueOf(map.get("合格点数").toString());
+                        double hgl = Double.valueOf(map.get("合格率").toString());
+                        String zdbzmdgdz = map.get("密度规定值").toString();
+                        String zdbzsczbhfw = map.get("实测值变化范围").toString();
+                        String zdmddbz = map.get("密度代表值").toString();
+
+                        Map map2 = new HashMap();
+                        map2.put("htd",commonInfoVo.getHtd());
+                        map2.put("ysdlx","连接线");
+                        map2.put("bz","标准密度");
+                        map2.put("bzsczbhfw",zdbzsczbhfw);
+                        map2.put("zmddbz",zdmddbz);
+                        map2.put("ymddbz",zdmddbz);
+                        map2.put("bzmdgdz",zdbzmdgdz);
+                        map2.put("zxbzjcds",zdzxbzjcds);
+                        map2.put("zxbzhgds",zdzxbzhgds);
+                        map2.put("hgl",hgl);
+                        resultList.add(map2);
+
+                    }
+
+                }else if (bz.equals("最大理论密度")){
+                    if (lx.contains("沥青路面压实度左幅") || lx.contains("沥青路面压实度右幅")){
+                        b  = true;
+                        zxzdjcds += Double.valueOf(map.get("检测点数").toString());
+                        zxzdhgds += Double.valueOf(map.get("合格点数").toString());
+                        zdmdgdz = map.get("密度规定值").toString();
+                        zdsczbhfw = map.get("实测值变化范围").toString();
+                        if (lx.contains("沥青路面压实度左幅")){
+                            zdzmddbz = map.get("密度代表值").toString();
+
+                        }else if (lx.contains("沥青路面压实度右幅")){
+                            zdymddbz = map.get("密度代表值").toString();
+                        }
+                    }
+                    else if (lx.equals("沥青路面压实度匝道")){
+                        double zdzxbzjcds = Double.valueOf(map.get("检测点数").toString());
+                        double zdzxbzhgds = Double.valueOf(map.get("合格点数").toString());
+                        double hgl = Double.valueOf(map.get("合格率").toString());
+                        String zdbzmdgdz = map.get("密度规定值").toString();
+                        String zdbzsczbhfw = map.get("实测值变化范围").toString();
+                        String zdmddbz = map.get("密度代表值").toString();
+
+                        Map map2 = new HashMap();
+                        map2.put("htd",commonInfoVo.getHtd());
+                        map2.put("ysdlx","匝道");
+                        map2.put("bz","标准密度");
+                        map2.put("bzsczbhfw",zdbzsczbhfw);
+                        map2.put("zmddbz",zdmddbz);
+                        map2.put("ymddbz",zdmddbz);
+                        map2.put("bzmdgdz",zdbzmdgdz);
+                        map2.put("zxbzjcds",zdzxbzjcds);
+                        map2.put("zxbzhgds",zdzxbzhgds);
+                        map2.put("hgl",hgl);
+                        resultList.add(map2);
+
+
+                    }else if (lx.contains("连接线")){
+                        double zdzxbzjcds = Double.valueOf(map.get("检测点数").toString());
+                        double zdzxbzhgds = Double.valueOf(map.get("合格点数").toString());
+                        double hgl = Double.valueOf(map.get("合格率").toString());
+                        String zdbzmdgdz = map.get("密度规定值").toString();
+                        String zdbzsczbhfw = map.get("实测值变化范围").toString();
+                        String zdmddbz = map.get("密度代表值").toString();
+
+                        Map map2 = new HashMap();
+                        map2.put("htd",commonInfoVo.getHtd());
+                        map2.put("ysdlx","连接线");
+                        map2.put("bz","标准密度");
+                        map2.put("bzsczbhfw",zdbzsczbhfw);
+                        map2.put("zmddbz",zdmddbz);
+                        map2.put("ymddbz",zdmddbz);
+                        map2.put("bzmdgdz",zdbzmdgdz);
+                        map2.put("zxbzjcds",zdzxbzjcds);
+                        map2.put("zxbzhgds",zdzxbzhgds);
+                        map2.put("hgl",hgl);
+                        resultList.add(map2);
+
+                    }
+                }
+            }
+            if (a){
+                Map map1 = new HashMap();
+                map1.put("htd",commonInfoVo.getHtd());
+                map1.put("ysdlx","主线");
+                map1.put("bz","标准密度");
+                map1.put("bzsczbhfw",bzsczbhfw);
+                map1.put("zmddbz",zmddbz);
+                map1.put("ymddbz",ymddbz);
+                map1.put("bzmdgdz",bzmdgdz);
+                map1.put("zxbzjcds",zxbzjcds);
+                map1.put("zxbzhgds",zxbzhgds);
+                map1.put("hgl",zxbzjcds!=0 ? df.format(zxbzhgds/zxbzjcds*100) : 0);
+                resultList.add(map1);
+            }
+            if (b){
+                Map map2 = new HashMap();
+                map2.put("htd",commonInfoVo.getHtd());
+                map2.put("ysdlx","主线");
+                map2.put("bz","最大理论密度");
+                map2.put("bzsczbhfw",zdsczbhfw);
+                map2.put("zmddbz",zdzmddbz);
+                map2.put("ymddbz",zdymddbz);
+                map2.put("bzmdgdz",zdmdgdz);
+                map2.put("zxbzjcds",zxzdjcds);
+                map2.put("zxbzhgds",zxzdhgds);
+                map2.put("hgl",zxzdjcds!=0 ? df.format(zxzdhgds/zxzdjcds*100) : 0);
+                resultList.add(map2);
+            }
+        }
+        /*Double lmMax = 0.0;
         Double lmMin = Double.MAX_VALUE;
         String gdz = "";
         String zdbz = "";
@@ -10787,10 +11010,10 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         Double ljxhgds = 0.0;
         boolean a = false;
         boolean b = false;
-        if (list.size()>0){
+        if (list!=null && list.size()>0){
             for (Map<String, Object> map : list) {
                 String lx = map.get("路面类型").toString();
-                if (lx.equals("沥青路面压实度左幅") || lx.equals("沥青路面压实度右幅")){
+                if (lx.contains("沥青路面压实度左幅") || lx.contains("沥青路面压实度右幅")){
                     a = true;
                     double max = Double.valueOf(map.get("最大值").toString());
                     lmMax = (max > lmMax) ? max : lmMax;
@@ -10799,17 +11022,17 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                     lmMin = (min < lmMin) ? min : lmMin;
 
                     gdz = map.get("规定值").toString();
-                    if (lx.equals("沥青路面压实度左幅")){
+                    if (lx.contains("沥青路面压实度左幅")){
                         zdbz = map.get("代表值").toString();
                         jcds += Double.valueOf(map.get("检测点数").toString());
                         hgds += Double.valueOf(map.get("合格点数").toString());
-                    }else if (lx.equals("沥青路面压实度右幅")){
+                    }else if (lx.contains("沥青路面压实度右幅")){
                         ydbz = map.get("代表值").toString();
                         jcds += Double.valueOf(map.get("检测点数").toString());
                         hgds += Double.valueOf(map.get("合格点数").toString());
                     }
 
-                }else if (lx.equals("沥青路面压实度匝道")){
+                }else if (lx.contains("沥青路面压实度匝道")){
                     Map map1 = new HashMap<>();
                     map1.put("htd",commonInfoVo.getHtd());
                     map1.put("ysdlx","匝道");
@@ -10865,6 +11088,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
             map2.put("ysdhgl",ljxjcds!=0 ? df.format(ljxhgds/ljxjcds*100) : 0);
             resultList.add(map2);
         }
+        System.out.println(resultList);*/
         return resultList;
     }
 
@@ -10914,21 +11138,24 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         List<Map<String, Object>> zdlist = new ArrayList<>();
         Map<String, Object> zdmap = new HashMap<>();
         List<Map<String, Object>> list12 = jjgFbgcLjgcZddmccService.lookJdbjg(commonInfoVo);
-        if (list12.size()>0){
+        if (list12!=null && list12.size()>0){
             zdmap.put("zddmccjcds",list12.get(0).get("检测总点数"));
             zdmap.put("zddmcchgds",list12.get(0).get("合格点数"));
-            zdmap.put("zddmcchgl",list12.get(0).get("合格点数"));
+            zdmap.put("zddmcchgl",list12.get(0).get("合格率"));
         }
 
         List<Map<String, Object>> list13 = jjgFbgcLjgcZdgqdService.lookJdbjg(commonInfoVo);
-        if (list13.size()>0){
+        if (list13!=null && list13.size()>0){
             zdmap.put("zdtqdjcds",list13.get(0).get("总点数"));
             zdmap.put("zdtqdhgds",list13.get(0).get("合格点数"));
-            zdmap.put("zdtqdhgl",list13.get(0).get("合格点数"));
+            zdmap.put("zdtqdhgl",list13.get(0).get("合格率"));
         }
-        zdmap.put("htd", commonInfoVo.getHtd());
-        zdmap.put("sheetname","表4.1.1-5");
-        zdlist.add(zdmap);
+        if (list12!=null && list12.size()>0 || list13!=null && list13.size()>0){
+            zdmap.put("htd", commonInfoVo.getHtd());
+            zdmap.put("sheetname","表4.1.1-5");
+            zdlist.add(zdmap);
+        }
+
         return zdlist;
     }
 
@@ -10942,21 +11169,23 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         List<Map<String, Object>> hdlist = new ArrayList<>();
         Map<String, Object> hdmap = new HashMap<>();
         List<Map<String, Object>> list10 = jjgFbgcLjgcHdgqdService.lookJdbjg(commonInfoVo);
-        System.out.println(list10);
         List<Map<String, Object>> list11 = jjgFbgcLjgcHdjgccService.lookJdbjg(commonInfoVo);
-        if (list10.size()>0){
+        if (list10!=null && list10.size()>0){
             hdmap.put("hdtqdjcds",list10.get(0).get("总点数"));
             hdmap.put("hdtqdhgds",list10.get(0).get("合格点数"));
             hdmap.put("hdtqdhgl",list10.get(0).get("合格率"));
         }
-        if (list11.size()>0){
+        if (list11!=null && list11.size()>0){
             hdmap.put("hdjgccjcds",list11.get(0).get("总点数"));
             hdmap.put("hdjgcchgds",list11.get(0).get("合格点数"));
             hdmap.put("hdjgcchgl",list11.get(0).get("合格率"));
         }
-        hdmap.put("htd", commonInfoVo.getHtd());
-        hdmap.put("sheetname","表4.1.1-4");
-        hdlist.add(hdmap);
+        if (list10!=null && list10.size()>0 || list11!=null && list11.size()>0){
+            hdmap.put("htd", commonInfoVo.getHtd());
+            hdmap.put("sheetname","表4.1.1-4");
+            hdlist.add(hdmap);
+        }
+
         return hdlist;
     }
 
@@ -10976,15 +11205,16 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
             xqmap.put("xqtqdhgl",list8.get(0).get("合格率"));
         }
         List<Map<String, Object>> list9 = jjgFbgcLjgcXqjgccService.lookJdbjg(commonInfoVo);
-        if (list9.size()>0){
+        if (list9!=null && list9.size()>0){
             xqmap.put("xqjgccjcds",list9.get(0).get("检测总点数"));
             xqmap.put("xqjgcchgds",list9.get(0).get("合格点数"));
             xqmap.put("xqjgcchgl",list9.get(0).get("合格率"));
         }
-
-        xqmap.put("htd", commonInfoVo.getHtd());
-        xqmap.put("sheetname","表4.1.1-3");
-        xqlist.add(xqmap);
+        if (list8!=null && list8.size()>0 || list9!=null && list9.size()>0){
+            xqmap.put("htd", commonInfoVo.getHtd());
+            xqmap.put("sheetname","表4.1.1-3");
+            xqlist.add(xqmap);
+        }
         return xqlist;
     }
 
@@ -10998,20 +11228,22 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         List<Map<String, Object>> pslist = new ArrayList<>();
         Map<String, Object> psmap = new LinkedHashMap<>();
         List<Map<String, Object>> list6 = jjgFbgcLjgcPsdmccService.lookJdbjg(commonInfoVo);
-        if (list6.size()>0){
+        if (list6!=null && list6.size()>0){
             psmap.put("psdmccjcds",list6.get(0).get("检测总点数"));
             psmap.put("psdmcchgds",list6.get(0).get("合格点数"));
             psmap.put("psdmcchgl",list6.get(0).get("合格率"));
         }
         List<Map<String, Object>> list7 = jjgFbgcLjgcPspqhdService.lookJdbjg(commonInfoVo);
-        if (list7.size()>0){
+        if (list7!=null && list7.size()>0){
             psmap.put("pspqhdjcds",list7.get(0).get("检测总点数"));
             psmap.put("pspqhdhgds",list7.get(0).get("合格点数"));
             psmap.put("pspqhdhgl",list7.get(0).get("合格率"));
         }
-        psmap.put("htd", commonInfoVo.getHtd());
-        psmap.put("sheetname","表4.1.1-2");
-        pslist.add(psmap);
+        if (list6!=null && list6.size()>0 || list7!=null && list7.size()>0){
+            psmap.put("htd", commonInfoVo.getHtd());
+            psmap.put("sheetname","表4.1.1-2");
+            pslist.add(psmap);
+        }
         return pslist;
     }
 
@@ -11050,13 +11282,28 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         }
 
         //弯沉
-        List<Map<String, Object>> list3 = jjgFbgcLmgcLmwcService.lookJdbjg(commonInfoVo);
+        List<Map<String, Object>> list3 = jjgFbgcLjgcLjwcLcfService.lookJdbjg(commonInfoVo);
         List<Map<String, Object>> list4 = jjgFbgcLjgcLjwcLcfService.lookJdbjg(commonInfoVo);
-        double d = Double.valueOf(list3.get(0).get("检测单元数").toString()) + Double.valueOf(list4.get(0).get("检测单元数").toString());
-        double dd = Double.valueOf(list3.get(0).get("合格单元数").toString()) + Double.valueOf(list4.get(0).get("合格单元数").toString());
-        tsdmap.put("wcjcds", decf.format(d));
-        tsdmap.put("wchgds", decf.format(dd));
-        tsdmap.put("wchgl",d!=0 ? df.format(dd/d*100) : 0);
+        double d = 0 ,dd = 0;
+        boolean f = false;
+        if (list3!=null&&list3.size()>0){
+            f = true;
+            d += Double.valueOf(list3.get(0).get("检测单元数").toString());
+            dd += Double.valueOf(list3.get(0).get("合格单元数").toString());
+        }
+        if (list4!=null&&list4.size()>0){
+            f = true;
+            d += Double.valueOf(list4.get(0).get("检测单元数").toString());
+            dd += Double.valueOf(list4.get(0).get("合格单元数").toString());
+        }
+        /*double d = Double.valueOf(list3.get(0).get("检测单元数").toString()) + Double.valueOf(list4.get(0).get("检测单元数").toString());
+        double dd = Double.valueOf(list3.get(0).get("合格单元数").toString()) + Double.valueOf(list4.get(0).get("合格单元数").toString());*/
+        if (f){
+            tsdmap.put("wcjcds", decf.format(d));
+            tsdmap.put("wchgds", decf.format(dd));
+            tsdmap.put("wchgl",d!=0 ? df.format(dd/d*100) : 0);
+        }
+        System.out.println(tsdmap);
 
         //边坡
         List<Map<String, Object>> list5 = jjgFbgcLjgcLjbpService.lookJdbjg(commonInfoVo);
@@ -11066,9 +11313,11 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
             tsdmap.put("bphgl",list5.get(0).get("合格率"));
         }
 
-        tsdmap.put("htd", commonInfoVo.getHtd());
-        tsdmap.put("sheetname","表4.1.1-1");
-        tsflist.add(tsdmap);
+        if (list1!=null && list1.size()>0 || list2!=null && list2.size()>0 || list3!=null&&list3.size()>0 || list4!=null&&list4.size()>0 || list5!=null && list5.size()>0){
+            tsdmap.put("htd", commonInfoVo.getHtd());
+            tsdmap.put("sheetname","表4.1.1-1");
+            tsflist.add(tsdmap);
+        }
         return tsflist;
     }
 
@@ -11081,8 +11330,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
     private List<Map<String,Object>> getLjjaData(String proname, String htd) {
         List<Map<String,Object>> fhllist = new ArrayList<>();
         Map<String,Object> map = new HashMap<>();
-        map.put("htd", htd);
-        map.put("sheetname","表3.4.3-1");
+
         Map<String,Object> map1 = jjgFbgcJtaqssJabzService.selectchs(proname, htd);
         if (map1.size()>0){
             map.put("bzccs",map1.get("wz"));
@@ -11097,7 +11345,11 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         if (map3.size()>0){
             map.put("fhlccs",map3.get("zh"));
         }
-        fhllist.add(map);
+        if (map1.size()>0 || map2.size()>0 || map3.size()>0){
+            map.put("htd", htd);
+            map.put("sheetname","表3.4.3-1");
+            fhllist.add(map);
+        }
         return fhllist;
     }
 
@@ -11383,7 +11635,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         List<Map<String,Object>> ljlist = new ArrayList<>();
         Map<String,Object> map = new LinkedHashMap<>();
         Map<String,Object> map1 = jjgFbgcLjgcHdgqdService.selectchs(proname, htd);
-        map.put("htd", htd);
+
         map.put("hdccs",map1.get("ccs"));
         //支挡工程
         Map<String,Object> map2 = jjgFbgcLjgcZddmccService.selectchs(proname, htd);
@@ -11391,8 +11643,12 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         //小桥
         Map<String,Object> map3 = jjgFbgcLjgcXqgqdService.selectchs(proname, htd);
         map.put("xqccs",map3.get("ccs"));
-        map.put("sheetname","表3.4.1-1");
-        ljlist.add(map);
+
+        if (!map1.get("ccs").toString().equals("0") || !map2.get("ccs").toString().equals("0") || !map3.get("ccs").toString().equals("0")){
+            map.put("htd", htd);
+            map.put("sheetname","表3.4.1-1");
+            ljlist.add(map);
+        }
         return ljlist;
     }
 

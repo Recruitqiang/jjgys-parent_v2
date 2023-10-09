@@ -407,10 +407,7 @@ public class JjgFbgcLjgcXqgqdServiceImpl extends ServiceImpl<JjgFbgcLjgcXqgqdMap
         //获取鉴定表文件
         File f = new File(filepath+File.separator+proname+File.separator+htd+File.separator+"06路基小桥砼强度.xlsx");
         if(!f.exists()){
-            jgmap.put("检测总点数",0);
-            jgmap.put("合格点数",0);
-            jgmap.put("合格率",0);
-            mapList.add(jgmap);
+            return null;
         }else {
             //创建工作簿
             XSSFWorkbook xwb = new XSSFWorkbook(new FileInputStream(f));

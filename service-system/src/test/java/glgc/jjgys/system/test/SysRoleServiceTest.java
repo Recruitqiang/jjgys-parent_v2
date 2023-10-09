@@ -36,11 +36,15 @@ public class SysRoleServiceTest {
     @Autowired
     private JjgJgProjectinfoService jjgJgProjectinfoService;
 
+    @Autowired
+    private JjgFbgcGenerateTablelService jjgFbgcGenerateTablelService;
+
 
 
     @Test
     public void hdgqdsc() throws Exception {
-        Map<String, Map<String, List<Map<String, Object>>>> s = jjgDpkshService.getjsxmdata("陕西高速");
+        jjgFbgcGenerateTablelService.generateBGZBG("延黄高速");
+        //Map<String, Map<String, List<Map<String, Object>>>> s = jjgDpkshService.getjsxmdata("陕西高速");
 
 
         //jjgJgProjectinfoService.getlqsData("陕西高速");
