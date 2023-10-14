@@ -23,4 +23,5 @@ public interface JjgJgjcsjService extends IService<JjgJgjcsj> {
 
     void generatepdb(String projectname);
 
+    void generatepdbOld(String proname);
 }

@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public interface JjgWgkfService extends IService<JjgWgkf> {
 
-    void export(HttpServletResponse response);
+    void export(HttpServletResponse response, String proname);
 
     void importwgkf(MultipartFile file, String proname);
 

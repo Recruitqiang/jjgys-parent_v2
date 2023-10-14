@@ -57,7 +57,7 @@ public class JjgZdhCzJgfcVo extends BaseRowModel {
 
 
     @ColumnWidth(23)
-    @ExcelProperty(value = "合同段" ,index = 6)
+    @ExcelProperty(value = "合同段" ,index = 5)
     private String htd;
 
 

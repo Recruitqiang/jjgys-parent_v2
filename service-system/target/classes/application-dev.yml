@@ -9,6 +9,7 @@ jjgys:
   path:
     filepath: D:/work/jjgys/opt/files
     jgfilepath: D:/work/jjgys/opt/jgfiles
+    picturepath: D:/work/jjgys/opt/files
 
 
 spring:

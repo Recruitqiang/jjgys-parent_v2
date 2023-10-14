@@ -2,10 +2,16 @@ package glgc.jjgys.model.projectvo.jggl;
 
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.write.style.ColumnWidth;
+import com.alibaba.excel.annotation.write.style.HeadFontStyle;
+import com.alibaba.excel.annotation.write.style.HeadRowHeight;
+import com.alibaba.excel.annotation.write.style.HeadStyle;
 import com.alibaba.excel.metadata.BaseRowModel;
 import lombok.Data;
 
 @Data
+@HeadStyle(fillForegroundColor = 13)
+@HeadFontStyle(fontHeightInPoints = 10)
+@HeadRowHeight(30)
 public class JCSJVo extends BaseRowModel {
     /**
      * 合同段
@@ -19,7 +25,7 @@ public class JCSJVo extends BaseRowModel {
      */
     @ColumnWidth(23)
     @ExcelProperty(value = "单位工程" ,index = 1)
-    private String name;
+    private String dwgc;
 
     /**
      * 分部工程

@@ -47,8 +47,8 @@ public class JjgZdhCzJgfcController {
 
     @ApiOperation("车辙模板文件导出")
     @GetMapping("exportcz")
-    public void exportcz(HttpServletResponse response, String cdsl) throws IOException {
-        jjgZdhCzJgfcService.exportcz(response,cdsl);
+    public void exportcz(HttpServletResponse response, @RequestParam String cd) throws IOException {
+        jjgZdhCzJgfcService.exportcz(response,cd);
     }
 
 
@@ -72,6 +72,7 @@ public class JjgZdhCzJgfcController {
 
             //调用方法分页查询
             IPage<JjgZdhCzJgfc> pageModel = jjgZdhCzJgfcService.page(pageParam, wrapper);
+            System.out.println(pageModel);
             //返回
             return Result.ok(pageModel);
         }

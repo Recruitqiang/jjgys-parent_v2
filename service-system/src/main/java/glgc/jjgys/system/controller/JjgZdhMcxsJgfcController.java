@@ -47,8 +47,8 @@ public class JjgZdhMcxsJgfcController {
 
     @ApiOperation("摩擦系数模板文件导出")
     @GetMapping("exportmcxs")
-    public void exportmcxs(HttpServletResponse response, String cdsl) throws IOException {
-        jjgZdhMcxsJgfcService.exportmcxs(response,cdsl);
+    public void exportmcxs(HttpServletResponse response, @RequestParam String cd) throws IOException {
+        jjgZdhMcxsJgfcService.exportmcxs(response,cd);
     }
 
     @ApiOperation(value = "摩擦系数数据文件导入")

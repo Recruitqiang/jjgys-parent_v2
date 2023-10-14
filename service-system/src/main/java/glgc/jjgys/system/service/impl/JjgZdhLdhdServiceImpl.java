@@ -606,7 +606,7 @@ public class JjgZdhLdhdServiceImpl extends ServiceImpl<JjgZdhLdhdMapper, JjgZdhL
             //创建文件根目录
             fdir.mkdirs();
         }
-        File directory = new File("src/main/resources/static");
+        File directory = new File("service-system/src/main/resources/static");
         String reportPath = directory.getCanonicalPath();
         String filename = "";
 

@@ -240,6 +240,25 @@ public class JjgFbgcCommonUtils {
 
     }
 
+    public static void deletejkEmptySheets(XSSFWorkbook wb){
+        ArrayList<String> delsheets = new ArrayList<String>();
+        for (int i = 0; i < wb.getNumberOfSheets(); i++) {
+            if(wb.getSheetAt(i).getRow(0)!=null&&wb.getSheetAt(i).getRow(0).getCell(0).getStringCellValue().contains("隧道断面测量坐标表"))//&&wb.getSheetAt(i).getSheetName().equals("连接线")
+            {
+                wb.getSheetAt(i).getRow(5).getCell(0).setCellType(CellType.STRING);
+                if(wb.getSheetAt(i).getRow(5).getCell(0)==null ||"".equals(wb.getSheetAt(i).getRow(5).getCell(0).getStringCellValue())){
+                    delsheets.add(wb.getSheetAt(i).getSheetName());
+                }
+            }
+        }
+        wb.removeSheetAt(wb.getSheetIndex("source"));
+        for (int i = 0; i < delsheets.size(); i++) {
+            //wb.setSheetHidden(wb.getSheetIndex(delsheets.get(i)),true);
+            wb.removeSheetAt(wb.getSheetIndex(delsheets.get(i)));
+        }
+
+    }
+
 
     public static void deletehpEmptySheets(XSSFWorkbook wb){
         ArrayList<String> delsheets = new ArrayList<String>();;

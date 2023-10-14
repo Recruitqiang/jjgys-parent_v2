@@ -46,8 +46,8 @@ public class JjgZdhGzsdJgfcController {
 
     @ApiOperation("构造深度模板文件导出")
     @GetMapping("exportgzsd")
-    public void exportgzsd(HttpServletResponse response,String cdsl) throws IOException {
-        jjgZdhGzsdJgfcService.exportgzsd(response,cdsl);
+    public void exportgzsd(HttpServletResponse response,@RequestParam String cd) throws IOException {
+        jjgZdhGzsdJgfcService.exportgzsd(response,cd);
     }
 
 

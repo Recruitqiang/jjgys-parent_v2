@@ -45,8 +45,8 @@ public class JjgWgkfController {
 
     @ApiOperation("外观扣分文件导出")
     @GetMapping("export")
-    public void export(HttpServletResponse response){
-        jjgWgkfService.export(response);
+    public void export(HttpServletResponse response, @RequestParam String projectname){
+        jjgWgkfService.export(response,projectname);
     }
 
     @ApiOperation(value = "外观扣分数据文件导入")

@@ -410,7 +410,7 @@ public class JjgFbgcLmgcLmhpServiceImpl extends ServiceImpl<JjgFbgcLmgcLmhpMappe
             calculateThicknessSheet(wb.getSheetAt(j));
             JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
         }
-        JjgFbgcCommonUtils.deleteEmptySheets(wb);
+        JjgFbgcCommonUtils.deletehpEmptySheets(wb);
 
         FileOutputStream fileOut = new FileOutputStream(f);
         wb.write(fileOut);

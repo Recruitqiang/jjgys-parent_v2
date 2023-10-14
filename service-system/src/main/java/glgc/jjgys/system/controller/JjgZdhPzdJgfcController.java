@@ -45,8 +45,8 @@ public class JjgZdhPzdJgfcController {
 
     @ApiOperation("平整度模板文件导出")
     @GetMapping("exportpzd")
-    public void exportpzd(HttpServletResponse response, String cdsl) throws IOException {
-        jjgZdhPzdJgfcService.exportpzd(response,cdsl);
+    public void exportpzd(HttpServletResponse response, @RequestParam String cd) throws IOException {
+        jjgZdhPzdJgfcService.exportpzd(response,cd);
     }
 
 

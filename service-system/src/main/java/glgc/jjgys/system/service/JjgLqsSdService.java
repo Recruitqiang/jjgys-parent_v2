@@ -23,4 +23,8 @@ public interface JjgLqsSdService extends IService<JjgLqsSd> {
     void importSD(MultipartFile file, String proname);
 
     List<JjgLqsSd> getsdName(String proname, String htd);
+
+    List<JjgLqsSd>  selectzfsd(String proname, String htd, String zf);
+
+    List<JjgLqsSd> selectyfsd(String proname, String htd, String yf);
 }

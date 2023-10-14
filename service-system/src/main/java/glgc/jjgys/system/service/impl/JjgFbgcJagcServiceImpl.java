@@ -91,13 +91,10 @@ public class JjgFbgcJagcServiceImpl implements JjgFbgcJagcService {
 
             List<File> list = new ArrayList<>();
             list.add(new File(filepath + "/02交安标线实测数据.xlsx"));
-
-
             JjgFbgcUtils.addFile(list, filepath + "/交安工程/标线", filepath);
             list.clear();
+
             list.add(new File(filepath + "/01交安标志实测数据.xlsx"));
-
-
             JjgFbgcUtils.addFile(list, filepath + "/交安工程/标志", filepath);
             list.clear();
             list.add(new File(filepath + "/03交安波形防护栏实测数据.xlsx"));

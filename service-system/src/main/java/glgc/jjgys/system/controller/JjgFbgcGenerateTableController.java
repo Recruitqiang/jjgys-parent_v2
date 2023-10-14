@@ -116,7 +116,8 @@ public class JjgFbgcGenerateTableController {
     }
 
     @RequestMapping(value = "/downloadbgzbg", method = RequestMethod.GET)
-    public void downloadbgzbg(HttpServletResponse response, String proname) throws IOException {
+    public void downloadbgzbg(HttpServletResponse response, @RequestParam String proname) throws IOException {
+        System.out.println(proname);
         String fileName = "报告中表格.xlsx";
         String p = filespath+ File.separator+proname+File.separator+fileName;
         File file = new File(p);

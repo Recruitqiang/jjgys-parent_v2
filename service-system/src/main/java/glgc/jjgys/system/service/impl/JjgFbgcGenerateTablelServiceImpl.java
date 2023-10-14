@@ -191,8 +191,12 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
     @Autowired
     private JjgFbgcSdgcLmgzsdsgpsfService jjgFbgcSdgcLmgzsdsgpsfService;
 
+
     @Autowired
     private JjgHtdService jjgHtdService;
+
+    @Autowired
+    private JjgFbgcSdgcJkService jjgFbgcSdgcJkService;
 
 
     @Autowired
@@ -625,15 +629,13 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                         if (map.get("路面类型").toString().contains("隧道右幅") || map.get("路面类型").toString().contains("隧道左幅")){
                             sdjcds += Double.valueOf(map.get("检测点数").toString());
                             sdhgds += Double.valueOf(map.get("合格点数").toString());
-                            sdgdz = map.get("规定值").toString();
-                            System.out.println(sdgdz);
-                            System.out.println(sdgdz);
+                            sdgdz = map.get("密度规定值").toString();
 
                         }else {
                         //if (map.get("路面类型").toString().contains("沥青路面压实度右幅") || map.get("路面类型").toString().contains("沥青路面压实度左幅")){
                             lmjcds += Double.valueOf(map.get("检测点数").toString());
                             lmhgds += Double.valueOf(map.get("合格点数").toString());
-                            lmgdz = map.get("规定值").toString();
+                            lmgdz = map.get("密度规定值").toString();
 
                         }
                     }
@@ -2082,6 +2084,30 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                 }
                 resultlist.addAll(relist);
 
+            }else if (value.contains("42隧道断面测量坐标表-")){
+                List<Map<String, Object>> list = jjgFbgcSdgcJkService.lookJdbjg(commonInfoVo);
+                if (list!=null && list.size()>0){
+
+                    for (Map<String, Object> map : list) {
+                        double zds = Double.valueOf(map.get("总点数").toString());
+                        double hgds = Double.valueOf(map.get("合格点数").toString());
+                        String s = map.get("sdname").toString();
+
+                        Map maps = new HashMap();
+                        maps.put("ccname","净空");
+                        maps.put("ccname1","隧道路面");
+                        maps.put("ccname2","");
+                        maps.put("yxps","偏差值≥0");
+                        maps.put("filename","详见《隧道断面测量坐标表》检测"+decf.format(zds)+"点,合格"+decf.format(hgds)+"点");
+                        maps.put("sheetname", "分部-"+s);
+                        maps.put("fbgc", "总体");
+                        maps.put("合格率",(zds != 0) ? df.format(hgds/zds*100) : "0");
+                        resultlist.add(maps);
+
+                    }
+
+                }
+
             }
 
         }
@@ -2717,10 +2743,10 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                 rowstart = sheet.getRow(i-15);
                 rowend = sheet.getRow(i-1);
                 row.getCell(8).setCellFormula("IF(COUNTIF("+rowstart.getCell(19).getReference()+":"+rowend.getCell(19).getReference()+",\"合格\")=COUNTA("+rowstart.getCell(19).getReference()+":"+rowend.getCell(19).getReference()+"),\"√\", \"\")");//=IF(COUNTIF(T7:T21, "合格") = COUNTA(T7:T21), "√", "")
-                row.getCell(10).setCellFormula("IF(COUNTIF("+rowstart.getCell(19).getReference()+":"+rowend.getCell(19).getReference()+",\"合格\")=COUNTA("+rowstart.getCell(19).getReference()+":"+rowend.getCell(19).getReference()+"),\"\", \"×\")");//=IF(COUNTIF(T7:T21, "不合格") = COUNTA(T7:T21), "", "×")
+                row.getCell(10).setCellFormula("IF(COUNTIF("+rowstart.getCell(19).getReference()+":"+rowend.getCell(19).getReference()+",\"不合格\")=COUNTA("+rowstart.getCell(19).getReference()+":"+rowend.getCell(19).getReference()+"),\"\", \"×\")");//=IF(COUNTIF(T7:T21, "不合格") = COUNTA(T7:T21), "", "×")
 
                 row.getCell(16).setCellFormula("IF(COUNTIF("+rowstart.getCell(19).getReference()+":"+rowend.getCell(19).getReference()+",\"合格\")=COUNTA("+rowstart.getCell(19).getReference()+":"+rowend.getCell(19).getReference()+"),\"√\", \"\")");//=IF(COUNTIF(T7:T21, "合格") = COUNTA(T7:T21), "√", "")
-                row.getCell(19).setCellFormula("IF(COUNTIF("+rowstart.getCell(19).getReference()+":"+rowend.getCell(19).getReference()+",\"合格\")=COUNTA("+rowstart.getCell(19).getReference()+":"+rowend.getCell(19).getReference()+"),\"\", \"×\")");//=IF(COUNTIF(T7:T21, "不合格") = COUNTA(T7:T21), "", "×")
+                row.getCell(19).setCellFormula("IF(COUNTIF("+rowstart.getCell(19).getReference()+":"+rowend.getCell(19).getReference()+",\"不合格\")=COUNTA("+rowstart.getCell(19).getReference()+":"+rowend.getCell(19).getReference()+"),\"\", \"×\")");//=IF(COUNTIF(T7:T21, "不合格") = COUNTA(T7:T21), "", "×")
             }
         }
 
@@ -3004,6 +3030,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
 
         List<Map<String, Object>> lmysdlist = new ArrayList<>();
         List<Map<String, Object>> lmwclist = new ArrayList<>();
+        List<Map<String, Object>> lmwclallist = new ArrayList<>();
         List<Map<String, Object>> lmwclcflist = new ArrayList<>();
         List<Map<String, Object>> lmssxslist = new ArrayList<>();
         List<Map<String, Object>> lmhntqdlist = new ArrayList<>();
@@ -3059,6 +3086,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         List<Map<String, Object>> sdpdlist = new ArrayList<>();
         List<Map<String, Object>> htdpdlist = new ArrayList<>();
         List<Map<String, Object>> xsxmpdlist = new ArrayList<>();
+        List<Map<String, Object>> lmhdldflist = new ArrayList<>();
 
         for (JjgHtd jjgHtd : htdlist) {
             String htd = jjgHtd.getName();
@@ -3094,13 +3122,13 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                 ljhzlist.addAll(ljjchzlist);
 
 
-
-
             }
             if (lx.contains("路面工程")){
                 //表4.1.2-1
                 List<Map<String, Object>> lmysd = getlmysdData(commonInfoVo);
                 lmysdlist.addAll(lmysd);
+                List<Map<String, Object>> lmwcall = getlmwcallData(commonInfoVo);
+                lmwclallist.addAll(lmwcall);
                 //表4.1.2-2
                 List<Map<String, Object>> lmwc = getlmwcData(commonInfoVo);
                 lmwclist.addAll(lmwc);
@@ -3142,6 +3170,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                 //表4.1.2-8(3) 厚度
                 List<Map<String, Object>> lmhd = getlmhdData(commonInfoVo);
                 lmhdlist.addAll(lmhd);
+
 
                 //表4.1.2-9 横坡
                 List<Map<String, Object>> hp = gethpData(commonInfoVo);
@@ -3211,7 +3240,6 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                 List<Map<String, Object>> sdhd = getsdhdData(commonInfoVo);
                 sdhdlist.addAll(sdhd);
 
-
                 //隧道路面横坡
                 List<Map<String, Object>> sdhp = getsdhpData(commonInfoVo);
                 sdhplist.addAll(sdhp);
@@ -3223,8 +3251,6 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                 if (sdlmhzlist !=null && sdlmhzlist.size()>0){
                     sdlmhzblist.addAll(sdlmhzlist);
                 }
-
-
 
             }
             if (lx.contains("桥梁工程")){
@@ -3376,6 +3402,9 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
 
         if (CollectionUtils.isNotEmpty(lmwclist)){
             DBExcellmwcdData(wb,lmwclist);
+        }
+        if (CollectionUtils.isNotEmpty(lmwclallist)){
+            DBExcellmwcalldData(wb,lmwclallist);
         }
         if (CollectionUtils.isNotEmpty(lmwclcflist)){
             DBExcellmwclcfdData(wb,lmwclcflist);
@@ -4197,21 +4226,22 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                 }else {
                     sheet.getRow(14).createCell(index).setCellValue(Double.valueOf(0));
                 }
-            /*if (datum.containsKey("cqhdjcds")){
-                sheet.getRow(15).createCell(index).setCellValue(Double.valueOf(datum.get("cqhdjcds").toString()));
-            }else {
-                sheet.getRow(15).createCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("cqhdhgds")){
-                sheet.getRow(16).createCell(index).setCellValue(Double.valueOf(datum.get("cqhdhgds").toString()));
-            }else {
-                sheet.getRow(16).createCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("cqhdhgl")){
-                sheet.getRow(17).createCell(index).setCellValue(Double.valueOf(datum.get("cqhdhgl").toString()));
-            }else {
-                sheet.getRow(17).createCell(index).setCellValue(Double.valueOf(0));
-            }*/
+
+                if (datum.containsKey("jkjcds")){
+                    sheet.getRow(15).createCell(index).setCellValue(Double.valueOf(datum.get("jkjcds").toString()));
+                }else {
+                    sheet.getRow(15).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("jkhgds")){
+                    sheet.getRow(16).createCell(index).setCellValue(Double.valueOf(datum.get("jkhgds").toString()));
+                }else {
+                    sheet.getRow(16).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("jkhgl")){
+                    sheet.getRow(17).createCell(index).setCellValue(Double.valueOf(datum.get("jkhgl").toString()));
+                }else {
+                    sheet.getRow(17).createCell(index).setCellValue(Double.valueOf(0));
+                }
 
                 if (datum.containsKey("ysdjcds")){
                     sheet.getRow(18).createCell(index).setCellValue(Double.valueOf(datum.get("ysdjcds").toString()));
@@ -4481,21 +4511,21 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
             }else {
                 sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(0));
             }
-            /*if (datum.containsKey("cqhdjcds")){
-                sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(datum.get("cqhdjcds").toString()));
+            if (datum.containsKey("jkjcds")){
+                sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(datum.get("jkjcds").toString()));
             }else {
                 sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(0));
             }
-            if (datum.containsKey("cqhdhgds")){
-                sheet.getRow(index).getCell(5).setCellValue(Double.valueOf(datum.get("cqhdhgds").toString()));
+            if (datum.containsKey("jkhgds")){
+                sheet.getRow(index).getCell(5).setCellValue(Double.valueOf(datum.get("jkhgds").toString()));
             }else {
                 sheet.getRow(index).getCell(5).setCellValue(Double.valueOf(0));
             }
-            if (datum.containsKey("cqhdhgl")){
-                sheet.getRow(index).getCell(6).setCellValue(Double.valueOf(datum.get("cqhdhgl").toString()));
+            if (datum.containsKey("jkhgl")){
+                sheet.getRow(index).getCell(6).setCellValue(Double.valueOf(datum.get("jkhgl").toString()));
             }else {
                 sheet.getRow(index).getCell(6).setCellValue(Double.valueOf(0));
-            }*/
+            }
             index++;
         }
     }
@@ -4684,6 +4714,23 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                 }else {
                     sheet.getRow(23).createCell(index).setCellValue(Double.valueOf(0));
                 }
+
+                if (datum.containsKey("qmpzdzds")){
+                    sheet.getRow(24).createCell(index).setCellValue(Double.valueOf(datum.get("qmpzdzds").toString()));
+                }else {
+                    sheet.getRow(24).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("qmpzdhgds")){
+                    sheet.getRow(25).createCell(index).setCellValue(Double.valueOf(datum.get("qmpzdhgds").toString()));
+                }else {
+                    sheet.getRow(25).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("qmpzdhgl")){
+                    sheet.getRow(26).createCell(index).setCellValue(Double.valueOf(datum.get("qmpzdhgl").toString()));
+                }else {
+                    sheet.getRow(26).createCell(index).setCellValue(Double.valueOf(0));
+                }
+
 
                 if (datum.containsKey("qmhpzds")){
                     sheet.getRow(27).createCell(index).setCellValue(Double.valueOf(datum.get("qmhpzds").toString()));
@@ -5459,23 +5506,23 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         int index = 3;
         for (Map<String, Object> datum : data) {
             sheet.getRow(index).getCell(0).setCellValue(datum.get("htd").toString());
-            if (datum.containsKey("sdlmhdlmlx")){
-                sheet.getRow(index).getCell(1).setCellValue(datum.get("sdlmhdlmlx").toString());
+            if (datum.containsKey("sdlmlx")){
+                sheet.getRow(index).getCell(1).setCellValue(datum.get("sdlmlx").toString());
             }
 
-            if (datum.containsKey("sdlmhdjcds")){
-                sheet.getRow(index).getCell(2).setCellValue(Double.valueOf(datum.get("sdlmhdjcds").toString()));
+            if (datum.containsKey("sdjcds")){
+                sheet.getRow(index).getCell(2).setCellValue(Double.valueOf(datum.get("sdjcds").toString()));
             }else {
                 sheet.getRow(index).getCell(2).setCellValue(Double.valueOf(0));
             }
-            if (datum.containsKey("sdlmhdhgs")){
-                sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(datum.get("sdlmhdhgs").toString()));
+            if (datum.containsKey("sdhgs")){
+                sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(datum.get("sdhgs").toString()));
             }else {
                 sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(0));
             }
 
-            if (datum.containsKey("sdlmhdhgl")){
-                sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(datum.get("sdlmhdhgl").toString()));
+            if (datum.containsKey("sdhgl")){
+                sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(datum.get("sdhgl").toString()));
             }else {
                 sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(0));
             }
@@ -6851,6 +6898,56 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
             }
             index++;
         }
+    }
+
+    /**
+     *
+     * @param wb
+     * @param data
+     */
+    private void DBExcellmwcalldData(XSSFWorkbook wb, List<Map<String, Object>> data) {
+        XSSFSheet sheet = wb.getSheet("表4.1.2-2");
+        int index = 3;
+        for (Map<String, Object> datum : data) {
+            sheet.getRow(index).getCell(0).setCellValue(datum.get("htd").toString());
+            if (datum.containsKey("lmwcdbz")){
+                sheet.getRow(index).getCell(1).setCellValue(Double.valueOf(datum.get("lmwcdbz").toString()));
+            }else {
+                sheet.getRow(index).getCell(1).setCellValue(0);
+            }
+
+            if (datum.containsKey("lmwcmax")){
+                sheet.getRow(index).getCell(2).setCellValue(Double.valueOf(datum.get("lmwcmax").toString()));
+            }else {
+                sheet.getRow(index).getCell(2).setCellValue(0);
+            }
+
+            if (datum.containsKey("lmwcmin")){
+                sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(datum.get("lmwcmin").toString()));
+            }else {
+                sheet.getRow(index).getCell(3).setCellValue(0);
+            }
+
+            if (datum.containsKey("lmwczds")){
+                sheet.getRow(index).getCell(4).setCellValue(Double.valueOf(datum.get("lmwczds").toString()));
+            }else {
+                sheet.getRow(index).getCell(4).setCellValue(0);
+            }
+
+            if (datum.containsKey("lmwchgds")){
+                sheet.getRow(index).getCell(5).setCellValue(Double.valueOf(datum.get("lmwchgds").toString()));
+            }else {
+                sheet.getRow(index).getCell(5).setCellValue(0);
+            }
+
+            if (datum.containsKey("lmwchgl")){
+                sheet.getRow(index).getCell(6).setCellValue(Double.valueOf(datum.get("lmwchgl").toString()));
+            }else {
+                sheet.getRow(index).getCell(6).setCellValue(0);
+            }
+            index++;
+        }
+
     }
 
     /**
@@ -8340,6 +8437,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
     private List<Map<String, Object>> getztData(CommonInfoVo commonInfoVo) throws IOException {
         List<Map<String, Object>> resultList = new ArrayList<>();
         List<Map<String, Object>> list = jjgFbgcSdgcZtkdService.lookJdbjg(commonInfoVo);
+        List<Map<String, Object>> jk = jjgFbgcSdgcJkService.lookJdbjg(commonInfoVo);
 
         if (list!=null && list.size()>0){
             Map map = new LinkedHashMap();
@@ -8347,6 +8445,14 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
             map.put("kdjcds",list.get(0).get("总点数"));
             map.put("kdhgds",list.get(0).get("合格点数"));
             map.put("kdhgl",list.get(0).get("合格率"));
+            resultList.add(map);
+        }
+        if (jk!=null && jk.size()>0){
+            Map map = new LinkedHashMap();
+            map.put("htd",commonInfoVo.getHtd());
+            map.put("jkjcds",list.get(0).get("总点数"));
+            map.put("jkhgds",list.get(0).get("合格点数"));
+            map.put("jkhgl",list.get(0).get("合格率"));
             resultList.add(map);
         }
 
@@ -8657,17 +8763,31 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         }
         //路面弯沉
         List<Map<String, Object>> list2 = jjgFbgcLmgcLmwcService.lookJdbjg(commonInfoVo);
+        List<Map<String, Object>> listlcf = jjgFbgcLmgcLmwcLcfService.lookJdbjg(commonInfoVo);
+        double wczds = 0;
+        double wchgds = 0;
+        boolean a =false,b = false;
         if (CollectionUtils.isNotEmpty(list2)){
-            double wczds = 0;
-            double wchgds = 0;
+            a = true;
             for (Map<String, Object> map : list2) {
                 wczds += Double.valueOf(map.get("检测单元数").toString());
                 wchgds += Double.valueOf(map.get("合格单元数").toString());
             }
+
+        }
+        if (CollectionUtils.isNotEmpty(listlcf)){
+            b = true;
+            for (Map<String, Object> map : listlcf) {
+                wczds += Double.valueOf(map.get("检测单元数").toString());
+                wchgds += Double.valueOf(map.get("合格单元数").toString());
+            }
+        }
+        if (a || b){
             resultmap.put("wczds",decf.format(wczds));
             resultmap.put("wchgds",decf.format(wchgds));
             resultmap.put("wchgl",wczds!=0 ? df.format(wchgds/wczds*100) : 0);
         }
+
         //车辙
         List<Map<String, Object>> list3 = jjgZdhCzService.lookJdbjg(commonInfoVo);
         if (CollectionUtils.isNotEmpty(list3)){
@@ -8737,15 +8857,28 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         }
 
         List<Map<String, Object>> list8 = jjgFbgcLmgcGslqlmhdzxfService.lookJdbjg(commonInfoVo);
+        List<Map<String, Object>> ldhd = jjgZdhLdhdService.lookJdbjg(commonInfoVo);
+        double lqhdzds = 0;
+        double lqhdhgds = 0;
+        boolean aa =false,bb = false;
         if (CollectionUtils.isNotEmpty(list8)){
-            double lqhdzds = 0;
-            double lqhdhgds = 0;
+            aa = true;
             for (Map<String, Object> map : list8) {
                 lqhdzds += Double.valueOf(map.get("上面层厚度检测点数").toString());
                 lqhdzds += Double.valueOf(map.get("总厚度检测点数").toString());
                 lqhdhgds += Double.valueOf(map.get("上面层厚度合格点数").toString());
                 lqhdhgds += Double.valueOf(map.get("总厚度合格点数").toString());
             }
+
+        }
+        if (CollectionUtils.isNotEmpty(ldhd)){
+            bb=true;
+            for (Map<String, Object> map : ldhd) {
+                lqhdzds += Double.valueOf(map.get("总点数").toString());
+                lqhdhgds += Double.valueOf(map.get("合格点数").toString());
+            }
+        }
+        if (aa || bb){
             resultmap.put("lqhdzds",decf.format(lqhdzds));
             resultmap.put("lqhdhgds",decf.format(lqhdhgds));
             resultmap.put("lqhdhgl",lqhdzds!=0 ? df.format(lqhdhgds/lqhdzds*100) : 0);
@@ -9046,11 +9179,10 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         DecimalFormat decf = new DecimalFormat("0.##");
         List<Map<String, Object>> resultList = new ArrayList<>();
         //沥青
+        double jcds = 0,hgds = 0;
+        boolean a = false,b = false;
         List<Map<String, Object>> list = jjgFbgcLmgcGslqlmhdzxfService.lookJdbjg(commonInfoVo);
         if (list!=null && list.size()>0){
-            double jcds = 0;
-            double hgds = 0;
-            boolean a = false;
             for (Map<String, Object> map : list) {
                 String lmlx = map.get("路面类型").toString();
                 if (lmlx.contains("隧道") ){
@@ -9061,7 +9193,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                     hgds += Double.valueOf(map.get("总厚度合格点数").toString());
                 }
             }
-            if (a){
+            /*if (a){
                 Map map2 = new HashMap();
                 map2.put("htd",commonInfoVo.getHtd());
                 map2.put("sdlmlx","沥青路面");
@@ -9069,8 +9201,32 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                 map2.put("sdhgs",decf.format(hgds));
                 map2.put("sdhgl",jcds!=0 ? df.format(hgds/jcds*100) : 0);
                 resultList.add(map2);
+            }*/
+        }
+        //混凝土  无隧道
+
+        //自动化的雷达法有
+        List<Map<String, Object>> list1 = jjgZdhLdhdService.lookJdbjg(commonInfoVo);
+        if (list1!=null && list1.size()>0){
+            for (Map<String, Object> map : list1) {
+                String lmlx = map.get("路面类型").toString();
+                if (lmlx.contains("隧道") ){
+                    b = true;
+                    jcds += Double.valueOf(map.get("总点数").toString());
+                    hgds += Double.valueOf(map.get("合格点数").toString());
+                }
             }
         }
+        if (a || b){
+            Map map2 = new HashMap();
+            map2.put("htd",commonInfoVo.getHtd());
+            map2.put("sdlmlx","沥青路面");
+            map2.put("sdjcds",decf.format(jcds));
+            map2.put("sdhgs",decf.format(hgds));
+            map2.put("sdhgl",jcds!=0 ? df.format(hgds/jcds*100) : 0);
+            resultList.add(map2);
+        }
+
         return resultList;
 
     }
@@ -10128,9 +10284,12 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         List<Map<String, Object>> resultList = new ArrayList<>();
         //沥青
         List<Map<String, Object>> list = jjgFbgcLmgcGslqlmhdzxfService.lookJdbjg(commonInfoVo);
-        if (list!=null && list.size()>0){
-            double jcds = 0;
-            double hgds = 0;
+        //雷达法
+        List<Map<String, Object>> list2 = jjgZdhLdhdService.lookJdbjg(commonInfoVo);
+        boolean a = false,b = false;
+        double jcds = 0,hgds = 0;
+        if (list!=null && list.size()>0) {
+            a = true;
             for (Map<String, Object> map : list) {
                 String lmlx = map.get("路面类型").toString();
                 if (lmlx.equals("路面左幅") || lmlx.equals("路面右幅")){
@@ -10140,6 +10299,18 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                     hgds += Double.valueOf(map.get("总厚度合格点数").toString());
                 }
             }
+        }
+        if (list2!=null && list2.size()>0) {
+            b = true;
+            for (Map<String, Object> map : list2) {
+                String lmlx = map.get("路面类型").toString();
+                if (lmlx.equals("左幅") || lmlx.equals("右幅")){
+                    jcds += Double.valueOf(map.get("总点数").toString());
+                    hgds += Double.valueOf(map.get("合格点数").toString());
+                }
+            }
+        }
+        if (a || b){
             Map map2 = new HashMap();
             map2.put("htd",commonInfoVo.getHtd());
             map2.put("lmhdlmlx","沥青路面");
@@ -10147,8 +10318,8 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
             map2.put("lmhdhgs",decf.format(hgds));
             map2.put("lmhdhgl",jcds!=0 ? df.format(hgds/jcds*100) : 0);
             resultList.add(map2);
-
         }
+
         //混凝土
         List<Map<String, Object>> list1 = jjgFbgcLmgcHntlmhdzxfService.lookJdbjg(commonInfoVo);
         if (list1!=null && list1.size()>0){
@@ -10732,6 +10903,67 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
             resultList.add(map1);
         }
         return resultList;
+    }
+
+
+    /**
+     * 表4.1.2-2  沥青路面弯沉检测结果汇总表
+     * @param commonInfoVo
+     * @return
+     * @throws IOException
+     */
+    private List<Map<String, Object>> getlmwcallData(CommonInfoVo commonInfoVo) throws IOException {
+        DecimalFormat df = new DecimalFormat("0.00");
+        List<Map<String, Object>> resultList = new ArrayList<>();
+        List<Map<String, Object>> listlcf = jjgFbgcLmgcLmwcLcfService.lookJdbjg(commonInfoVo);
+        List<Map<String, Object>> listbrml = jjgFbgcLmgcLmwcService.lookJdbjg(commonInfoVo);
+        double zds =0;
+        double hgds =0;
+        boolean a =false,b=false;
+        if (listlcf!=null && listlcf.size()>0){
+            a = true;
+            for (Map<String, Object> map : listlcf) {
+                zds += Double.valueOf(map.get("检测单元数").toString());
+                hgds += Double.valueOf(map.get("合格单元数").toString());
+            }
+           /* Map map = new HashMap();
+            map.put("htd",commonInfoVo.getHtd());
+            map.put("lmwcdbz",listlcf.get(0).get("规定值"));
+            map.put("lmwcmax",getmaxvalue(listlcf.get(0).get("代表值").toString()));
+            map.put("lmwcmin",getminvalue(listlcf.get(0).get("代表值").toString()));
+            map.put("lmwczds",list.get(0).get("检测单元数"));
+            map.put("lmwchgds",list.get(0).get("合格单元数"));
+            map.put("lmwchgl",list.get(0).get("合格率"));
+            resultList.add(map);*/
+        }
+        if (listbrml!=null && listbrml.size()>0) {
+            b = true;
+            for (Map<String, Object> map : listbrml) {
+                zds += Double.valueOf(map.get("检测单元数").toString());
+                hgds += Double.valueOf(map.get("合格单元数").toString());
+            }
+        }
+        if (a || b){
+            Map map = new HashMap();
+            map.put("htd",commonInfoVo.getHtd());
+            if (a){
+                map.put("lmwcdbz",listlcf.get(0).get("规定值"));
+                map.put("lmwcmax",getmaxvalue(listlcf.get(0).get("代表值").toString()));
+                map.put("lmwcmin",getminvalue(listlcf.get(0).get("代表值").toString()));
+            }
+            if (b){
+                map.put("lmwcdbz",listbrml.get(0).get("规定值"));
+                map.put("lmwcmax",getmaxvalue(listbrml.get(0).get("代表值").toString()));
+                map.put("lmwcmin",getminvalue(listbrml.get(0).get("代表值").toString()));
+            }
+
+            map.put("lmwczds",zds);
+            map.put("lmwchgds",hgds);
+            map.put("lmwchgl",zds!=0 ? df.format(hgds/zds*100) : 0);
+            resultList.add(map);
+        }
+        return resultList;
+
     }
 
 

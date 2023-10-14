@@ -1,5 +1,6 @@
 package glgc.jjgys.model.project;
 
+import com.alibaba.excel.metadata.BaseRowModel;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -23,7 +24,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @TableName("jjg_jgjcsj")
-public class JjgJgjcsj implements Serializable {
+public class JjgJgjcsj  implements Serializable{
 
     private static final long serialVersionUID = 1L;
 

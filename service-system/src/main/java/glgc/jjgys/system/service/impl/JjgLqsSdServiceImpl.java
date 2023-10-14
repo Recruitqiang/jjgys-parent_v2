@@ -1,6 +1,7 @@
 package glgc.jjgys.system.service.impl;
 
 import com.alibaba.excel.EasyExcel;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import glgc.jjgys.common.excel.ExcelUtil;
 import glgc.jjgys.model.project.JjgLqsQl;
 import glgc.jjgys.model.project.JjgLqsSd;
@@ -86,6 +87,28 @@ public class JjgLqsSdServiceImpl extends ServiceImpl<JjgLqsSdMapper, JjgLqsSd> i
     @Override
     public List<JjgLqsSd> getsdName(String proname, String htd) {
         List<JjgLqsSd> list = jjgLqsSdMapper.getsdName(proname,htd);
+        return list;
+
+    }
+
+    @Override
+    public List<JjgLqsSd>  selectzfsd(String proname, String htd, String zf) {
+        QueryWrapper<JjgLqsSd> wrapper = new QueryWrapper<>();
+        wrapper.eq("proname",proname);
+        wrapper.eq("htd",htd);
+        wrapper.eq("lf",zf);
+        List<JjgLqsSd> list = jjgLqsSdMapper.selectList(wrapper);
+        return list;
+
+    }
+
+    @Override
+    public List<JjgLqsSd> selectyfsd(String proname, String htd, String yf) {
+        QueryWrapper<JjgLqsSd> wrapper = new QueryWrapper<>();
+        wrapper.eq("proname",proname);
+        wrapper.eq("htd",htd);
+        wrapper.eq("lf",yf);
+        List<JjgLqsSd> list = jjgLqsSdMapper.selectList(wrapper);
         return list;
 
     }
