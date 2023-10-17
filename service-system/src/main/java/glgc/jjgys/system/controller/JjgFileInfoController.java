@@ -9,6 +9,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
@@ -38,8 +39,8 @@ public class JjgFileInfoController {
     //下载
     @ApiOperation("下载")
     @PostMapping("download")
-    public Result download(@RequestBody List<JjgFileInfo> list) throws IOException {
-        jjgFileInfoService.download(list);
+    public Result download(HttpServletResponse response, @RequestBody List<JjgFileInfo> list) throws IOException {
+        jjgFileInfoService.download(response,list);
         return Result.ok();
 
     }

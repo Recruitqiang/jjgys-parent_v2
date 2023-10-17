@@ -4,9 +4,11 @@ import glgc.jjgys.model.project.JjgFileInfo;
 import glgc.jjgys.system.mapper.JjgFileInfoMapper;
 import glgc.jjgys.system.service.JjgFileInfoService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import glgc.jjgys.system.utils.JjgFbgcCommonUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +53,7 @@ public class JjgFileInfoServiceImpl extends ServiceImpl<JjgFileInfoMapper, JjgFi
     }
 
     @Override
-    public void download(List<JjgFileInfo> downloadPath) throws IOException {
+    public void download(HttpServletResponse response, List<JjgFileInfo> downloadPath) throws IOException {
         if (downloadPath.size() == 1 && downloadPath.get(0).getIsDir()){
             File file = new File(downloadPath.get(0).getPath());
             String zipFileName = downloadPath.get(0).getName() + ".zip";
@@ -62,9 +64,11 @@ public class JjgFileInfoServiceImpl extends ServiceImpl<JjgFileInfoMapper, JjgFi
             // Download file
             if (downloadPath.size() == 1){
                 // Download single file
-                File file = new File(downloadPath.get(0).getPath());
+                JjgFbgcCommonUtils.download(response,downloadPath.get(0).getPath(),downloadPath.get(0).getName());
+
+                /*File file = new File(downloadPath.get(0).getPath());
                 FileInputStream fileIn = new FileInputStream(file);
-                fileIn.close();
+                fileIn.close();*/
             }else {
                 downloadBatch(downloadPath);
             }
