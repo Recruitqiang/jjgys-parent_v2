@@ -10,14 +10,19 @@ import glgc.jjgys.model.project.JjgZdhMcxs;
 import glgc.jjgys.model.project.JjgZdhMcxsJgfc;
 import glgc.jjgys.model.projectvo.ljgc.CommonInfoVo;
 import glgc.jjgys.system.service.JjgZdhMcxsJgfcService;
+import glgc.jjgys.system.utils.JjgFbgcCommonUtils;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -36,6 +41,25 @@ public class JjgZdhMcxsJgfcController {
 
     @Autowired
     private JjgZdhMcxsJgfcService jjgZdhMcxsJgfcService;
+
+    @Value(value = "${jjgys.path.jgfilepath}")
+    private String jgfilepath;
+
+    @RequestMapping(value = "/download", method = RequestMethod.GET)
+    public void downloadExport(HttpServletRequest request, HttpServletResponse response, String proname, String htd) throws IOException {
+        List<Map<String,Object>> lxlist = jjgZdhMcxsJgfcService.selectlx(proname,htd);
+        List<String> fileName = new ArrayList<>();
+        for (Map<String, Object> map : lxlist) {
+            String lxbs = map.get("lxbs").toString();
+            if (lxbs.equals("主线")){
+                fileName.add("19路面摩擦系数");;
+            }else {
+                fileName.add("62互通摩擦系数-"+lxbs);
+            }
+        }
+        String zipname = "摩擦系数鉴定表";
+        JjgFbgcCommonUtils.batchDowndFile(response,zipname,fileName,jgfilepath+ File.separator+proname+File.separator+htd);
+    }
 
     @ApiOperation("生成摩擦系数鉴定表")
     @PostMapping("generateJdb")

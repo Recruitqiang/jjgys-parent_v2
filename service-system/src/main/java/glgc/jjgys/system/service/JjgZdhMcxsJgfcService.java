@@ -8,6 +8,8 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -25,4 +27,5 @@ public interface JjgZdhMcxsJgfcService extends IService<JjgZdhMcxsJgfc> {
 
     void generateJdb(JgCommonEntity proname) throws IOException, ParseException;
 
+    List<Map<String, Object>> selectlx(String proname, String htd);
 }

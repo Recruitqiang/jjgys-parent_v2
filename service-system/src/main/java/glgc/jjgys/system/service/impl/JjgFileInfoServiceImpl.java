@@ -54,23 +54,25 @@ public class JjgFileInfoServiceImpl extends ServiceImpl<JjgFileInfoMapper, JjgFi
 
     @Override
     public void download(HttpServletResponse response, List<JjgFileInfo> downloadPath) throws IOException {
+        System.out.println(downloadPath);
         if (downloadPath.size() == 1 && downloadPath.get(0).getIsDir()){
-            File file = new File(downloadPath.get(0).getPath());
-            String zipFileName = downloadPath.get(0).getName() + ".zip";
-            ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(zipFileName));
-            zipDirectory(file, downloadPath.get(0).getName(), zipOut);
-            zipOut.close();
+            JjgFbgcCommonUtils.Downloadfile(response,downloadPath.get(0).getName(),downloadPath.get(0).getPath());
         } else {
             // Download file
             if (downloadPath.size() == 1){
                 // Download single file
                 JjgFbgcCommonUtils.download(response,downloadPath.get(0).getPath(),downloadPath.get(0).getName());
-
-                /*File file = new File(downloadPath.get(0).getPath());
-                FileInputStream fileIn = new FileInputStream(file);
-                fileIn.close();*/
             }else {
-                downloadBatch(downloadPath);
+                // Download batch file
+                String zipname = "文件";
+                //String path = downloadPath.get(0).getPath();
+                List<String> list = new ArrayList<>();
+                for (JjgFileInfo jjgFileInfo : downloadPath) {
+                    list.add(jjgFileInfo.getPath());
+                }
+                System.out.println(list+"wq");
+                JjgFbgcCommonUtils.DownloadBatch(response,zipname,list);
+                //downloadBatch(downloadPath);
             }
         }
 

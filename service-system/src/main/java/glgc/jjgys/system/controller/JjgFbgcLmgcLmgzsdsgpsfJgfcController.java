@@ -9,13 +9,17 @@ import glgc.jjgys.model.project.JjgFbgcLmgcLmgzsdsgpsf;
 import glgc.jjgys.model.project.JjgFbgcLmgcLmgzsdsgpsfJgfc;
 import glgc.jjgys.model.projectvo.ljgc.CommonInfoVo;
 import glgc.jjgys.system.service.JjgFbgcLmgcLmgzsdsgpsfJgfcService;
+import glgc.jjgys.system.utils.JjgFbgcCommonUtils;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
@@ -33,6 +37,19 @@ public class JjgFbgcLmgcLmgzsdsgpsfJgfcController {
 
     @Autowired
     private JjgFbgcLmgcLmgzsdsgpsfJgfcService jjgFbgcLmgcLmgzsdsgpsfJgfcService;
+
+    @Value(value = "${jjgys.path.jgfilepath}")
+    private String jgfilepath;
+
+    @RequestMapping(value = "/download", method = RequestMethod.GET)
+    public void downloadExport(HttpServletResponse response, String proname, String htd) throws IOException {
+        String fileName = "20构造深度手工铺沙法.xlsx";
+        String p = jgfilepath+ File.separator+proname+File.separator+htd+File.separator+fileName;
+        File file = new File(p);
+        if (file.exists()){
+            JjgFbgcCommonUtils.download(response,p,fileName);
+        }
+    }
 
     @ApiOperation("生成构造深度手工铺沙法鉴定表")
     @PostMapping("generateJdb")

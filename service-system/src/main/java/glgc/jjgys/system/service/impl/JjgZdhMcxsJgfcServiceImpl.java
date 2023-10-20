@@ -151,6 +151,12 @@ public class JjgZdhMcxsJgfcServiceImpl extends ServiceImpl<JjgZdhMcxsJgfcMapper,
         }
     }
 
+    @Override
+    public List<Map<String, Object>> selectlx(String proname, String htd) {
+        List<Map<String,Object>> lxlist = jjgZdhMcxsJgfcMapper.selectlx(proname,htd);
+        return lxlist;
+    }
+
     private void gethtdjdb(String proname, String htd, String sjz) throws IOException, ParseException {
 
         List<Map<String,Object>> lxlist = jjgZdhMcxsJgfcMapper.selectlx(proname,htd);

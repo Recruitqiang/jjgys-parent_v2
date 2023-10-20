@@ -3,6 +3,7 @@ package glgc.jjgys.system.service.impl;
 import cn.hutool.core.io.resource.ClassPathResource;
 import com.alibaba.excel.EasyExcel;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import glgc.jjgys.common.excel.ExcelListener;
 import glgc.jjgys.common.excel.ExcelUtil;
 import glgc.jjgys.model.project.JjgFbgcLjgcHdgqd;
 import glgc.jjgys.model.projectvo.ljgc.CommonInfoVo;
@@ -14,6 +15,7 @@ import glgc.jjgys.system.service.JjgFbgcLjgcHdgqdService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import glgc.jjgys.system.utils.JjgFbgcCommonUtils;
 import glgc.jjgys.system.utils.RowCopy;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.*;
@@ -26,6 +28,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
@@ -129,8 +133,81 @@ public class JjgFbgcLjgcHdgqdServiceImpl extends ServiceImpl<JjgFbgcLjgcHdgqdMap
                             new ExcelHandler<JjgFbgcLjgcHdgqdVo>(JjgFbgcLjgcHdgqdVo.class) {
                                 @Override
                                 public void handle(List<JjgFbgcLjgcHdgqdVo> dataList) {
-                                    for(JjgFbgcLjgcHdgqdVo hdgqdVo: dataList)
-                                    {
+                                    int rowNumber = 2;
+                                    for(JjgFbgcLjgcHdgqdVo hdgqdVo: dataList) {
+                                        if (StringUtils.isEmpty(hdgqdVo.getZh())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，桩号为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(hdgqdVo.getBw1())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，部位1值为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(hdgqdVo.getBw2())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，部位2值为空，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(hdgqdVo.getCdz1()) || StringUtils.isEmpty(hdgqdVo.getCdz1())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，测定值1值有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(hdgqdVo.getZ2()) || StringUtils.isEmpty(hdgqdVo.getZ2())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，值2有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(hdgqdVo.getZ3()) || StringUtils.isEmpty(hdgqdVo.getZ3())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，值3有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(hdgqdVo.getZ4()) || StringUtils.isEmpty(hdgqdVo.getZ4())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，值4有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(hdgqdVo.getZ5()) || StringUtils.isEmpty(hdgqdVo.getZ5())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，值5有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(hdgqdVo.getZ6())|| StringUtils.isEmpty(hdgqdVo.getZ6())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，值6有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(hdgqdVo.getZ7())|| StringUtils.isEmpty(hdgqdVo.getZ7())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，值7有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(hdgqdVo.getZ8())|| StringUtils.isEmpty(hdgqdVo.getZ8())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，值8有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(hdgqdVo.getZ9())|| StringUtils.isEmpty(hdgqdVo.getZ9())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，值9有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(hdgqdVo.getZ10()) || StringUtils.isEmpty(hdgqdVo.getZ10())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，值10有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(hdgqdVo.getZ11()) || StringUtils.isEmpty(hdgqdVo.getZ11())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，值11有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(hdgqdVo.getZ12()) || StringUtils.isEmpty(hdgqdVo.getZ12())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，值12有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(hdgqdVo.getZ13())|| StringUtils.isEmpty(hdgqdVo.getZ13())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，值13有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(hdgqdVo.getZ14()) || StringUtils.isEmpty(hdgqdVo.getZ14())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，值14有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(hdgqdVo.getZ15())|| StringUtils.isEmpty(hdgqdVo.getZ15())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，值15有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(hdgqdVo.getZ16())|| StringUtils.isEmpty(hdgqdVo.getZ16())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，值16有误，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(hdgqdVo.getHtjd())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，回弹角度值是空的，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(hdgqdVo.getJzm())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，浇筑面值是空的，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(hdgqdVo.getThsd())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，碳化深度值是空的，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(hdgqdVo.getSfbs())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，是否泵送值是空的，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(hdgqdVo.getSjqd())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，设计强度值是空的，请修改后重新上传");
+                                        }
+
                                         JjgFbgcLjgcHdgqd fbgcLjgcHdgqd = new JjgFbgcLjgcHdgqd();
                                         BeanUtils.copyProperties(hdgqdVo,fbgcLjgcHdgqd);
                                         fbgcLjgcHdgqd.setCreatetime(new Date());
@@ -138,6 +215,7 @@ public class JjgFbgcLjgcHdgqdServiceImpl extends ServiceImpl<JjgFbgcLjgcHdgqdMap
                                         fbgcLjgcHdgqd.setHtd(commonInfoVo.getHtd());
                                         fbgcLjgcHdgqd.setFbgc(commonInfoVo.getFbgc());
                                         jjgFbgcLjgcHdgqdMapper.insert(fbgcLjgcHdgqd);
+                                        rowNumber++;
                                     }
                                 }
                             }
@@ -273,48 +351,142 @@ public class JjgFbgcLjgcHdgqdServiceImpl extends ServiceImpl<JjgFbgcLjgcHdgqdMap
         sheet.getRow(tableNum*25+index).getCell(2).setCellValue(row.getBw2());
 
         if(!"".equals(row.getCdz1()))
-            sheet.getRow(tableNum*25+index).getCell(3).setCellValue(Double.valueOf(row.getCdz1()).intValue());
+            try {
+                sheet.getRow(tableNum*25+index).getCell(3).setCellValue(Double.valueOf(row.getCdz1()).intValue());
+            }catch (NumberFormatException e) {
+                // 处理异常，填写空值
+                sheet.getRow(tableNum*25+index).getCell(3).setCellValue("");
+            }
+
         if(!"".equals(row.getZ2()))
-            sheet.getRow(tableNum*25+index).getCell(4).setCellValue(Double.valueOf(row.getZ2()).intValue());
+            try {
+                sheet.getRow(tableNum*25+index).getCell(4).setCellValue(Double.valueOf(row.getZ2()).intValue());
+            }catch (NumberFormatException e){
+                // 处理异常，填写空值
+                sheet.getRow(tableNum*25+index).getCell(4).setCellValue("");
+            }
+
         if(!"".equals(row.getZ3()))
-            sheet.getRow(tableNum*25+index).getCell(5).setCellValue(Double.valueOf(row.getZ3()).intValue());
+            try {
+                sheet.getRow(tableNum*25+index).getCell(5).setCellValue(Double.valueOf(row.getZ3()).intValue());
+            }catch (NumberFormatException e){
+                sheet.getRow(tableNum*25+index).getCell(5).setCellValue("");
+            }
         if(!"".equals(row.getZ4()))
-            sheet.getRow(tableNum*25+index).getCell(6).setCellValue(Double.valueOf(row.getZ4()).intValue());
+            try {
+                sheet.getRow(tableNum*25+index).getCell(6).setCellValue(Double.valueOf(row.getZ4()).intValue());
+            }catch (NumberFormatException e){
+                sheet.getRow(tableNum*25+index).getCell(6).setCellValue("");
+            }
+
         if(!"".equals(row.getZ5()))
-            sheet.getRow(tableNum*25+index).getCell(7).setCellValue(Double.valueOf(row.getZ5()).intValue());
+            try {
+                sheet.getRow(tableNum*25+index).getCell(7).setCellValue(Double.valueOf(row.getZ5()).intValue());
+            }catch (NumberFormatException e){
+                sheet.getRow(tableNum*25+index).getCell(7).setCellValue("");
+            }
         if(!"".equals(row.getZ6()))
-            sheet.getRow(tableNum*25+index).getCell(8).setCellValue(Double.valueOf(row.getZ6()).intValue());
+            try {
+                sheet.getRow(tableNum*25+index).getCell(8).setCellValue(Double.valueOf(row.getZ6()).intValue());
+            }catch (NumberFormatException e){
+                sheet.getRow(tableNum*25+index).getCell(8).setCellValue("");
+            }
+
         if(!"".equals(row.getZ7()))
-            sheet.getRow(tableNum*25+index).getCell(9).setCellValue(Double.valueOf(row.getZ7()).intValue());
+            try {
+                sheet.getRow(tableNum*25+index).getCell(9).setCellValue(Double.valueOf(row.getZ7()).intValue());
+            }catch (NumberFormatException e){
+                sheet.getRow(tableNum*25+index).getCell(9).setCellValue("");
+            }
         if(!"".equals(row.getZ8()))
-            sheet.getRow(tableNum*25+index).getCell(10).setCellValue(Double.valueOf(row.getZ8()).intValue());
+            try {
+                sheet.getRow(tableNum*25+index).getCell(10).setCellValue(Double.valueOf(row.getZ8()).intValue());
+            }catch (NumberFormatException e){
+                sheet.getRow(tableNum*25+index).getCell(10).setCellValue("");
+            }
+
         if(!"".equals(row.getZ9()))
-            sheet.getRow(tableNum*25+index).getCell(11).setCellValue(Double.valueOf(row.getZ9()).intValue());
+            try {
+                sheet.getRow(tableNum*25+index).getCell(11).setCellValue(Double.valueOf(row.getZ9()).intValue());
+            }catch (NumberFormatException e){
+                sheet.getRow(tableNum*25+index).getCell(11).setCellValue("");
+            }
+
         if(!"".equals(row.getZ10()))
-            sheet.getRow(tableNum*25+index).getCell(12).setCellValue(Double.valueOf(row.getZ10()).intValue());
+            try {
+                sheet.getRow(tableNum*25+index).getCell(12).setCellValue(Double.valueOf(row.getZ10()).intValue());
+            }catch (NumberFormatException e){
+                sheet.getRow(tableNum*25+index).getCell(12).setCellValue("");
+            }
+
         if(!"".equals(row.getZ11()))
-            sheet.getRow(tableNum*25+index).getCell(13).setCellValue(Double.valueOf(row.getZ11()).intValue());
+            try {
+                sheet.getRow(tableNum*25+index).getCell(13).setCellValue(Double.valueOf(row.getZ11()).intValue());
+            }catch (NumberFormatException e){
+                sheet.getRow(tableNum*25+index).getCell(13).setCellValue("");
+            }
+
         if(!"".equals(row.getZ12()))
-            sheet.getRow(tableNum*25+index).getCell(14).setCellValue(Double.valueOf(row.getZ12()).intValue());
+            try {
+                sheet.getRow(tableNum*25+index).getCell(14).setCellValue(Double.valueOf(row.getZ12()).intValue());
+            }catch (NumberFormatException e){
+                sheet.getRow(tableNum*25+index).getCell(14).setCellValue("");
+            }
+
         if(!"".equals(row.getZ13()))
-            sheet.getRow(tableNum*25+index).getCell(15).setCellValue(Double.valueOf(row.getZ13()).intValue());
+            try {
+                sheet.getRow(tableNum*25+index).getCell(15).setCellValue(Double.valueOf(row.getZ13()).intValue());
+            }catch (NumberFormatException e){
+                sheet.getRow(tableNum*25+index).getCell(15).setCellValue("");
+            }
+
         if(!"".equals(row.getZ14()))
-            sheet.getRow(tableNum*25+index).getCell(16).setCellValue(Double.valueOf(row.getZ14()).intValue());
+            try {
+                sheet.getRow(tableNum*25+index).getCell(16).setCellValue(Double.valueOf(row.getZ14()).intValue());
+            }catch (NumberFormatException e){
+                sheet.getRow(tableNum*25+index).getCell(16).setCellValue("");
+            }
         if(!"".equals(row.getZ15()))
-            sheet.getRow(tableNum*25+index).getCell(17).setCellValue(Double.valueOf(row.getZ15()).intValue());
+            try {
+                sheet.getRow(tableNum*25+index).getCell(17).setCellValue(Double.valueOf(row.getZ15()).intValue());
+            }catch (NumberFormatException e){
+                sheet.getRow(tableNum*25+index).getCell(17).setCellValue("");
+            }
+
         if(!"".equals(row.getZ16()))
-            sheet.getRow(tableNum*25+index).getCell(18).setCellValue(Double.valueOf(row.getZ16()).intValue());
+            try {
+                sheet.getRow(tableNum*25+index).getCell(18).setCellValue(Double.valueOf(row.getZ16()).intValue());
+            }catch (NumberFormatException e){
+                sheet.getRow(tableNum*25+index).getCell(18).setCellValue("");
+            }
+
 
         if("水平".equals(row.getHtjd())){
             sheet.getRow(tableNum*25+index).getCell(20).setCellValue(row.getHtjd());//U回弹角度
         }
         else{
-            sheet.getRow(tableNum*25+index).getCell(20).setCellValue(Double.valueOf(row.getHtjd()).intValue());//U回弹角度
+            try {
+                sheet.getRow(tableNum*25+index).getCell(20).setCellValue(Double.valueOf(row.getHtjd()).intValue());//U回弹角度
+            }catch (NumberFormatException e){
+                sheet.getRow(tableNum*25+index).getCell(20).setCellValue("");
+            }
+
         }
         sheet.getRow(tableNum*25+index).getCell(23).setCellValue(row.getJzm());//X浇筑面
-        sheet.getRow(tableNum*25+index).getCell(26).setCellValue(Double.valueOf(row.getThsd()));//AA碳化深度
+
+        try {
+            sheet.getRow(tableNum*25+index).getCell(26).setCellValue(Double.valueOf(row.getThsd()));//AA碳化深度
+        }catch (NumberFormatException e){
+            sheet.getRow(tableNum*25+index).getCell(26).setCellValue("");
+        }
         sheet.getRow(tableNum*25+index).getCell(28).setCellValue(row.getSfbs());//AC是否泵送
-        sheet.getRow(tableNum*25+index).getCell(31).setCellValue(Double.valueOf(row.getSjqd()).intValue());//AF设计强度
+
+        try {
+            sheet.getRow(tableNum*25+index).getCell(31).setCellValue(Double.valueOf(row.getSjqd()).intValue());//AF设计强度
+        }catch (NumberFormatException e){
+            sheet.getRow(tableNum*25+index).getCell(31).setCellValue("");
+        }
+
         sheet.getRow(tableNum*25+index).getCell(31).setCellStyle(cellstyle);
 
     }

@@ -1,6 +1,7 @@
 package glgc.jjgys.system.utils;
 
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.*;
 
@@ -32,6 +33,133 @@ public class JjgFbgcCommonUtils {
 
     @Value(value = "${jjgys.path.filepath}")
     private static String filespath;
+
+    public static void Downloadfile( HttpServletResponse response,String zipName,String path) throws UnsupportedEncodingException {
+        //设置压缩包的名字
+        String downloadName = URLEncoder.encode(zipName+".zip", "UTF-8");
+        response.reset();
+        response.setHeader("Content-disposition", "attachment; filename=" + downloadName);
+        response.setContentType("application/zip;charset=utf-8");
+        response.setCharacterEncoding("utf-8");
+
+        //设置压缩流：直接写入response，实现边压缩边下载
+        ZipOutputStream zipOs = null;
+        //循环将文件写入压缩流
+        DataOutputStream os = null;
+        //文件夹
+        //File folder;
+        try {
+            zipOs = new ZipOutputStream(new BufferedOutputStream(response.getOutputStream()));
+            //设置压缩方法
+            zipOs.setMethod(ZipOutputStream.DEFLATED);
+            zipOs.setEncoding("GBK");
+            //获取文件夹路径
+            File folder = new File(path);
+            //调用递归方法压缩文件夹
+            compressFolder(folder, folder.getName(), zipOs);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            //关闭流
+            try {
+                if (os != null) {
+                    os.flush();
+                    os.close();
+                }
+                if (zipOs != null) {
+                    zipOs.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+    private static void compressFolder(File sourceFile, String baseName, ZipOutputStream zipOs) throws IOException {
+        if (sourceFile.isDirectory()) {
+            File[] files = sourceFile.listFiles();
+            for (File file : files) {
+                String entryName = baseName + "/" + file.getName();
+                compressFolder(file, entryName, zipOs);
+            }
+        } else {
+            byte[] buffer = new byte[1024];
+            FileInputStream fis = new FileInputStream(sourceFile);
+            zipOs.putNextEntry(new ZipEntry(baseName));
+            int length;
+            while ((length = fis.read(buffer)) > 0) {
+                zipOs.write(buffer, 0, length);
+            }
+            fis.close();
+        }
+    }
+
+
+    public static void DownloadBatch( HttpServletResponse response,String zipName,List list) throws UnsupportedEncodingException {
+        //设置压缩包的名字
+        String downloadName = URLEncoder.encode(zipName+".zip", "UTF-8");
+        response.reset();
+        response.setHeader("Content-disposition", "attachment; filename=" + downloadName);
+        response.setContentType("application/zip;charset=utf-8");
+        response.setCharacterEncoding("utf-8");
+
+        //设置压缩流：直接写入response，实现边压缩边下载
+        ZipOutputStream zipOs = null;
+        //循环将文件写入压缩流
+        DataOutputStream os = null;
+        //文件
+        File file;
+        try {
+            zipOs = new ZipOutputStream(new BufferedOutputStream(response.getOutputStream()));
+            //设置压缩方法
+            zipOs.setMethod(ZipOutputStream.DEFLATED);
+            //遍历文件信息（主要获取文件名/文件路径等）
+            for (int i=0;i<list.size();i++) {
+                String path = list.get(i).toString();
+                System.out.println(path);
+                String name = StringUtils.substringAfterLast(path, "\\");
+                //String path = filepath+File.separator+name;
+                System.out.println(name);
+
+                file = new File(path);
+                if (!file.exists()) {
+                    continue;
+                }
+                //添加ZipEntry，并将ZipEntry写入文件流
+                zipOs.putNextEntry(new ZipEntry(name));
+                zipOs.setEncoding("gbk");
+                os = new DataOutputStream(zipOs);
+                FileInputStream fs = new FileInputStream(file);
+                byte[] b = new byte[100];
+                int length;
+                //读入需要下载的文件的内容，打包到zip文件
+                while ((length = fs.read(b)) != -1) {
+                    os.write(b, 0, length);
+                }
+                //关闭流
+                fs.close();
+                zipOs.closeEntry();
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            //关闭流
+            try {
+                if (os != null) {
+                    os.flush();
+                    os.close();
+                }
+                if (zipOs != null) {
+                    zipOs.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
 
     /**
      *

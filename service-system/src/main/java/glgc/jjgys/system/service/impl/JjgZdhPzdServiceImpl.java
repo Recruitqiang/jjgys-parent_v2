@@ -179,7 +179,25 @@ public class JjgZdhPzdServiceImpl extends ServiceImpl<JjgZdhPzdMapper, JjgZdhPzd
             List<Map<String, Object>> qlyxList = montageIRI(qlyfdata);
 
             List<Map<String, Object>> lmzfList = montageIRI(datazf);
+            Collections.sort(lmzfList, new Comparator<Map<String, Object>>() {
+                @Override
+                public int compare(Map<String, Object> o1, Map<String, Object> o2) {
+                    // 名字相同时按照 qdzh 排序
+                    Double qdzh1 = Double.parseDouble(o1.get("qdzh").toString());
+                    Double qdzh2 = Double.parseDouble(o2.get("qdzh").toString());
+                    return qdzh1.compareTo(qdzh2);
+                }
+            });
             List<Map<String, Object>> lmyfList = montageIRI(datayf);
+            Collections.sort(lmyfList, new Comparator<Map<String, Object>>() {
+                @Override
+                public int compare(Map<String, Object> o1, Map<String, Object> o2) {
+                    // 名字相同时按照 qdzh 排序
+                    Double qdzh1 = Double.parseDouble(o1.get("qdzh").toString());
+                    Double qdzh2 = Double.parseDouble(o2.get("qdzh").toString());
+                    return qdzh1.compareTo(qdzh2);
+                }
+            });
 
             double zdzh = Double.parseDouble(lmzfList.get(0).get("qdzh").toString());
             double finzdzh = Double.parseDouble(lmzfList.get(lmzfList.size()-1).get("qdzh").toString());
@@ -1550,7 +1568,7 @@ public class JjgZdhPzdServiceImpl extends ServiceImpl<JjgZdhPzdMapper, JjgZdhPzd
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         SimpleDateFormat outputDateFormat = new SimpleDateFormat("yyyy.MM.dd");
         if (data != null && !data.isEmpty()) {
-            createTable(getNum(data,cdsl)/2+10, wb, sheetname, cdsl);
+            createTable(getNum(data,cdsl)/2+1, wb, sheetname, cdsl);
             XSSFSheet sheet = wb.getSheet(sheetname);
 
             String time = String.valueOf(data.get(0).get("createTime")) ;

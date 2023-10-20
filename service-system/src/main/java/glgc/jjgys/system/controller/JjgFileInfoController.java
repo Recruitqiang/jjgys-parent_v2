@@ -39,9 +39,8 @@ public class JjgFileInfoController {
     //下载
     @ApiOperation("下载")
     @PostMapping("download")
-    public Result download(HttpServletResponse response, @RequestBody List<JjgFileInfo> list) throws IOException {
+    public void download(HttpServletResponse response, @RequestBody List<JjgFileInfo> list) throws IOException {
         jjgFileInfoService.download(response,list);
-        return Result.ok();
 
     }
 

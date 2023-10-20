@@ -2,6 +2,9 @@ package glgc.jjgys.model.projectvo.jggl;
 
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.write.style.ColumnWidth;
+import com.alibaba.excel.annotation.write.style.HeadFontStyle;
+import com.alibaba.excel.annotation.write.style.HeadRowHeight;
+import com.alibaba.excel.annotation.write.style.HeadStyle;
 import com.alibaba.excel.metadata.BaseRowModel;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -16,8 +19,9 @@ import lombok.EqualsAndHashCode;
  * @since 2023-09-25
  */
 @Data
-@EqualsAndHashCode(callSuper = false)
-@TableName("jjg_wgkf")
+@HeadStyle(fillForegroundColor = 13)
+@HeadFontStyle(fontHeightInPoints = 10)
+@HeadRowHeight(30)
 public class JjgWgkfVo extends BaseRowModel {
 
     /**

@@ -9,6 +9,7 @@ import glgc.jjgys.model.project.JjgZdhCz;
 import glgc.jjgys.model.project.JjgZdhCzJgfc;
 import glgc.jjgys.model.projectvo.ljgc.CommonInfoVo;
 import glgc.jjgys.system.service.JjgZdhCzJgfcService;
+import glgc.jjgys.system.utils.JjgFbgcCommonUtils;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,9 +17,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -37,6 +41,22 @@ public class JjgZdhCzJgfcController {
 
     @Value(value = "${jjgys.path.jgfilepath}")
     private String jgfilepath;
+
+    @RequestMapping(value = "/download", method = RequestMethod.GET)
+    public void downloadExport(HttpServletResponse response, String proname, String htd) throws IOException {
+        List<Map<String,Object>> lxlist = jjgZdhCzJgfcService.selectlx(proname,htd);
+        List<String> fileName = new ArrayList<>();
+        for (Map<String, Object> map : lxlist) {
+            String lxbs = map.get("lxbs").toString();
+            if (lxbs.equals("主线")){
+                fileName.add("14路面车辙");;
+            }else {
+                fileName.add("69互通车辙-"+lxbs);
+            }
+        }
+        String zipname = "车辙鉴定表";
+        JjgFbgcCommonUtils.batchDowndFile(response,zipname,fileName,jgfilepath+ File.separator+proname+File.separator+htd);
+    }
 
     @ApiOperation("生成车辙鉴定表")
     @PostMapping("generateJdb")

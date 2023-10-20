@@ -1826,4 +1826,10 @@ public class JjgZdhCzJgfcServiceImpl extends ServiceImpl<JjgZdhCzJgfcMapper, Jjg
         inputStream.close();
 
     }
+
+    @Override
+    public List<Map<String, Object>> selectlx(String proname, String htd) {
+        List<Map<String,Object>> lxlist = jjgZdhCzJgfcMapper.selectlx(proname,htd);
+        return lxlist;
+    }
 }

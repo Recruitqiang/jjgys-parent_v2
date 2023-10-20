@@ -2,6 +2,9 @@ package glgc.jjgys.model.projectvo.ljgc;
 
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.write.style.ColumnWidth;
+import com.alibaba.excel.annotation.write.style.HeadFontStyle;
+import com.alibaba.excel.annotation.write.style.HeadRowHeight;
+import com.alibaba.excel.annotation.write.style.HeadStyle;
 import com.alibaba.excel.metadata.BaseRowModel;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -24,6 +27,9 @@ import java.util.Date;
  * @since 2023-03-01
  */
 @Data
+@HeadStyle(fillForegroundColor = 13)
+@HeadFontStyle(fontHeightInPoints = 10)
+@HeadRowHeight(30)
 public class JjgFbgcLjgcLjwcLcfVo extends BaseRowModel {
 
     @ColumnWidth(23)
