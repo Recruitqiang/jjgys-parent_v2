@@ -55,7 +55,7 @@ public class JjgZdhLdhdController {
 
     @RequestMapping(value = "/download", method = RequestMethod.GET)
     public void downloadExport(HttpServletResponse response, String proname, String htd) throws IOException {
-        String fileName = ".xlsx";
+        String fileName = "16路面雷达厚度.xlsx";
         String p = filespath+ File.separator+proname+File.separator+htd+File.separator+fileName;
         File file = new File(p);
         if (file.exists()){
@@ -80,7 +80,7 @@ public class JjgZdhLdhdController {
 
     @ApiOperation("雷达厚度模板文件导出")
     @GetMapping("exportldhd")
-    public void exportldhd(HttpServletResponse response,String cdsl) throws IOException {
+    public void exportldhd(HttpServletResponse response, @RequestParam String cdsl) throws IOException {
         jjgZdhLdhdService.exportldhd(response,cdsl);
     }
 

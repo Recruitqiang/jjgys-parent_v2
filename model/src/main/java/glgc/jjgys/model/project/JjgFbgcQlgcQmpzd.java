@@ -68,6 +68,9 @@ public class JjgFbgcQlgcQmpzd implements Serializable {
     @TableField("scz")
     private String scz;
 
+    @TableField("lmlx")
+    private String lmlx;
+
     @TableField("proname")
     private String proname;
 

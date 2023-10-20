@@ -55,37 +55,39 @@ public class JjgFbgcLjgcZddmccServiceImpl extends ServiceImpl<JjgFbgcLjgcZddmccM
 
     @Override
     public void generateJdb(CommonInfoVo commonInfoVo) throws IOException {
+
         String proname = commonInfoVo.getProname();
         String htd = commonInfoVo.getHtd();
         String fbgc = commonInfoVo.getFbgc();
         //获得数据
-        QueryWrapper<JjgFbgcLjgcZddmcc> wrapper=new QueryWrapper<>();
-        wrapper.like("proname",proname);
-        wrapper.like("htd",htd);
-        wrapper.like("fbgc",fbgc);
-        wrapper.orderByAsc("zhjwz","cjzh","bw");
+        QueryWrapper<JjgFbgcLjgcZddmcc> wrapper = new QueryWrapper<>();
+        wrapper.like("proname", proname);
+        wrapper.like("htd", htd);
+        wrapper.like("fbgc", fbgc);
+        wrapper.orderByAsc("zhjwz", "cjzh", "bw");
         List<JjgFbgcLjgcZddmcc> data = jjgFbgcLjgcZddmccMapper.selectList(wrapper);
 
-        File f = new File(filepath+File.separator+proname+File.separator+htd+File.separator+"11路基支挡断面尺寸.xlsx");
-        if (data == null || data.size()==0){
+        File f = new File(filepath + File.separator + proname + File.separator + htd + File.separator + "11路基支挡断面尺寸.xlsx");
+        if (data == null || data.size() == 0) {
             return;
-        }else {
+        } else {
             //存放鉴定表的目录
-            File fdir = new File(filepath+File.separator+proname+File.separator+htd);
-            if(!fdir.exists()){
+            File fdir = new File(filepath + File.separator + proname + File.separator + htd);
+            if (!fdir.exists()) {
                 //创建文件根目录
                 fdir.mkdirs();
             }
             File directory = new File("service-system/src/main/resources/static");
             String reportPath = directory.getCanonicalPath();
             String name = "支挡断面尺寸.xlsx";
-            String path =reportPath+File.separator+name;
+            String path = reportPath + File.separator + name;
+
             Files.copy(Paths.get(path), new FileOutputStream(f));
             FileInputStream in = new FileInputStream(f);
             wb = new XSSFWorkbook(in);
             createTable(gettableNum(data.size()));
             String sheetname = "支挡断面尺寸";
-            if(DBtoExcel(data,proname,htd,fbgc,sheetname)){
+            if (DBtoExcel(data, proname, htd, fbgc, sheetname)) {
                 calculateSheet(wb.getSheet("支挡断面尺寸"));
                 for (int j = 0; j < wb.getNumberOfSheets(); j++) {   //表内公式  计算 显示结果
                     JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
@@ -94,7 +96,6 @@ public class JjgFbgcLjgcZddmccServiceImpl extends ServiceImpl<JjgFbgcLjgcZddmccM
                 wb.write(fileOut);
                 fileOut.flush();
                 fileOut.close();
-
             }
 
         }

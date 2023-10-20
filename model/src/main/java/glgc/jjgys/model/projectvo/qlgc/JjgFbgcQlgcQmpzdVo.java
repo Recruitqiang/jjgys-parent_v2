@@ -74,5 +74,10 @@ public class JjgFbgcQlgcQmpzdVo extends BaseRowModel {
     @ExcelProperty(value = "实测值" ,index = 5)
     private String scz;
 
+    @ColumnWidth(23)
+    @ExcelProperty(value = "路面类型" ,index = 6)
+    private String lmlx;
+
+
 
 }

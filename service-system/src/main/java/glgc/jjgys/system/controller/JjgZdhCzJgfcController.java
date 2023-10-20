@@ -42,6 +42,12 @@ public class JjgZdhCzJgfcController {
     @Value(value = "${jjgys.path.jgfilepath}")
     private String jgfilepath;
 
+    @ApiOperation("查看平均值")
+    @GetMapping("lookpjz")
+    public void lookpjz(@RequestParam String proname) {
+        //jjgZdhCzJgfcService.lookpjz(proname);
+    }
+
     @RequestMapping(value = "/download", method = RequestMethod.GET)
     public void downloadExport(HttpServletResponse response, String proname, String htd) throws IOException {
         List<Map<String,Object>> lxlist = jjgZdhCzJgfcService.selectlx(proname,htd);

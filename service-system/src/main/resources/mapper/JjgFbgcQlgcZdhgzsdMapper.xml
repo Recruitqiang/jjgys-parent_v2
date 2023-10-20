@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="glgc.jjgys.system.mapper.JjgFbgcQlgcZdhgzsdMapper">
+
+    <select id="selectlx" resultType="java.util.Map" parameterType="java.lang.String">
+        SELECT DISTINCT lxbs from jjg_fbgc_qlgc_zdhgzsd  where proname = #{proname} and htd = #{htd}
+    </select>
+
+    <select id="selectcdnum" resultType="java.lang.Integer" parameterType="java.lang.String">
+        SELECT COUNT(DISTINCT val) from jjg_fbgc_qlgc_zdhgzsd where proname = #{proname} and htd = #{htd} and lxbs=#{zx}
+    </select>
+
+    <select id="selectzfList" resultType="java.util.Map" parameterType="java.lang.String">
+        SELECT * from jjg_fbgc_qlgc_zdhgzsd where proname = #{proname} and htd = #{htd} and cd LIKE '左幅%' ORDER BY zdbs,qdzh,val
+    </select>
+
+    <select id="selectyfList" resultType="java.util.Map" parameterType="java.lang.String">
+        SELECT * from jjg_fbgc_qlgc_zdhgzsd where proname = #{proname} and htd = #{htd} and cd LIKE '右幅%' ORDER BY zdbs,qdzh,val
+    </select>
+
+</mapper>

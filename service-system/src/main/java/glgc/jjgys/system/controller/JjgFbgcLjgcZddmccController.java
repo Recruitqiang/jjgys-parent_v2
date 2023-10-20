@@ -72,7 +72,6 @@ public class JjgFbgcLjgcZddmccController {
     @PostMapping("generateJdb")
     public void generateJdb(@RequestBody CommonInfoVo commonInfoVo) throws Exception {
         jjgFbgcLjgcZddmccService.generateJdb(commonInfoVo);
-
     }
 
     @ApiOperation("查看支档断面尺寸鉴定结果")

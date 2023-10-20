@@ -202,22 +202,36 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
         Map<String, Map<String, Map<String, Object>>> getqlnum = getqlnum(proname);
 
         Map<String, Map<String, Map<String, Object>>> getsdnum = getsdnum(proname);
-        Map<String, Map<String, Map<String, Object>>> getja = getja(proname);
 
-        Map<String, Map<String, Map<String, Object>>> mergedMap = new HashMap<>();
+        Map<String, Map<String, Map<String, Object>>> getja = getja(proname);
+        Map<String, Map<String, Map<String, Object>>> getljfr = getljfr(proname);
+
+        Map<String, Map<String, Map<String, Object>>> mergedMap = new LinkedHashMap<>();
+
         mergeIntoMap(mergedMap, getqlnum);
         mergeIntoMap(mergedMap, getsdnum);
         mergeIntoMap(mergedMap, getja);
+        mergeIntoMap(mergedMap, getljfr);
+        System.out.println(mergedMap);
         /**
-         {
-         建设项目={桥={中桥=0, 大桥=0, 小桥=7, 特大桥=0}, 交安={单柱=106, 双悬=1, 门架=5, 单悬=20, 附着=27, 双柱=19}, 隧道={中隧道=2, 短隧道=0, 特长隧道=0, 长隧道=2}},
-         TJ-4={桥={中桥=0, 大桥=0, 小桥=1, 特大桥=0}},
-         LJ-1={交安={单柱=106, 双悬=1, 门架=5, 单悬=20, 附着=27, 双柱=19}},
-         TJ-3={桥={中桥=0, 大桥=0, 小桥=2, 特大桥=0}, 隧道={中隧道=2, 短隧道=0, 特长隧道=0, 长隧道=0}},
-         TJ-2={桥={中桥=0, 大桥=0, 小桥=2, 特大桥=0}, 隧道={中隧道=0, 短隧道=0, 特长隧道=0, 长隧道=2}},
-         TJ-1={桥={中桥=0, 大桥=0, 小桥=2, 特大桥=0}}
-         }
+         {建设项目=
+         {桥={中桥=0, 大桥=0, 小桥=32, 特大桥=0},
+         路基={涵洞=80, 通道=80, 小桥=80, 支挡=80},
+         交安={门洞=10, 双旋=10, 单柱=11, 单旋=10, 附着=10, 双柱=10},
+         隧道={中隧道=6, 短隧道=0, 特长隧道=0, 长隧道=10}},
+
+         TJ-8={桥={中桥=0, 大桥=0, 小桥=4, 特大桥=0}, 路基={涵洞=10, 通道=10, 小桥=10, 支挡=10}, 隧道={中隧道=0, 短隧道=0, 特长隧道=0, 长隧道=2}},
+         TJ-7={桥={中桥=0, 大桥=0, 小桥=3, 特大桥=0}, 路基={涵洞=10, 通道=10, 小桥=10, 支挡=10}, 隧道={中隧道=0, 短隧道=0, 特长隧道=0, 长隧道=2}},
+         TJ-6={桥={中桥=0, 大桥=0, 小桥=5, 特大桥=0}, 路基={涵洞=10, 通道=10, 小桥=10, 支挡=10}, 隧道={中隧道=2, 短隧道=0, 特长隧道=0, 长隧道=0}},
+         TJ-5={桥={中桥=0, 大桥=0, 小桥=6, 特大桥=0}, 路基={涵洞=10, 通道=10, 小桥=10, 支挡=10}, 隧道={中隧道=2, 短隧道=0, 特长隧道=0, 长隧道=0}},
+         JA-1={交安={门洞=10, 双旋=10, 单柱=10, 单旋=10, 附着=10, 双柱=10}},
+         TJ-4={桥={中桥=0, 大桥=0, 小桥=5, 特大桥=0}, 路基={涵洞=10, 通道=10, 小桥=10, 支挡=10}, 隧道={中隧道=0, 短隧道=0, 特长隧道=0, 长隧道=2}},
+         TJ-3={桥={中桥=0, 大桥=0, 小桥=3, 特大桥=0}, 路基={涵洞=10, 通道=10, 小桥=10, 支挡=10}, 隧道={中隧道=2, 短隧道=0, 特长隧道=0, 长隧道=0}},
+         TJ-2={桥={中桥=0, 大桥=0, 小桥=3, 特大桥=0}, 路基={涵洞=10, 通道=10, 小桥=10, 支挡=10}, 隧道={中隧道=0, 短隧道=0, 特长隧道=0, 长隧道=2}},
+         TJ-1={桥={中桥=0, 大桥=0, 小桥=3, 特大桥=0}, 路基={涵洞=10, 通道=10, 小桥=10, 支挡=10}, 隧道={中隧道=0, 短隧道=0, 特长隧道=0, 长隧道=2}},
+         JA-2={交安={单柱=1}}}
          */
+
         return mergedMap;
     }
 
@@ -250,7 +264,55 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
             }));
             return v1;
         }));
-        System.out.println(getdwgchgl);
+        /**
+         * {
+         * 路面工程={
+         *  单位工程合格率={
+         *      LM-3=[{zds=0.0, hgl=0, hgds=0.0}],
+         *      LM-2=[{zds=0.0, hgl=0, hgds=0.0}],
+         *      LM-1=[{zds=491.0, hgl=88.80, hgds=436.0}]},
+         *  单位工程指标完成率={
+         *      TJ-8=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-8}],
+         *      TJ-7=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-7}],
+         *      TJ-6=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-6}],
+         *      TJ-5=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-5}],
+         *      TJ-4=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-4}],
+         *      TJ-3=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-3}],
+         *      TJ-2=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-2}],
+         *      TJ-1=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=459, htdname=TJ-1}]}},
+         *
+         * 交安工程={
+         *      单位工程合格率={JA-1=[{zds=3469.0, hgl=97.06, hgds=3367.0}]},
+         *      单位工程指标完成率={TJ-8=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-8}],
+         *      TJ-7=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-7}],
+         *      TJ-6=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-6}],
+         *      TJ-5=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-5}],
+         *      TJ-4=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-4}],
+         *      TJ-3=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-3}],
+         *      TJ-2=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-2}],
+         *      TJ-1=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=459, htdname=TJ-1}]}},
+         *
+         *
+         *      路基工程={单位工程合格率={TJ-8=[{zds=0.0, hgl=0, hgds=0.0}], TJ-7=[{zds=0.0, hgl=0, hgds=0.0}], TJ-6=[{zds=0.0, hgl=0, hgds=0.0}], TJ-5=[{zds=0.0, hgl=0, hgds=0.0}],
+         *      TJ-4=[{zds=0.0, hgl=0, hgds=0.0}], TJ-3=[{zds=0.0, hgl=0, hgds=0.0}], TJ-2=[{zds=0.0, hgl=0, hgds=0.0}], TJ-1=[{zds=674.0, hgl=90.21, hgds=608.0}]},
+         *      单位工程指标完成率={TJ-8=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-8}], TJ-7=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-7}],
+         *      TJ-6=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-6}], TJ-5=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-5}],
+         *      TJ-4=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-4}], TJ-3=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-3}],
+         *      TJ-2=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-2}], TJ-1=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=459, htdname=TJ-1}]}},
+         *
+         *
+         *      桥梁工程={单位工程合格率={TJ-8=[{zds=0.0, hgl=0, hgds=0.0}], TJ-7=[{zds=0.0, hgl=0, hgds=0.0}], TJ-6=[{zds=0.0, hgl=0, hgds=0.0}],
+         *      TJ-5=[{zds=0.0, hgl=0, hgds=0.0}], TJ-4=[{zds=0.0, hgl=0, hgds=0.0}], TJ-3=[{zds=0.0, hgl=0, hgds=0.0}], TJ-2=[{zds=0.0, hgl=0, hgds=0.0}],
+         *      TJ-1=[{zds=1456.0, hgl=89.77, hgds=1307.0}]}, 单位工程指标完成率={TJ-8=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-8}],
+         *      TJ-7=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-7}], TJ-6=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-6}],
+         *      TJ-5=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-5}], TJ-4=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-4}],
+         *      TJ-3=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-3}], TJ-2=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-2}],
+         *      TJ-1=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=459, htdname=TJ-1}]}},
+         *
+         *      隧道工程={单位工程合格率={TJ-8=[{zds=0.0, hgl=0, hgds=0.0}], TJ-7=[{zds=0.0, hgl=0, hgds=0.0}],
+         *      TJ-6=[{zds=0.0, hgl=0, hgds=0.0}], TJ-5=[{zds=0.0, hgl=0, hgds=0.0}], TJ-4=[{zds=0.0, hgl=0, hgds=0.0}], TJ-3=[{zds=0.0, hgl=0, hgds=0.0}], TJ-2=[{zds=0.0, hgl=0, hgds=0.0}],
+         *      TJ-1=[{zds=9258.0, hgl=97.29, hgds=9007.0}]}, 单位工程指标完成率={TJ-8=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-8}], TJ-7=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-7}], TJ-6=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-6}], TJ-5=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-5}], TJ-4=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-4}], TJ-3=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-3}], TJ-2=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=0, htdname=TJ-2}], TJ-1=[{fbgcname=桥梁工程, zs=5000.0, proname=延黄高速, jcs=459, htdname=TJ-1}]}}}
+         */
         return getdwgchgl;
     }
 
@@ -1726,11 +1788,12 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
             }
         }
         Map<String,Map<String, Map<String, List<Map<String, Object>>>>> dd = new HashMap<>();
-        Map<String, Map<String, List<Map<String, Object>>>> te = new HashMap<>();
+
         Map<String, List<Map<String, Object>>> result = zslist.stream()
                 .collect(Collectors.groupingBy(map -> (String) map.get("htdname")));
         result.forEach((group, grouphtdData) -> {
             Map<String, List<Map<String, Object>>> htdname = grouphtdData.stream().collect(Collectors.groupingBy(map -> (String) map.get("fbgcname")));
+            Map<String, Map<String, List<Map<String, Object>>>> te = new HashMap<>();
             te.put("合同段指标完成率",htdname);
             dd.put(group,te);
         });
@@ -2335,15 +2398,18 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
 
         }
         Map<String,Map<String, Map<String, List<Map<String, Object>>>>> dd = new HashMap<>();
-        Map<String, Map<String, List<Map<String, Object>>>> te = new HashMap<>();
+
         Map<String, List<Map<String, Object>>> result = res.stream()
                 .collect(Collectors.groupingBy(map -> (String) map.get("htd")));
 
         result.forEach((group, grouphtdData) -> {
             Map<String, List<Map<String, Object>>> lxname = grouphtdData.stream().collect(Collectors.groupingBy(map -> (String) map.get("lx")));
+            Map<String, Map<String, List<Map<String, Object>>>> te = new HashMap<>();
             te.put("合同段合格率",lxname);
             dd.put(group,te);
         });
+
+        System.out.println(dd);
 
         /**
          * {LJ-2={合同段合格率={
@@ -2373,6 +2439,7 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
         QueryWrapper<JjgPlaninfo> wrapper=new QueryWrapper<>();
         wrapper.eq("proname",proname);
         List<JjgPlaninfo> list = jjgLookProjectPlanService.list(wrapper);
+
         Map<String, List<JjgPlaninfo>> groupedData = list.stream()
                 .collect(Collectors.groupingBy(JjgPlaninfo::getFbgc));
         groupedData.forEach((group, grouphtdData) -> {
@@ -2397,6 +2464,7 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
                 zslist.add(mapz);
             });
         });
+
         for (Map<String, Object> map : zslist) {
             String htd = map.get("htdname").toString();
             String fbgcname = map.get("fbgcname").toString();
@@ -2466,16 +2534,17 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
                 map.put("jcs",num1+num2+num3+num4+num5+num6+num7+num8+num9+num10+num11+num12);
             }
         }
+
         Map<String,Map<String, Map<String, List<Map<String, Object>>>>> dd = new HashMap<>();
-        Map<String, Map<String, List<Map<String, Object>>>> te = new HashMap<>();
         Map<String, List<Map<String, Object>>> result = zslist.stream()
                 .collect(Collectors.groupingBy(map -> (String) map.get("fbgcname")));
+
         result.forEach((group, grouphtdData) -> {
             Map<String, List<Map<String, Object>>> htdname = grouphtdData.stream().collect(Collectors.groupingBy(map -> (String) map.get("htdname")));
+            Map<String, Map<String, List<Map<String, Object>>>> te = new HashMap<>();
             te.put("单位工程指标完成率",htdname);
             dd.put(group,te);
         });
-
         return dd;
     }
 
@@ -3201,66 +3270,224 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
         }
     }
 
+    @Autowired
+    private JjgLjfrnumService jjgLjfrnumService;
+
+    /**
+     *
+     * @param proname
+     * @return
+     */
+    private Map<String, Map<String, Map<String, Object>>> getljfr(String proname) {
+        Map<String, Map<String, Map<String, Object>>> data = new LinkedHashMap<>();
+
+        QueryWrapper<JjgLjfrnum> wrapper = new QueryWrapper<>();
+        wrapper.eq("proname", proname);
+        List<JjgLjfrnum> list = jjgLjfrnumService.list(wrapper);
+        Set<String> janumhtd = new HashSet<>();
+        if (list!=null){
+            for (JjgLjfrnum janum : list) {
+                String htd = janum.getHtd();
+                janumhtd.add(htd);
+            }
+        }
+
+        QueryWrapper<JjgHtd> wrapperhtd = new QueryWrapper<>();
+        wrapperhtd.eq("proname", proname);
+        List<JjgHtd> htdList = jjgHtdService.list(wrapperhtd);
+        List<String> htd = new ArrayList<>();
+        for (JjgHtd jjgHtd : htdList) {
+            String htdName = jjgHtd.getName();
+            htd.add(htdName);
+        }
+        //获取到合同段中和交安中不相同的合同段名称
+        List<String> notInList = htd.stream()
+                .filter(e -> !janumhtd.contains(e))
+                .collect(Collectors.toList());
+        if (notInList!=null){
+            for (String s : notInList) {
+                JjgLjfrnum janum = new JjgLjfrnum();
+                janum.setProname(proname);
+                janum.setHtd(s);
+                janum.setFbgc("-");
+                janum.setZb("-");
+                janum.setNum("0");
+                list.add(janum);
+            }
+        }
+
+        //按建设项目
+        if (list!=null){
+            int totla1 = 0,totla2 = 0,totla3 = 0,totla4 = 0;
+            for (JjgLjfrnum ljfrnum : list) {
+                String zb = ljfrnum.getZb();
+                String num = ljfrnum.getNum();
+                if (zb.equals("支挡")){
+                    totla1+=Integer.valueOf(num);
+                }else if (zb.equals("涵洞")){
+                    totla2+=Integer.valueOf(num);
+                }else if (zb.equals("通道")){
+                    totla3+=Integer.valueOf(num);
+                }else if (zb.equals("小桥")){
+                    totla4+=Integer.valueOf(num);
+                }
+            }
+            Map<String,Object> mapja = new HashMap();
+            Map<String, Map<String, Object>> re = new HashMap<>();
+            mapja.put("支挡",totla1);
+            mapja.put("涵洞",totla2);
+            mapja.put("通道",totla3);
+            mapja.put("小桥",totla4);
+            re.put("路基",mapja);
+            data.put("建设项目",re);
+
+            //按合同段
+            List<Map<String,Object>> resultMapList = list.stream()
+                    .map(jjgJanum -> {
+                        Map<String,Object> map = new HashMap<>();
+                        map.put("proname", jjgJanum.getProname());
+                        map.put("htd", jjgJanum.getHtd());
+                        map.put("fbgc", jjgJanum.getFbgc());
+                        map.put("zb", jjgJanum.getZb());
+                        map.put("num", jjgJanum.getNum());
+                        // 将其他属性逐个放入map中
+                        return map;
+                    })
+                    .collect(Collectors.toList());
+            Map<String, List<Map<String,Object>>> groupedMap = resultMapList.stream()
+                    .collect(Collectors.groupingBy(map -> map.get("htd").toString()));
+            // 输出每个分组的结果
+            for (String key : groupedMap.keySet()) {
+                System.out.println("属性: " + key);
+                List<Map<String,Object>> groupList = groupedMap.get(key);
+                Map<String,Object> map11 = new HashMap();
+                Map<String, Map<String,Object>> re1 = new HashMap<>();
+                for (Map<String,Object> map : groupList) {
+                    String zb = map.get("zb").toString();
+                    String num = map.get("num").toString();
+                    map11.put(zb,num);
+                }
+                re1.put("路基",map11);
+                data.put(key,re1);
+            }
+
+        }
+        return data;
+
+    }
+
+
+
+    @Autowired
+    private JjgJanumService jjgJanumService;
+
     /**
      *
      * @param proname
      * @return
      */
     private Map<String, Map<String, Map<String, Object>>> getja(String proname) {
-        Map<String, Map<String, Map<String, Object>>> data = new HashMap<>();
-        Map<String,Object> map = new HashMap();
-        Map<String, Map<String, Object>> re = new HashMap<>();
+        Map<String, Map<String, Map<String, Object>>> data = new LinkedHashMap<>();
 
-        QueryWrapper<JjgFbgcJtaqssJabz> wrapper = new QueryWrapper<>();
+        QueryWrapper<JjgJanum> wrapper = new QueryWrapper<>();
         wrapper.eq("proname", proname);
-        List<JjgFbgcJtaqssJabz> list = jjgFbgcJtaqssJabzService.list(wrapper);
+        List<JjgJanum> list = jjgJanumService.list(wrapper);
+        Set<String> janumhtd = new HashSet<>();
+        if (list!=null){
+            for (JjgJanum janum : list) {
+                String htd = janum.getHtd();
+                janumhtd.add(htd);
+            }
+        }
 
-        Map<String, List<JjgFbgcJtaqssJabz>> groupedData = list.stream()
-                .collect(Collectors.groupingBy(JjgFbgcJtaqssJabz::getLzlx));
-        groupedData.forEach((group, groupData) -> {
-            map.put(group,groupData.size());
+        QueryWrapper<JjgHtd> wrapperhtd = new QueryWrapper<>();
+        wrapperhtd.eq("proname", proname);
+        List<JjgHtd> htdList = jjgHtdService.list(wrapperhtd);
+        List<String> htd = new ArrayList<>();
+        for (JjgHtd jjgHtd : htdList) {
+            String htdName = jjgHtd.getName();
+            htd.add(htdName);
+        }
+        //获取到合同段中和交安中不相同的合同段名称
+        List<String> notInList = htd.stream()
+                .filter(e -> !janumhtd.contains(e))
+                .collect(Collectors.toList());
 
-        });
-        re.put("交安",map);
-        data.put("建设项目",re);
+        if (notInList!=null){
+            for (String s : notInList) {
+                JjgJanum janum = new JjgJanum();
+                janum.setProname(proname);
+                janum.setHtd(s);
+                janum.setFbgc("-");
+                janum.setZb("-");
+                janum.setNum("0");
+                list.add(janum);
+            }
+        }
 
-        //按合同段
-        Map<String, List<JjgFbgcJtaqssJabz>> grouphtd = list.stream()
-                .collect(Collectors.groupingBy(JjgFbgcJtaqssJabz::getHtd));
-        grouphtd.forEach((group, grouphtdData) -> {
-            Map<String,Object> map1 = new HashMap();
-            Map<String, Map<String, Object>> re1 = new HashMap<>();
-            AtomicInteger dxb1 = new AtomicInteger();
-            AtomicInteger sxb1 = new AtomicInteger();
-            AtomicInteger dz1 = new AtomicInteger();
-            AtomicInteger sz1 = new AtomicInteger();
-            AtomicInteger mj1 = new AtomicInteger();
-            Map<String, List<JjgFbgcJtaqssJabz>> grouplx = grouphtdData.stream()
-                    .collect(Collectors.groupingBy(JjgFbgcJtaqssJabz::getLzlx));
-            grouplx.forEach((group1, groupData) -> {
-                map1.put(group1,groupData.size());
-                /*if (group1.equals("单悬臂")){
-                    dxb1.getAndIncrement();
-                }else if (group1.equals("双悬臂")){
-                    sxb1.getAndIncrement();
-                }else if (group1.equals("单柱")){
-                    dz1.getAndIncrement();
-                }else if (group1.equals("双柱")){
-                    sz1.getAndIncrement();
-                }else if (group1.equals("门架")){
-                    mj1.getAndIncrement();
-                }*/
-                re1.put("交安",map1);
-                data.put(group,re1);
-                    });
-            /*map1.put("单悬臂",dxb1);
-            map1.put("双悬臂",sxb1);
-            map1.put("单柱",dz1);
-            map1.put("双柱",sz1);
-            map1.put("门架",mj1);*/
+        //按建设项目
+        if (list!=null){
+            int totla1 = 0,totla2 = 0,totla3 = 0,totla4 = 0,totla5 = 0,totla6 = 0;
+            for (JjgJanum janum : list) {
+                String zb = janum.getZb();
+                String num = janum.getNum();
+                if (zb.equals("单旋")){
+                    totla1+=Integer.valueOf(num);
+                }else if (zb.equals("双旋")){
+                    totla2+=Integer.valueOf(num);
+                }else if (zb.equals("附着")){
+                    totla3+=Integer.valueOf(num);
+                }else if (zb.equals("门洞")){
+                    totla4+=Integer.valueOf(num);
+                }else if (zb.equals("单柱")){
+                    totla5+=Integer.valueOf(num);
+                }else if (zb.equals("双柱")){
+                    totla6+=Integer.valueOf(num);
+                }
+            }
+            Map<String,Object> mapja = new HashMap();
+            Map<String, Map<String, Object>> re = new HashMap<>();
+            mapja.put("单旋",totla1);
+            mapja.put("双旋",totla2);
+            mapja.put("附着",totla3);
+            mapja.put("门洞",totla4);
+            mapja.put("单柱",totla5);
+            mapja.put("双柱",totla6);
+            re.put("交安",mapja);
+            data.put("建设项目",re);
 
-        });
+            //按合同段
+            List<Map<String,Object>> resultMapList = list.stream()
+                    .map(jjgJanum -> {
+                        Map<String,Object> map = new HashMap<>();
+                        map.put("proname", jjgJanum.getProname());
+                        map.put("htd", jjgJanum.getHtd());
+                        map.put("fbgc", jjgJanum.getFbgc());
+                        map.put("zb", jjgJanum.getZb());
+                        map.put("num", jjgJanum.getNum());
+                        // 将其他属性逐个放入map中
+                        return map;
+                    })
+                    .collect(Collectors.toList());
 
+            Map<String, List<Map<String,Object>>> groupedMap = resultMapList.stream()
+                    .collect(Collectors.groupingBy(map -> map.get("htd").toString()));
+            // 输出每个分组的结果
+            for (String key : groupedMap.keySet()) {
+                System.out.println("属性: " + key);
+                List<Map<String,Object>> groupList = groupedMap.get(key);
+                Map<String,Object> map11 = new HashMap();
+                Map<String, Map<String,Object>> re1 = new HashMap<>();
+                for (Map<String,Object> map : groupList) {
+                    String zb = map.get("zb").toString();
+                    String num = map.get("num").toString();
+                    map11.put(zb,num);
+                }
+                re1.put("交安",map11);
+                data.put(key,re1);
+            }
+
+        }
         return data;
     }
 
@@ -3270,26 +3497,50 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
      * @return
      */
     private Map<String, Map<String, Map<String, Object>>> getsdnum(String proname) {
-        Map<String, Map<String, Map<String, Object>>> data = new HashMap<>();
+        Map<String, Map<String, Map<String, Object>>> data = new LinkedHashMap<>();
         Map<String,Object> map = new HashMap();
         Map<String, Map<String, Object>> re = new HashMap<>();
 
         QueryWrapper<JjgLqsSd> wrapper = new QueryWrapper<>();
         wrapper.eq("proname", proname);
         List<JjgLqsSd> list = jjgLqsSdService.list(wrapper);
+
+        Set<String> sdhtd = new HashSet<>();//存隧道表中的合同段
+
+
         Set<String> uniqueNames = new HashSet<>();
         List<JjgLqsSd> deduplicatedList = new ArrayList<>();
 
         for (JjgLqsSd obj : list) {
             // 获取name属性的值
             String name = obj.getSdname();
+            sdhtd.add(name);
             // 如果name是唯一的，则将其加入HashSet集合
             if (uniqueNames.add(name)) {
                 // 将找到的对象加入新的列表
                 deduplicatedList.add(obj);
             }
         }
-
+        QueryWrapper<JjgHtd> wrapperhtd = new QueryWrapper<>();
+        wrapperhtd.eq("proname", proname);
+        List<JjgHtd> htdList = jjgHtdService.list(wrapperhtd);
+        List<String> htd = new ArrayList<>();
+        for (JjgHtd jjgHtd : htdList) {
+            String htdName = jjgHtd.getName();
+            htd.add(htdName);
+        }
+        List<String> notInList = htd.stream()
+                .filter(e -> !sdhtd.contains(e))
+                .collect(Collectors.toList());
+        if (notInList!=null){
+            for (String s : notInList) {
+                JjgLqsSd jjgLqsSd = new JjgLqsSd();
+                jjgLqsSd.setProname(proname);
+                jjgLqsSd.setHtd(s);
+                jjgLqsSd.setSdqc("0");
+                deduplicatedList.add(jjgLqsSd);
+            }
+        }
 
         int tcsd = 0, csd = 0,zsd = 0, dsd = 0;
         for (JjgLqsSd jjgLqsSd : deduplicatedList) {
@@ -3304,7 +3555,7 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
             }else if (sdc < 1000 && sdc >= 500){
                 zsd++;
 
-            }else if (sdc < 500){
+            }else if (sdc < 500 && sdc >0){
                 dsd++;
             }
         }
@@ -3334,7 +3585,7 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
                 }else if (sdc < 1000 && sdc >= 500){
                     zsd1++;
 
-                }else if (sdc < 500){
+                }else if (sdc < 500 && sdc >0){
                     dsd1++;
                 }
             }
@@ -3355,7 +3606,7 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
      * @return
      */
     private Map<String, Map<String, Map<String, Object>>> getqlnum(String proname) {
-        Map<String, Map<String, Map<String, Object>>> data = new HashMap<>();
+        Map<String, Map<String, Map<String, Object>>> data = new LinkedHashMap<>();
         Map<String,Object> map = new HashMap();
         Map<String, Map<String, Object>> re = new HashMap<>();
 
@@ -3368,14 +3619,36 @@ public class JjgDpkshServiceImpl extends ServiceImpl<JjgDpkshMapper,Object> impl
 
         Set<String> uniqueNames = new HashSet<>();
         List<JjgLqsQl> deduplicatedList = new ArrayList<>();
-
+        Set<String> sdhtd = new HashSet<>();//存桥梁表中的合同段
         for (JjgLqsQl obj : list) {
             // 获取name属性的值
             String name = obj.getQlname();
+            sdhtd.add(name);
             // 如果name是唯一的，则将其加入HashSet集合
             if (uniqueNames.add(name)) {
                 // 将找到的对象加入新的列表
                 deduplicatedList.add(obj);
+            }
+        }
+
+        QueryWrapper<JjgHtd> wrapperhtd = new QueryWrapper<>();
+        wrapperhtd.eq("proname", proname);
+        List<JjgHtd> htdList = jjgHtdService.list(wrapperhtd);
+        List<String> htd = new ArrayList<>();
+        for (JjgHtd jjgHtd : htdList) {
+            String htdName = jjgHtd.getName();
+            htd.add(htdName);
+        }
+        List<String> notInList = htd.stream()
+                .filter(e -> !sdhtd.contains(e))
+                .collect(Collectors.toList());
+        if (notInList!=null){
+            for (String s : notInList) {
+                JjgLqsQl ql = new JjgLqsQl();
+                ql.setProname(proname);
+                ql.setHtd(s);
+                ql.setDkkj("0");
+                deduplicatedList.add(ql);
             }
         }
 

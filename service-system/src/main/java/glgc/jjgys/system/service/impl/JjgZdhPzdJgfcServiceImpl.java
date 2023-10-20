@@ -185,7 +185,25 @@ public class JjgZdhPzdJgfcServiceImpl extends ServiceImpl<JjgZdhPzdJgfcMapper, J
             List<Map<String, Object>> qlyxList = montageIRI(qlyfdata);
 
             List<Map<String, Object>> lmzfList = montageIRI(datazf);
+            Collections.sort(lmzfList, new Comparator<Map<String, Object>>() {
+                @Override
+                public int compare(Map<String, Object> o1, Map<String, Object> o2) {
+                    // 名字相同时按照 qdzh 排序
+                    Double qdzh1 = Double.parseDouble(o1.get("qdzh").toString());
+                    Double qdzh2 = Double.parseDouble(o2.get("qdzh").toString());
+                    return qdzh1.compareTo(qdzh2);
+                }
+            });
             List<Map<String, Object>> lmyfList = montageIRI(datayf);
+            Collections.sort(lmyfList, new Comparator<Map<String, Object>>() {
+                @Override
+                public int compare(Map<String, Object> o1, Map<String, Object> o2) {
+                    // 名字相同时按照 qdzh 排序
+                    Double qdzh1 = Double.parseDouble(o1.get("qdzh").toString());
+                    Double qdzh2 = Double.parseDouble(o2.get("qdzh").toString());
+                    return qdzh1.compareTo(qdzh2);
+                }
+            });
 
             double zdzh = Double.parseDouble(lmzfList.get(0).get("qdzh").toString());
             double finzdzh = Double.parseDouble(lmzfList.get(lmzfList.size()-1).get("qdzh").toString());
@@ -194,6 +212,25 @@ public class JjgZdhPzdJgfcServiceImpl extends ServiceImpl<JjgZdhPzdJgfcMapper, J
             double yzdzh = Double.parseDouble(lmyfList.get(0).get("qdzh").toString());
             double yfinzdzh = Double.parseDouble(lmyfList.get(lmyfList.size()-1).get("qdzh").toString());
             List<Map<String, Object>> lmyf = decrementNumberByStep(yzdzh,yfinzdzh,lmyfList,cdsl);
+
+            Collections.sort(lmzf, new Comparator<Map<String, Object>>() {
+                @Override
+                public int compare(Map<String, Object> o1, Map<String, Object> o2) {
+                    // 名字相同时按照 qdzh 排序
+                    Double qdzh1 = Double.parseDouble(o1.get("qdzh").toString());
+                    Double qdzh2 = Double.parseDouble(o2.get("qdzh").toString());
+                    return qdzh1.compareTo(qdzh2);
+                }
+            });
+            Collections.sort(lmyf, new Comparator<Map<String, Object>>() {
+                @Override
+                public int compare(Map<String, Object> o1, Map<String, Object> o2) {
+                    // 名字相同时按照 qdzh 排序
+                    Double qdzh1 = Double.parseDouble(o1.get("qdzh").toString());
+                    Double qdzh2 = Double.parseDouble(o2.get("qdzh").toString());
+                    return qdzh1.compareTo(qdzh2);
+                }
+            });
 
             writeExcelData(proname,htd,lmzf,lmyf,sdzxList,sdyxList,qlzxList,qlyxList,cdsl,sjz,zx);
         }else if (zx.contains("连接线")){
@@ -1660,15 +1697,15 @@ public class JjgZdhPzdJgfcServiceImpl extends ServiceImpl<JjgZdhPzdJgfcMapper, J
                 for (int i = 0 ; i < sfc.length ; i++) {
                     if (lm.get("cd").equals("左幅")){
                         if (!sfc[i].equals("-")) {
-                            sheet.getRow(tableNum * a + 7 + index % b).getCell(5 + i).setCellValue(Double.parseDouble(sfc[i]));
+                            sheet.getRow(tableNum * a + 7 + index % b).getCell(cdsl*i+5).setCellValue(Double.parseDouble(sfc[i]));
                         }else {
-                            sheet.getRow(tableNum * a + 7 + index % b).getCell(5 + i).setCellValue(sfc[i]);
+                            sheet.getRow(tableNum * a + 7 + index % b).getCell(cdsl*i+5).setCellValue(sfc[i]);
                         }
                     }else {
                         if (!sfc[i].equals("-")){
-                            sheet.getRow(tableNum * a + 7 + index % b).getCell((2*cdsl+5)+i).setCellValue(Double.parseDouble(sfc[i]));
+                            sheet.getRow(tableNum * a + 7 + index % b).getCell((2*cdsl+5)+cdsl*i).setCellValue(Double.parseDouble(sfc[i]));
                         }else {
-                            sheet.getRow(tableNum * a + 7 + index % b).getCell((2*cdsl+5)+i).setCellValue(sfc[i]);
+                            sheet.getRow(tableNum * a + 7 + index % b).getCell((2*cdsl+5)+cdsl*i).setCellValue(sfc[i]);
                         }
 
                     }
@@ -1681,7 +1718,7 @@ public class JjgZdhPzdJgfcServiceImpl extends ServiceImpl<JjgZdhPzdJgfcMapper, J
                     sheet.getRow(tableNum * a + 7 + index % b).getCell(0).setCellValue(m);
                     sheet.getRow(tableNum * a + 7 + index % b).getCell(4).setCellValue(Double.valueOf(lm.get("zdzh").toString()));
                     if (lm.get("cd").equals("左幅")){
-                        sheet.getRow(tableNum * a + 7 + index % b).getCell(5 + i).setCellValue(lm.get("name").toString());
+                        sheet.getRow(tableNum * a + 7 + index % b).getCell(cdsl*i+5).setCellValue(lm.get("name").toString());
 
                         startRow = tableNum * a + 7 + index % b ;
                         endRow = tableNum * a + 7 + index % b ;
@@ -1690,7 +1727,7 @@ public class JjgZdhPzdJgfcServiceImpl extends ServiceImpl<JjgZdhPzdJgfcMapper, J
                         endCol = 2*cdsl+4;
 
                     }else {
-                        sheet.getRow(tableNum * a + 7 + index % b).getCell((2*cdsl+5) + i).setCellValue(lm.get("name").toString());
+                        sheet.getRow(tableNum * a + 7 + index % b).getCell((2*cdsl+5) + cdsl*i).setCellValue(lm.get("name").toString());
                         startRow = tableNum * a + 7 + index % b ;
                         endRow = tableNum * a + 7 + index % b ;
 
@@ -1712,6 +1749,20 @@ public class JjgZdhPzdJgfcServiceImpl extends ServiceImpl<JjgZdhPzdJgfcMapper, J
         }
         List<Map<String, Object>> maps = mergeCells(rowAndcol);
         for (Map<String, Object> map : maps) {
+            int startRow1 = Integer.parseInt(map.get("startRow").toString());
+            int endRow1 = Integer.parseInt(map.get("endRow").toString());
+            int startCol1 = Integer.parseInt(map.get("startCol").toString());
+            int endCol1 = Integer.parseInt(map.get("endCol").toString());
+            CellRangeAddress newRegion = new CellRangeAddress(startRow1, endRow1, startCol1, endCol1);
+            // 检查是否存在重叠的合并区域
+            List<CellRangeAddress> mergedRegions = sheet.getMergedRegions();
+            for (int i = mergedRegions.size() - 1; i >= 0; i--) {
+                CellRangeAddress mergedRegion = mergedRegions.get(i);
+                if (mergedRegion.intersects(newRegion)){
+                    sheet.removeMergedRegion(i);
+                }
+            }
+
             sheet.addMergedRegion(new CellRangeAddress(Integer.parseInt(map.get("startRow").toString()), Integer.parseInt(map.get("endRow").toString()), Integer.parseInt(map.get("startCol").toString()), Integer.parseInt(map.get("endCol").toString())));
         }
 
@@ -1929,9 +1980,9 @@ public class JjgZdhPzdJgfcServiceImpl extends ServiceImpl<JjgZdhPzdJgfcMapper, J
         if (!sfc[0].isEmpty()) {
             for (int i = 0 ; i < sfc.length ; i++) {
                 if (!sfc[i].equals("-")){
-                    sheet.getRow(tableNum * a + 7 + index % b).getCell(5+i).setCellValue(Double.parseDouble(sfc[i]));
+                    sheet.getRow(tableNum * a + 7 + index % b).getCell(cdsl*i+5).setCellValue(Double.parseDouble(sfc[i]));
                 }else {
-                    sheet.getRow(tableNum * a + 7 + index % b).getCell((2*cdsl+5)+i).setCellValue(sfc[i]);
+                    sheet.getRow(tableNum * a + 7 + index % b).getCell(cdsl*i+5).setCellValue(sfc[i]);
                 }
 
             }

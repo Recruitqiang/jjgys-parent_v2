@@ -34,6 +34,16 @@ public class JjgFbgcCommonUtils {
     @Value(value = "${jjgys.path.filepath}")
     private static String filespath;
 
+    public static boolean ishidden(String path, String sheet) throws IOException {
+        File f = new File(path);
+        XSSFWorkbook xwb = new XSSFWorkbook(new FileInputStream(f));
+        int sheetIndex = xwb.getSheetIndex(sheet);
+        //表3.4.4-1
+        boolean sheetHidden = xwb.isSheetHidden(sheetIndex);
+        return sheetHidden;
+
+    }
+
     public static void Downloadfile( HttpServletResponse response,String zipName,String path) throws UnsupportedEncodingException {
         //设置压缩包的名字
         String downloadName = URLEncoder.encode(zipName+".zip", "UTF-8");

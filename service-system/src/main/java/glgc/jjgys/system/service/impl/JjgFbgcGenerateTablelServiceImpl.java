@@ -217,6 +217,33 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
     @Autowired
     private JjgLqsSdService jjgLqsSdService;
 
+    //=========
+    @Autowired
+    private JjgFbgcQlgcZdhgzsdService jjgFbgcQlgcZdhgzsdService;
+
+    @Autowired
+    private JjgFbgcQlgcZdhmcxsService jjgFbgcQlgcZdhmcxsService;
+
+    @Autowired
+    private JjgFbgcQlgcZdhpzdService jjgFbgcQlgcZdhpzdService;
+
+    @Autowired
+    private JjgFbgcSdgcZdhczService jjgFbgcSdgcZdhczService;
+
+    @Autowired
+    private JjgFbgcSdgcZdhgzsdService jjgFbgcSdgcZdhgzsdService;
+
+    @Autowired
+    private JjgFbgcSdgcZdhldhdService jjgFbgcSdgcZdhldhdService;
+
+    @Autowired
+    private JjgFbgcSdgcZdhmcxsService jjgFbgcSdgcZdhmcxsService;
+
+    @Autowired
+    private JjgFbgcSdgcZdhpzdService jjgFbgcSdgcZdhpzdService;
+
+
+
     @Value(value = "${jjgys.path.filepath}")
     private String filepath;
 
@@ -422,11 +449,11 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                             newMap.put("yxps", s);
                             newMap.put("sheetname", "分部-路基");
                             newMap.put("fbgc", "小桥");
-                            maps9.add(newMap);
+                            newMaps9.add(newMap);
                         }
                     }
-                    maps9 = newMaps9;
-                    resultlist.addAll(maps9);
+                    //maps9 = newMaps9;
+                    resultlist.addAll(newMaps9);
                     break;
                 case "07路基小桥结构尺寸.xlsx":
                     List<Map<String, Object>> maps10 = jjgFbgcLjgcXqjgccService.lookJdbjg(commonInfoVo);
@@ -514,13 +541,13 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                     for (Map<String, Object> result : maps13) {
                         Map<String, Object> newMap = new HashMap<>(result);
                         if (result.get("项目").toString().contains("反光膜逆反射系数")){
-                            newMap.put("filename", "详见《交通标志板安装质量鉴定表》检测"+zdsd+"点,合格"+hgdsd+"点");
+                            newMap.put("filename", "详见《交通标志板安装质量鉴定表》检测"+decf.format(zdsd)+"点,合格"+decf.format(hgdsd)+"点");
                             newMap.put("合格率", hgl);
                             newMap.put("总点数", zdsd);
                             newMap.put("合格点数", hgdsd);
 
                         }else {
-                            newMap.put("filename", "详见《交通标志板安装质量鉴定表》检测"+result.get("总点数")+"点,合格"+result.get("合格点数")+"点");
+                            newMap.put("filename", "详见《交通标志板安装质量鉴定表》检测"+decf.format(result.get("总点数"))+"点,合格"+decf.format(result.get("合格点数"))+"点");
                         }
                         newMap.put("ccname", result.get("项目"));
                         newMap.put("yxps", result.get("规定值或允许偏差"));
@@ -528,6 +555,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                         newMap.put("fbgc", "标志");
                         newMaps13.add(newMap);
                     }
+                    System.out.println(newMaps13);
                     resultlist.addAll(newMaps13);
                     break;
                 case "57交安标线厚度.xlsx":
@@ -603,7 +631,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                             }else {
                                 va = "+"+yxpcmap.get("yxwcz")+";"+"-"+yxpcmap.get("yxwcf");
                             }
-                            newMap.put("filename", "详见《交安砼护栏断面尺寸质量鉴定表》检测"+jdjgmap.get("总点数")+"点,合格"+jdjgmap.get("合格点数")+"点");
+                            newMap.put("filename", "详见《交安砼护栏断面尺寸质量鉴定表》检测"+jdjgmap.get("检测总点数")+"点,合格"+jdjgmap.get("合格点数")+"点");
                             newMap.put("ccname", "△砼护栏断面尺寸");
                             newMap.put("yxps", va);
                             newMap.put("sheetname", "分部-交安");
@@ -1031,6 +1059,23 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                     }
                     resultlist.addAll(qlsbbhclist);
                     break;
+                /*case "37桥面构造深度.xlsx":
+                    List<Map<String, Object>> list21 = jjgFbgcQlgcZdhgzsdService.lookJdbjg(commonInfoVo);
+                    List<Map<String, Object>> qmgzsdlist = new ArrayList<>();
+                    for (Map<String, Object> map : list21) {
+                        double z = Double.valueOf(map.get("总点数").toString());
+                        double h = Double.valueOf(map.get("合格点数").toString());
+                        Map map5 = new HashMap();
+                        map5.put("ccname","构造深度");
+                        map5.put("yxps",map.get("设计值"));
+                        map5.put("filename","详见《桥面系构造深度质量鉴定表》检测"+map.get("总点数")+"点,合格"+map.get("合格点数")+"点");
+                        map5.put("sheetname", "分部-"+map.get("qlmc"));
+                        map5.put("fbgc", "桥面系");
+                        map5.put("合格率", (z != 0) ? df.format(h/z*100) : "0");
+                        qmgzsdlist.add(map5);
+                    }
+                    resultlist.addAll(qmgzsdlist);
+                    break;*/
                 case "24路面横坡.xlsx":
                     //工作簿分路面，桥，隧道
                     List<Map<String, String>> list5 = jjgFbgcLmgcLmhpService.lookJdbjg(commonInfoVo);
@@ -2111,10 +2156,17 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
             }
 
         }
+
         Map<String, List<Map<String, Object>>> groupedData = resultlist.stream()
                 .filter(map -> map.get("sheetname") != null) // 添加非空判断
                 .collect(Collectors.groupingBy(map -> (String) map.get("sheetname")));
+        /*Map<String, List<Map<String, Object>>> groupedData = resultlist.stream()
+                .filter(map -> map.get("sheetname") != null)
+                .sorted(Comparator.comparing(map -> (String) ((Map<String, Object>)map).get("sheetname"))
+                        .thenComparing(map -> (String) ((Map<String, Object>)map).get("ccname")))
+                .collect(Collectors.groupingBy(map -> (String) ((Map<String, Object>)map).get("sheetname")));*/
         //按分组后的数据，每个分组写一个工作簿
+        System.out.println(groupedData);
         DBwriteToExcel(groupedData,proname,htd);
 
     }
@@ -2214,6 +2266,10 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
 
     }
 
+    /**
+     *
+     * @param sheet
+     */
     private void calculateJSZLSheet(XSSFSheet sheet) {
         XSSFRow row = null;
         XSSFRow rowstart = null;
@@ -2374,6 +2430,10 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         }
     }
 
+    /**
+     *
+     * @param sheet
+     */
     private void calculateHtdSheet(XSSFSheet sheet) {
         XSSFRow row = null;
         XSSFRow rowstart = null;
@@ -2742,11 +2802,16 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
             if ("实测项目是否全部合格".equals(row.getCell(0).toString())) {
                 rowstart = sheet.getRow(i-15);
                 rowend = sheet.getRow(i-1);
-                row.getCell(8).setCellFormula("IF(COUNTIF("+rowstart.getCell(19).getReference()+":"+rowend.getCell(19).getReference()+",\"合格\")=COUNTA("+rowstart.getCell(19).getReference()+":"+rowend.getCell(19).getReference()+"),\"√\", \"\")");//=IF(COUNTIF(T7:T21, "合格") = COUNTA(T7:T21), "√", "")
-                row.getCell(10).setCellFormula("IF(COUNTIF("+rowstart.getCell(19).getReference()+":"+rowend.getCell(19).getReference()+",\"不合格\")=COUNTA("+rowstart.getCell(19).getReference()+":"+rowend.getCell(19).getReference()+"),\"\", \"×\")");//=IF(COUNTIF(T7:T21, "不合格") = COUNTA(T7:T21), "", "×")
-
-                row.getCell(16).setCellFormula("IF(COUNTIF("+rowstart.getCell(19).getReference()+":"+rowend.getCell(19).getReference()+",\"合格\")=COUNTA("+rowstart.getCell(19).getReference()+":"+rowend.getCell(19).getReference()+"),\"√\", \"\")");//=IF(COUNTIF(T7:T21, "合格") = COUNTA(T7:T21), "√", "")
-                row.getCell(19).setCellFormula("IF(COUNTIF("+rowstart.getCell(19).getReference()+":"+rowend.getCell(19).getReference()+",\"不合格\")=COUNTA("+rowstart.getCell(19).getReference()+":"+rowend.getCell(19).getReference()+"),\"\", \"×\")");//=IF(COUNTIF(T7:T21, "不合格") = COUNTA(T7:T21), "", "×")
+                //=IF(COUNTIF(T29:T43,"不合格")>0,"","√")
+                //row.getCell(8).setCellFormula("IF(COUNTIF("+rowstart.getCell(19).getReference()+":"+rowend.getCell(19).getReference()+",\"合格\")=COUNTA("+rowstart.getCell(19).getReference()+":"+rowend.getCell(19).getReference()+"),\"√\", \"\")");//=IF(COUNTIF(T7:T21, "合格") = COUNTA(T7:T21), "√", "")
+                row.getCell(8).setCellFormula("IF(COUNTIF("+rowstart.getCell(19).getReference()+":"+rowend.getCell(19).getReference()+",\"不合格\")>0,\"\",\"√\")");
+                //=IF(COUNTIF(T95:T109,"不合格")>0,"×","")
+                row.getCell(10).setCellFormula("IF(COUNTIF("+rowstart.getCell(19).getReference()+":"+rowend.getCell(19).getReference()+",\"不合格\")>0,\"×\",\"\")");
+                //row.getCell(10).setCellFormula("IF(COUNTIF("+rowstart.getCell(19).getReference()+":"+rowend.getCell(19).getReference()+",\"不合格\")=COUNTA("+rowstart.getCell(19).getReference()+":"+rowend.getCell(19).getReference()+"),\"×\", \"\")");//=IF(COUNTIF(T7:T21, "不合格") = COUNTA(T7:T21), "", "×")
+                row.getCell(16).setCellFormula("IF(COUNTIF("+rowstart.getCell(19).getReference()+":"+rowend.getCell(19).getReference()+",\"不合格\")>0,\"\",\"√\")");
+                row.getCell(19).setCellFormula("IF(COUNTIF("+rowstart.getCell(19).getReference()+":"+rowend.getCell(19).getReference()+",\"不合格\")>0,\"×\",\"\")");
+                //row.getCell(16).setCellFormula("IF(COUNTIF("+rowstart.getCell(19).getReference()+":"+rowend.getCell(19).getReference()+",\"合格\")=COUNTA("+rowstart.getCell(19).getReference()+":"+rowend.getCell(19).getReference()+"),\"√\", \"\")");//=IF(COUNTIF(T7:T21, "合格") = COUNTA(T7:T21), "√", "")
+                //row.getCell(19).setCellFormula("IF(COUNTIF("+rowstart.getCell(19).getReference()+":"+rowend.getCell(19).getReference()+",\"不合格\")=COUNTA("+rowstart.getCell(19).getReference()+":"+rowend.getCell(19).getReference()+"),\"×\", \"\")");//=IF(COUNTIF(T7:T21, "不合格") = COUNTA(T7:T21), "", "×")
             }
         }
 
@@ -2955,6 +3020,20 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
     private void createTable(XSSFWorkbook wb,int gettableNum,String sheetname) {
         for(int i = 1; i < gettableNum; i++){
             RowCopy.copyRows(wb, sheetname, sheetname, 0, 21, i*22);
+        }
+        XSSFSheet sheet = wb.getSheet(sheetname);
+        XSSFRow row = null;
+        for (int i = sheet.getFirstRowNum(); i <= sheet.getPhysicalNumberOfRows(); i++) {
+            row = sheet.getRow(i);
+            if (row == null) {
+                continue;
+            }
+            if ("质量结论（合格/不合格）".equals(row.getCell(19).toString())) {
+                for (int j = 1;j<16;j++){
+                    sheet.getRow(i+j).getCell(19).setCellType(CellType.BLANK);
+                }
+            }
+
         }
         if(gettableNum > 1){
             wb.setPrintArea(wb.getSheetIndex(sheetname), 0, 20, 0, gettableNum*22-1);
@@ -4260,21 +4339,21 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                 }
 
                 //车辙
-           /* if (datum.containsKey("cqhdjcds")){
-                sheet.getRow(21).createCell(index).setCellValue(Double.valueOf(datum.get("cqhdjcds").toString()));
-            }else {
-                sheet.getRow(21).createCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("cqhdhgds")){
-                sheet.getRow(22).createCell(index).setCellValue(Double.valueOf(datum.get("cqhdhgds").toString()));
-            }else {
-                sheet.getRow(22).createCell(index).setCellValue(Double.valueOf(0));
-            }
-            if (datum.containsKey("cqhdhgl")){
-                sheet.getRow(23).createCell(index).setCellValue(Double.valueOf(datum.get("cqhdhgl").toString()));
-            }else {
-                sheet.getRow(23).createCell(index).setCellValue(Double.valueOf(0));
-            }*/
+                if (datum.containsKey("czjcds")){
+                    sheet.getRow(21).createCell(index).setCellValue(Double.valueOf(datum.get("czjcds").toString()));
+                }else {
+                    sheet.getRow(21).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("czhgds")){
+                    sheet.getRow(22).createCell(index).setCellValue(Double.valueOf(datum.get("czhgds").toString()));
+                }else {
+                    sheet.getRow(22).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("czhgl")){
+                    sheet.getRow(23).createCell(index).setCellValue(Double.valueOf(datum.get("czhgl").toString()));
+                }else {
+                    sheet.getRow(23).createCell(index).setCellValue(Double.valueOf(0));
+                }
 
                 if (datum.containsKey("xsjcds")){
                     sheet.getRow(24).createCell(index).setCellValue(Double.valueOf(datum.get("xsjcds").toString()));
@@ -4323,7 +4402,38 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                 }else {
                     sheet.getRow(32).createCell(index).setCellValue(Double.valueOf(0));
                 }
-
+                //sss
+                if (datum.containsKey("pzdjcds")){
+                    sheet.getRow(33).createCell(index).setCellValue(Double.valueOf(datum.get("pzdjcds").toString()));
+                }else {
+                    sheet.getRow(33).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("pzdhgds")){
+                    sheet.getRow(34).createCell(index).setCellValue(Double.valueOf(datum.get("pzdhgds").toString()));
+                }else {
+                    sheet.getRow(34).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("pzdhgl")){
+                    sheet.getRow(35).createCell(index).setCellValue(Double.valueOf(datum.get("pzdhgl").toString()));
+                }else {
+                    sheet.getRow(35).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                //kang
+                if (datum.containsKey("khjcds")){
+                    sheet.getRow(36).createCell(index).setCellValue(Double.valueOf(datum.get("khjcds").toString()));
+                }else {
+                    sheet.getRow(36).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("khhgds")){
+                    sheet.getRow(37).createCell(index).setCellValue(Double.valueOf(datum.get("khhgds").toString()));
+                }else {
+                    sheet.getRow(37).createCell(index).setCellValue(Double.valueOf(0));
+                }
+                if (datum.containsKey("khhgl")){
+                    sheet.getRow(38).createCell(index).setCellValue(Double.valueOf(datum.get("khhgl").toString()));
+                }else {
+                    sheet.getRow(38).createCell(index).setCellValue(Double.valueOf(0));
+                }
                 if (datum.containsKey("hdjcds")){
                     sheet.getRow(39).createCell(index).setCellValue(Double.valueOf(datum.get("hdjcds").toString()));
                 }else {
@@ -4367,120 +4477,153 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
      */
     private void DBExcelsdlmData(XSSFWorkbook wb, List<Map<String, Object>> data) {
         XSSFSheet sheet = wb.getSheet("表4.1.4-3");
-        int index = 3;
+        int index = 2;
         for (Map<String, Object> datum : data) {
-            sheet.getRow(index).createCell(0).setCellValue(datum.get("htd").toString());
+            sheet.getRow(2).createCell(index).setCellValue(datum.get("htd").toString());
 
             if (datum.containsKey("ysdjcds")){
-                sheet.getRow(index).createCell(1).setCellValue(Double.valueOf(datum.get("ysdjcds").toString()));
+                sheet.getRow(3).createCell(index).setCellValue(Double.valueOf(datum.get("ysdjcds").toString()));
             }else {
-                sheet.getRow(index).createCell(1).setCellValue(0);
+                sheet.getRow(3).createCell(index).setCellValue(0);
             }
             if (datum.containsKey("ysdhgds")){
-                sheet.getRow(index).createCell(2).setCellValue(Double.valueOf(datum.get("ysdhgds").toString()));
+                sheet.getRow(4).createCell(index).setCellValue(Double.valueOf(datum.get("ysdhgds").toString()));
             }else {
-                sheet.getRow(index).createCell(2).setCellValue(Double.valueOf(0));
+                sheet.getRow(4).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("ysdhgl")){
-                sheet.getRow(index).createCell(3).setCellValue(Double.valueOf(datum.get("ysdhgl").toString()));
+                sheet.getRow(5).createCell(index).setCellValue(Double.valueOf(datum.get("ysdhgl").toString()));
             }else {
-                sheet.getRow(index).createCell(3).setCellValue(Double.valueOf(0));
+                sheet.getRow(5).createCell(index).setCellValue(Double.valueOf(0));
             }
 
             //车辙
-           /* if (datum.containsKey("cqhdjcds")){
-                sheet.getRow(index).createCell(4).setCellValue(Double.valueOf(datum.get("cqhdjcds").toString()));
+            if (datum.containsKey("czjcds")){
+                sheet.getRow(6).createCell(index).setCellValue(Double.valueOf(datum.get("czjcds").toString()));
             }else {
-                sheet.getRow(index).createCell(4).setCellValue(Double.valueOf(0));
+                sheet.getRow(6).createCell(index).setCellValue(Double.valueOf(0));
             }
-            if (datum.containsKey("cqhdhgds")){
-                sheet.getRow(index).createCell(5).setCellValue(Double.valueOf(datum.get("cqhdhgds").toString()));
+            if (datum.containsKey("czhgds")){
+                sheet.getRow(7).createCell(index).setCellValue(Double.valueOf(datum.get("czhgds").toString()));
             }else {
-                sheet.getRow(index).createCell(5).setCellValue(Double.valueOf(0));
+                sheet.getRow(7).createCell(index).setCellValue(Double.valueOf(0));
             }
-            if (datum.containsKey("cqhdhgl")){
-                sheet.getRow(index).createCell(6).setCellValue(Double.valueOf(datum.get("cqhdhgl").toString()));
+            if (datum.containsKey("czhgl")){
+                sheet.getRow(8).createCell(index).setCellValue(Double.valueOf(datum.get("czhgl").toString()));
             }else {
-                sheet.getRow(index).createCell(6).setCellValue(Double.valueOf(0));
-            }*/
+                sheet.getRow(8).createCell(index).setCellValue(Double.valueOf(0));
+            }
 
             if (datum.containsKey("xsjcds")){
-                sheet.getRow(index).createCell(7).setCellValue(Double.valueOf(datum.get("xsjcds").toString()));
+                sheet.getRow(9).createCell(index).setCellValue(Double.valueOf(datum.get("xsjcds").toString()));
             }else {
-                sheet.getRow(index).createCell(7).setCellValue(Double.valueOf(0));
+                sheet.getRow(9).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("xshgds")){
-                sheet.getRow(index).createCell(8).setCellValue(Double.valueOf(datum.get("xshgds").toString()));
+                sheet.getRow(10).createCell(index).setCellValue(Double.valueOf(datum.get("xshgds").toString()));
             }else {
-                sheet.getRow(index).createCell(8).setCellValue(Double.valueOf(0));
+                sheet.getRow(10).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("xshgl")){
-                sheet.getRow(index).createCell(9).setCellValue(Double.valueOf(datum.get("xshgl").toString()));
+                sheet.getRow(11).createCell(index).setCellValue(Double.valueOf(datum.get("xshgl").toString()));
             }else {
-                sheet.getRow(index).createCell(9).setCellValue(Double.valueOf(0));
+                sheet.getRow(11).createCell(index).setCellValue(Double.valueOf(0));
             }
 
             if (datum.containsKey("qdjcds")){
-                sheet.getRow(index).createCell(10).setCellValue(Double.valueOf(datum.get("qdjcds").toString()));
+                sheet.getRow(12).createCell(index).setCellValue(Double.valueOf(datum.get("qdjcds").toString()));
             }else {
-                sheet.getRow(index).createCell(10).setCellValue(Double.valueOf(0));
+                sheet.getRow(12).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("qdhgds")){
-                sheet.getRow(index).createCell(11).setCellValue(Double.valueOf(datum.get("qdhgds").toString()));
+                sheet.getRow(13).createCell(index).setCellValue(Double.valueOf(datum.get("qdhgds").toString()));
             }else {
-                sheet.getRow(index).createCell(11).setCellValue(Double.valueOf(0));
+                sheet.getRow(13).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("qdhgl")){
-                sheet.getRow(index).createCell(12).setCellValue(Double.valueOf(datum.get("qdhgl").toString()));
+                sheet.getRow(14).createCell(index).setCellValue(Double.valueOf(datum.get("qdhgl").toString()));
             }else {
-                sheet.getRow(index).createCell(12).setCellValue(Double.valueOf(0));
+                sheet.getRow(14).createCell(index).setCellValue(Double.valueOf(0));
             }
 
             if (datum.containsKey("gcjcds")){
-                sheet.getRow(index).createCell(13).setCellValue(Double.valueOf(datum.get("gcjcds").toString()));
+                sheet.getRow(15).createCell(index).setCellValue(Double.valueOf(datum.get("gcjcds").toString()));
             }else {
-                sheet.getRow(index).createCell(13).setCellValue(Double.valueOf(0));
+                sheet.getRow(15).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("gchgds")){
-                sheet.getRow(index).createCell(14).setCellValue(Double.valueOf(datum.get("gchgds").toString()));
+                sheet.getRow(16).createCell(index).setCellValue(Double.valueOf(datum.get("gchgds").toString()));
             }else {
-                sheet.getRow(index).createCell(14).setCellValue(Double.valueOf(0));
+                sheet.getRow(16).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("gchgl")){
-                sheet.getRow(index).createCell(15).setCellValue(Double.valueOf(datum.get("gchgl").toString()));
+                sheet.getRow(17).createCell(index).setCellValue(Double.valueOf(datum.get("gchgl").toString()));
             }else {
-                sheet.getRow(index).createCell(15).setCellValue(Double.valueOf(0));
+                sheet.getRow(17).createCell(index).setCellValue(Double.valueOf(0));
             }
-            if (datum.containsKey("hdjcds")){
-                sheet.getRow(index).createCell(22).setCellValue(Double.valueOf(datum.get("hdjcds").toString()));
+            //平整度
+            if (datum.containsKey("pzdjcds")){
+                sheet.getRow(18).createCell(index).setCellValue(Double.valueOf(datum.get("pzdjcds").toString()));
             }else {
-                sheet.getRow(index).createCell(22).setCellValue(Double.valueOf(0));
+                sheet.getRow(18).createCell(index).setCellValue(Double.valueOf(0));
+            }
+            if (datum.containsKey("pzdhgds")){
+                sheet.getRow(19).createCell(index).setCellValue(Double.valueOf(datum.get("pzdhgds").toString()));
+            }else {
+                sheet.getRow(19).createCell(index).setCellValue(Double.valueOf(0));
+            }
+            if (datum.containsKey("pzdhgl")){
+                sheet.getRow(20).createCell(index).setCellValue(Double.valueOf(datum.get("pzdhgl").toString()));
+            }else {
+                sheet.getRow(20).createCell(index).setCellValue(Double.valueOf(0));
+            }
+            //抗滑
+            if (datum.containsKey("khjcds")){
+                sheet.getRow(21).createCell(index).setCellValue(Double.valueOf(datum.get("khjcds").toString()));
+            }else {
+                sheet.getRow(21).createCell(index).setCellValue(Double.valueOf(0));
+            }
+            if (datum.containsKey("khhgds")){
+                sheet.getRow(22).createCell(index).setCellValue(Double.valueOf(datum.get("khhgds").toString()));
+            }else {
+                sheet.getRow(22).createCell(index).setCellValue(Double.valueOf(0));
+            }
+            if (datum.containsKey("khhgl")){
+                sheet.getRow(23).createCell(index).setCellValue(Double.valueOf(datum.get("khhgl").toString()));
+            }else {
+                sheet.getRow(23).createCell(index).setCellValue(Double.valueOf(0));
+            }
+
+            if (datum.containsKey("hdjcds")){
+                sheet.getRow(24).createCell(index).setCellValue(Double.valueOf(datum.get("hdjcds").toString()));
+            }else {
+                sheet.getRow(24).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("hdhgds")){
-                sheet.getRow(index).createCell(23).setCellValue(Double.valueOf(datum.get("hdhgds").toString()));
+                sheet.getRow(25).createCell(index).setCellValue(Double.valueOf(datum.get("hdhgds").toString()));
             }else {
-                sheet.getRow(index).createCell(23).setCellValue(Double.valueOf(0));
+                sheet.getRow(25).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("hdhgl")){
-                sheet.getRow(index).createCell(24).setCellValue(Double.valueOf(datum.get("hdhgl").toString()));
+                sheet.getRow(26).createCell(index).setCellValue(Double.valueOf(datum.get("hdhgl").toString()));
             }else {
-                sheet.getRow(index).createCell(24).setCellValue(Double.valueOf(0));
+                sheet.getRow(26).createCell(index).setCellValue(Double.valueOf(0));
             }
 
             if (datum.containsKey("hpjcds")){
-                sheet.getRow(index).createCell(25).setCellValue(Double.valueOf(datum.get("hpjcds").toString()));
+                sheet.getRow(27).createCell(index).setCellValue(Double.valueOf(datum.get("hpjcds").toString()));
             }else {
-                sheet.getRow(index).createCell(25).setCellValue(Double.valueOf(0));
+                sheet.getRow(27).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("hphgds")){
-                sheet.getRow(index).createCell(26).setCellValue(Double.valueOf(datum.get("hphgds").toString()));
+                sheet.getRow(28).createCell(index).setCellValue(Double.valueOf(datum.get("hphgds").toString()));
             }else {
-                sheet.getRow(index).createCell(26).setCellValue(Double.valueOf(0));
+                sheet.getRow(28).createCell(index).setCellValue(Double.valueOf(0));
             }
             if (datum.containsKey("hphgl")){
-                sheet.getRow(index).createCell(27).setCellValue(Double.valueOf(datum.get("hphgl").toString()));
+                sheet.getRow(29).createCell(index).setCellValue(Double.valueOf(datum.get("hphgl").toString()));
             }else {
-                sheet.getRow(index).createCell(27).setCellValue(Double.valueOf(0));
+                sheet.getRow(29).createCell(index).setCellValue(Double.valueOf(0));
             }
             index++;
         }
@@ -8310,7 +8453,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         DecimalFormat df = new DecimalFormat("0.00");
         DecimalFormat decf = new DecimalFormat("0.##");
         List<Map<String, Object>> resultList = new ArrayList<>();
-        boolean a =false,b =false,c =false,d =false,e =false,f =false;
+        boolean a =false,b =false,c =false,d =false,e =false,f =false,aa= false,bb =false,cc = false,dd = false,ee = false;
         Map map = new LinkedHashMap();
 
         //沥青路面压实度
@@ -8329,6 +8472,19 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         }
 
         //沥青路面车辙
+        List<Map<String, Object>> list = jjgFbgcSdgcZdhczService.lookJdbjg(commonInfoVo);
+        if (list!=null && list.size()>0){
+            aa = true;
+            double zds = 0;
+            double hgds = 0;
+            for (Map<String, Object> objectMap : list) {
+                zds += Double.valueOf(objectMap.get("总点数").toString());
+                hgds += Double.valueOf(objectMap.get("合格点数").toString());
+            }
+            map.put("czjcds",decf.format(zds));
+            map.put("czhgds",decf.format(hgds));
+            map.put("czhgl",zds!=0 ? df.format(hgds/zds*100) : 0);
+        }
 
         //沥青路面渗水系数
         List<Map<String, Object>> list2 = jjgFbgcSdgcLmssxsService.lookJdbjg(commonInfoVo);
@@ -8376,16 +8532,51 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         }
 
         //平整度
-
+        List<Map<String, Object>> list10 = jjgFbgcSdgcZdhpzdService.lookJdbjg(commonInfoVo);
+        if (list10!=null && list10.size()>0){
+            bb = true;
+            double zds = 0;
+            double hgds = 0;
+            for (Map<String, Object> objectMap : list10) {
+                zds += Double.valueOf(objectMap.get("总点数").toString());
+                hgds += Double.valueOf(objectMap.get("合格点数").toString());
+            }
+            map.put("pzdjcds",decf.format(zds));
+            map.put("pzdhgds",decf.format(hgds));
+            map.put("pzdhgl",zds!=0 ? df.format(hgds/zds*100) : 0);
+        }
         //抗滑
+        List<Map<String, Object>> list8 = jjgFbgcSdgcZdhgzsdService.lookJdbjg(commonInfoVo);
+        double khzds = 0;
+        double khhgds = 0;
+        if (list8!=null && list8.size()>0) {
+            cc = true;
+            for (Map<String, Object> objectMap : list8) {
+                khzds += Double.valueOf(objectMap.get("总点数").toString());
+                khhgds += Double.valueOf(objectMap.get("合格点数").toString());
+            }
+        }
+        List<Map<String, Object>> list9 = jjgFbgcSdgcZdhmcxsService.lookJdbjg(commonInfoVo);
+        if (list9!=null && list9.size()>0) {
+            dd = true;
+            for (Map<String, Object> objectMap : list9) {
+                khzds += Double.valueOf(objectMap.get("总点数").toString());
+                khhgds += Double.valueOf(objectMap.get("合格点数").toString());
+            }
+        }
+        if (cc || dd){
+            map.put("khjcds",decf.format(khzds));
+            map.put("khhgds",decf.format(khhgds));
+            map.put("khhgl",khzds!=0 ? df.format(khhgds/khzds*100) : 0);
+        }
 
         //厚度
         List<Map<String, Object>> list5 = jjgFbgcSdgcSdhntlmhdzxfService.lookJdbjg(commonInfoVo);
+        List<Map<String, Object>> list11 = jjgFbgcSdgcZdhldhdService.lookJdbjg(commonInfoVo);
         double hzds = 0;
         double hhgds = 0;
         if (list5!=null && list5.size()>0){
             e = true;
-
             for (Map<String, Object> objectMap : list5) {
                 hzds += Double.valueOf(objectMap.get("检测点数").toString());
                 hhgds += Double.valueOf(objectMap.get("合格点数").toString());
@@ -8400,6 +8591,13 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
             for (Map<String, Object> objectMap : list6) {
                 hzds += Double.valueOf(objectMap.get("上面层厚度检测点数").toString());
                 hhgds += Double.valueOf(objectMap.get("上面层厚度合格点数").toString());
+            }
+        }
+        if (list11!=null && list11.size()>0){
+            ee = true;
+            for (Map<String, Object> objectMap : list11) {
+                hzds += Double.valueOf(objectMap.get("总点数").toString());
+                hhgds += Double.valueOf(objectMap.get("合格点数").toString());
             }
         }
 
@@ -8418,7 +8616,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
             map.put("hphgds",decf.format(hgds));
             map.put("hphgl",zds!=0 ? df.format(hgds/zds*100) : 0);
         }
-        if (a || b || c || d || e || f){
+        if (a || b || c || d || e || f || aa || bb || cc || dd || ee){
             map.put("htd",commonInfoVo.getHtd());
             resultList.add(map);
         }
@@ -8557,24 +8755,40 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         DecimalFormat df = new DecimalFormat("0.00");
         DecimalFormat decf = new DecimalFormat("0.##");
         List<Map<String, Object>> resultList = new ArrayList<>();
-        boolean a = false, b =false,c = false;
+        boolean a = false, b =false,c = false,d = false,e= false,f = false;
         Map resultmap = new LinkedHashMap();
 
         //平整度
         List<Map<String, Object>> list = jjgFbgcQlgcQmpzdService.lookJdbjg(commonInfoVo);
+        List<Map<String, Object>> list1 = jjgFbgcQlgcZdhpzdService.lookJdbjg(commonInfoVo);
+        double pzdzds = 0;
+        double pzdhgds = 0;
         if (CollectionUtils.isNotEmpty(list)){
-            double zds = 0;
-            double hgds = 0;
             c = true;
-
             for (Map<String, Object> map : list) {
-                zds += Double.valueOf(map.get("检测点数").toString());
-                hgds += Double.valueOf(map.get("合格点数").toString());
+                pzdzds += Double.valueOf(map.get("检测点数").toString());
+                pzdhgds += Double.valueOf(map.get("合格点数").toString());
             }
-            resultmap.put("qmpzdzds",decf.format(zds));
+            /*resultmap.put("qmpzdzds",decf.format(zds));
             resultmap.put("qmpzdhgds",decf.format(hgds));
-            resultmap.put("qmpzdhgl",zds!=0 ? df.format(hgds/zds*100) : 0);
+            resultmap.put("qmpzdhgl",zds!=0 ? df.format(hgds/zds*100) : 0);*/
 
+        }
+        if (CollectionUtils.isNotEmpty(list1)){
+            f = true;
+            for (Map<String, Object> map : list1) {
+                pzdzds += Double.valueOf(map.get("总点数").toString());
+                pzdhgds += Double.valueOf(map.get("合格点数").toString());
+            }
+            /*resultmap.put("qmpzdzds",decf.format(zds));
+            resultmap.put("qmpzdhgds",decf.format(hgds));
+            resultmap.put("qmpzdhgl",zds!=0 ? df.format(hgds/zds*100) : 0);*/
+
+        }
+        if (c || f) {
+            resultmap.put("qmpzdzds",decf.format(pzdzds));
+            resultmap.put("qmpzdhgds",decf.format(pzdhgds));
+            resultmap.put("qmpzdhgl",pzdzds!=0 ? df.format(pzdhgds/pzdzds*100) : 0);
         }
 
         //横坡
@@ -8595,20 +8809,41 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
 
         //抗滑
         List<Map<String, Object>> list3 = jjgFbgcQlgcQmgzsdService.lookJdbjg(commonInfoVo);
+        List<Map<String, Object>> list4 = jjgFbgcQlgcZdhgzsdService.lookJdbjg(commonInfoVo);
+        List<Map<String, Object>> list5 = jjgFbgcQlgcZdhmcxsService.lookJdbjg(commonInfoVo);
+        double zdskh = 0;
+        double hgdskh = 0;
         if (CollectionUtils.isNotEmpty(list3)){
-            double zds = 0;
-            double hgds = 0;
             b = true;
-
             for (Map<String, Object> map : list3) {
-                zds += Double.valueOf(map.get("检测点数").toString());
-                hgds += Double.valueOf(map.get("合格点数").toString());
+                zdskh += Double.valueOf(map.get("检测点数").toString());
+                hgdskh += Double.valueOf(map.get("合格点数").toString());
             }
-            resultmap.put("qmkhgzsdzds",decf.format(zds));
-            resultmap.put("qmkhgzsdhgds",decf.format(hgds));
-            resultmap.put("qmkhgzsdhgl",zds!=0 ? df.format(hgds/zds*100) : 0);
         }
-        if (a || b || c){
+        if (CollectionUtils.isNotEmpty(list4)){
+            d = true;
+            for (Map<String, Object> map : list4) {
+                zdskh += Double.valueOf(map.get("总点数").toString());
+                hgdskh += Double.valueOf(map.get("合格点数").toString());
+            }
+           /* resultmap.put("qmkhgzsdzds",decf.format(zds));
+            resultmap.put("qmkhgzsdhgds",decf.format(hgds));
+            resultmap.put("qmkhgzsdhgl",zds!=0 ? df.format(hgds/zds*100) : 0);*/
+        }
+        if (CollectionUtils.isNotEmpty(list5)){
+            e = true;
+            for (Map<String, Object> map : list5) {
+                zdskh += Double.valueOf(map.get("总点数").toString());
+                hgdskh += Double.valueOf(map.get("合格点数").toString());
+            }
+        }
+        if (b || d || e) {
+            resultmap.put("qmkhgzsdzds",decf.format(zdskh));
+            resultmap.put("qmkhgzsdhgds",decf.format(hgdskh));
+            resultmap.put("qmkhgzsdhgl",zdskh!=0 ? df.format(hgdskh/zdskh*100) : 0);
+        }
+
+        if (a || b || c || d || e || f){
             resultmap.put("htd",commonInfoVo.getHtd());
             resultList.add(resultmap);
 

@@ -136,6 +136,7 @@ public class JjgFbgcLjgcHdgqdServiceImpl extends ServiceImpl<JjgFbgcLjgcHdgqdMap
                                     int rowNumber = 2;
                                     for(JjgFbgcLjgcHdgqdVo hdgqdVo: dataList) {
                                         if (StringUtils.isEmpty(hdgqdVo.getZh())) {
+                                            //第2行的数据中，部位1值为空，请修改后重新上传
                                             throw new JjgysException(20001, "第"+rowNumber+"行的数据中，桩号为空，请修改后重新上传");
                                         }
                                         if (StringUtils.isEmpty(hdgqdVo.getBw1())) {
@@ -338,6 +339,7 @@ public class JjgFbgcLjgcHdgqdServiceImpl extends ServiceImpl<JjgFbgcLjgcHdgqdMap
         if(sheet.getRow(tableNum*25+1) == null || sheet.getRow(tableNum*25+1).getCell(2) == null){
             return;
         }
+
         sheet.getRow(tableNum*25+1).getCell(2).setCellValue(proname);
         sheet.getRow(tableNum*25+1).getCell(29).setCellValue(htd);
         sheet.getRow(tableNum*25+2).getCell(2).setCellValue(fbgc);

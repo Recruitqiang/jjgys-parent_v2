@@ -1,8 +1,11 @@
 package glgc.jjgys.system.service.impl;
 
 import com.alibaba.excel.EasyExcel;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import glgc.jjgys.common.excel.ExcelUtil;
 import glgc.jjgys.model.project.JjgFbgcQlgcZdhpzd;
+import glgc.jjgys.model.project.JjgLqsQl;
+import glgc.jjgys.model.project.JjgLqsSd;
 import glgc.jjgys.model.project.JjgZdhPzd;
 import glgc.jjgys.model.projectvo.ljgc.CommonInfoVo;
 import glgc.jjgys.model.projectvo.qlgc.JjgFbgcQlgcZdhpzdVo;
@@ -12,15 +15,14 @@ import glgc.jjgys.system.exception.JjgysException;
 import glgc.jjgys.system.mapper.JjgFbgcQlgcZdhpzdMapper;
 import glgc.jjgys.system.service.JjgFbgcQlgcZdhpzdService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import glgc.jjgys.system.service.JjgLqsQlService;
+import glgc.jjgys.system.service.JjgLqsSdService;
 import glgc.jjgys.system.utils.RowCopy;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,6 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -124,26 +127,93 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
     }
 
     @Override
-    public List<Map<String, Object>> lookJdbjg(CommonInfoVo commonInfoVo) {
-        return null;
+    public List<Map<String, Object>> lookJdbjg(CommonInfoVo commonInfoVo) throws IOException {
+        String proname = commonInfoVo.getProname();
+        String htd = commonInfoVo.getHtd();
+        DecimalFormat df = new DecimalFormat("0.00");
+        DecimalFormat decf = new DecimalFormat("0.##");
+        int cds = getcds(proname,htd);
+        File f = new File(filepath + File.separator + proname + File.separator + htd + File.separator + "33桥面平整度.xlsx");
+
+        if (!f.exists()) {
+            return new ArrayList<>();
+        } else {
+            XSSFWorkbook wb = new XSSFWorkbook(new FileInputStream(f));
+            List<Map<String, Object>> jgmap = new ArrayList<>();
+            for (int j = 0; j < wb.getNumberOfSheets(); j++) {
+                if (!wb.isSheetHidden(wb.getSheetIndex(wb.getSheetAt(j)))) {
+                    XSSFSheet slSheet = wb.getSheetAt(j);
+
+                    XSSFCell xmname = slSheet.getRow(1).getCell(5);//项目名
+                    XSSFCell htdname = slSheet.getRow(1).getCell(cds*4+4);//合同段名
+
+
+                    if (proname.equals(xmname.toString()) && htd.equals(htdname.toString())) {
+                        slSheet.getRow(5).getCell(cds*4+9).setCellType(CellType.STRING);//总点数
+                        slSheet.getRow(5).getCell(cds*4+10).setCellType(CellType.STRING);//合格点数
+
+                        slSheet.getRow(5).getCell(cds*4+11).setCellType(CellType.STRING);
+                        slSheet.getRow(5).getCell(cds*4+12).setCellType(CellType.STRING);
+                        slSheet.getRow(3).getCell(5).setCellType(CellType.STRING);
+                        double zds = Double.valueOf(slSheet.getRow(5).getCell(cds*4+9).getStringCellValue());
+                        double hgds = Double.valueOf(slSheet.getRow(5).getCell(cds*4+10).getStringCellValue());
+                        String zdsz1 = decf.format(zds);
+                        String hgdsz1 = decf.format(hgds);
+                        Map map = new HashMap();
+                        map.put("路面类型", wb.getSheetName(j));
+                        map.put("总点数", zdsz1);
+                        map.put("设计值", slSheet.getRow(3).getCell(5).getStringCellValue());
+                        map.put("合格点数", hgdsz1);
+                        map.put("合格率", zds!=0 ? df.format(hgds/zds*100) : 0);
+                        map.put("Max",slSheet.getRow(5).getCell(cds*4+11).getStringCellValue());
+                        map.put("Min",slSheet.getRow(5).getCell(cds*4+12).getStringCellValue());
+                        jgmap.add(map);
+                    }
+                }
+            }
+            return jgmap;
+        }
     }
+
+    /**
+     *
+     * @param proname
+     * @param htd
+     * @return
+     */
+    private int getcds(String proname, String htd) {
+        List<Map<String,Object>> lxlist = jjgFbgcQlgcZdhpzdMapper.selectlx(proname,htd);
+        int cds = 0;
+        int maxNum = 2; // 添加一个变量用来保存最大值
+        for (Map<String, Object> map : lxlist) {
+            String zx = map.get("lxbs").toString();
+            int num = jjgFbgcQlgcZdhpzdMapper.selectcdnum(proname,htd,zx);
+            if (num > maxNum) { // 如果当前num大于maxNum，则更新maxNum的值
+                maxNum = num;
+            }
+        }
+        cds = maxNum;
+        return cds;
+    }
+
 
     @Override
     public void generateJdb(CommonInfoVo commonInfoVo) throws IOException, ParseException {
         String proname = commonInfoVo.getProname();
         String htd = commonInfoVo.getHtd();
         List<Map<String,Object>> lxlist = jjgFbgcQlgcZdhpzdMapper.selectlx(proname,htd);
+        int cds = 0;
+        int maxNum = 2;
         for (Map<String, Object> map : lxlist) {
-            String zx = map.get("qlname").toString();
+            String zx = map.get("lxbs").toString();
             int num = jjgFbgcQlgcZdhpzdMapper.selectcdnum(proname,htd,zx);
-            int cds = 0;
-            if (num == 1){
-                cds = 2;
-            }else {
-                cds=num;
+            if (num > maxNum) { // 如果当前num大于maxNum，则更新maxNum的值
+                maxNum = num;
             }
-            handlezxData(proname,htd,zx,cds,commonInfoVo.getSjz());
         }
+        cds = maxNum;
+        handlezxData(proname,htd,cds,commonInfoVo.getSjz());
+
 
     }
 
@@ -151,11 +221,10 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
      *
      * @param proname
      * @param htd
-     * @param zx
      * @param cdsl
      * @param sjz
      */
-    private void handlezxData(String proname, String htd, String zx, int cdsl, String sjz) throws IOException, ParseException {
+    private void handlezxData(String proname, String htd, int cdsl, String sjz) throws IOException, ParseException {
         String[] arr = null;
         if (cdsl == 2) {
             arr = new String[] {"左幅一车道", "左幅二车道", "右幅一车道", "右幅二车道"};
@@ -172,8 +241,8 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
         }
         String result = sb.substring(0, sb.length() - 1); // 去掉最后一个逗号
 
-        List<Map<String,Object>> datazf = jjgFbgcQlgcZdhpzdMapper.selectzfList(proname,htd,zx,result);
-        List<Map<String,Object>> datayf = jjgFbgcQlgcZdhpzdMapper.selectyfList(proname,htd,zx,result);
+        List<Map<String,Object>> datazf = jjgFbgcQlgcZdhpzdMapper.selectzfList(proname,htd,result);
+        List<Map<String,Object>> datayf = jjgFbgcQlgcZdhpzdMapper.selectyfList(proname,htd,result);
 
         List<Map<String, Object>> lmzfList = montageIRI(datazf);
         Collections.sort(lmzfList, new Comparator<Map<String, Object>>() {
@@ -196,7 +265,6 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
             }
         });
 
-
         double zdzh = Double.parseDouble(lmzfList.get(0).get("qdzh").toString());
         double finzdzh = Double.parseDouble(lmzfList.get(lmzfList.size()-1).get("qdzh").toString());
         List<Map<String, Object>> lmzf = decrementNumberByStep(zdzh,finzdzh,lmzfList,cdsl);
@@ -204,9 +272,29 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
         double yzdzh = Double.parseDouble(lmyfList.get(0).get("qdzh").toString());
         double yfinzdzh = Double.parseDouble(lmyfList.get(lmyfList.size()-1).get("qdzh").toString());
         List<Map<String, Object>> lmyf = decrementNumberByStep(yzdzh,yfinzdzh,lmyfList,cdsl);
-
-        writeExcelData(proname,htd,lmzf,lmyf,cdsl,sjz,zx);
+        Collections.sort(lmzf, new Comparator<Map<String, Object>>() {
+            @Override
+            public int compare(Map<String, Object> o1, Map<String, Object> o2) {
+                // 名字相同时按照 qdzh 排序
+                Double qdzh1 = Double.parseDouble(o1.get("qdzh").toString());
+                Double qdzh2 = Double.parseDouble(o2.get("qdzh").toString());
+                return qdzh1.compareTo(qdzh2);
+            }
+        });
+        Collections.sort(lmyf, new Comparator<Map<String, Object>>() {
+            @Override
+            public int compare(Map<String, Object> o1, Map<String, Object> o2) {
+                // 名字相同时按照 qdzh 排序
+                Double qdzh1 = Double.parseDouble(o1.get("qdzh").toString());
+                Double qdzh2 = Double.parseDouble(o2.get("qdzh").toString());
+                return qdzh1.compareTo(qdzh2);
+            }
+        });
+        writeExcelData(proname,htd,lmzf,lmyf,cdsl,sjz);
     }
+
+    @Autowired
+    private JjgLqsQlService jjgLqsQlService;
 
     /**
      *
@@ -216,12 +304,11 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
      * @param lmyfList
      * @param cdsl
      * @param sjz
-     * @param zx
      * @throws IOException
      */
-    private void writeExcelData(String proname, String htd, List<Map<String, Object>> lmzfList, List<Map<String, Object>> lmyfList, int cdsl, String sjz, String zx) throws IOException, ParseException {
+    private void writeExcelData(String proname, String htd, List<Map<String, Object>> lmzfList, List<Map<String, Object>> lmyfList, int cdsl, String sjz) throws IOException, ParseException {
         XSSFWorkbook wb = null;
-        String fname="33桥面平整度-"+zx+".xlsx";
+        String fname="33桥面平整度.xlsx";
         File f = new File(filepath+File.separator+proname+File.separator+htd+File.separator+fname);
         File fdir = new File(filepath + File.separator + proname + File.separator + htd);
         if (!fdir.exists()) {
@@ -250,8 +337,21 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
         lmzfList.addAll(lmyfList);
         if (lmzfList.size()>0 && !lmzfList.isEmpty()){
             List<Map<String,Object>> addList = addMissingData(lmzfList,cdsl);
-            String sheetmame = "沥青桥";
-            DBtoExcelLM(proname,htd,addList,wb,sheetmame,cdsl,sjz,zx);
+            List<Map<String, Object>> mapslist = mergedList(addList,cdsl);
+
+
+            String lxbs = mapslist.get(0).get("lxbs").toString();
+            QueryWrapper<JjgLqsQl> wrapper = new QueryWrapper<>();
+            wrapper.eq("name",lxbs);
+            List<JjgLqsQl> list = jjgLqsQlService.list(wrapper);
+            String sheetmame = "";
+            if (list.get(0).getPzlx().contains("水泥")){
+                sheetmame = "混凝土桥";
+            }else {
+                sheetmame = "沥青桥";
+            }
+
+            DBtoExcel(proname,htd,addList,wb,sheetmame,cdsl,sjz);
         }
 
         String[] arr = {"混凝土收费站","混凝土匝道隧道","沥青匝道隧道","混凝土匝道桥","沥青匝道桥","沥青匝道","混凝土匝道","混凝土隧道","沥青隧道","混凝土桥","沥青桥","混凝土路面","沥青路面"};
@@ -298,7 +398,7 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
         Map<String, List<Map<String, Object>>> groupedData =
                 dataLists.stream()
                         .collect(Collectors.groupingBy(
-                                item -> item.get("name") + "-" + item.get("qdzh") + "-" + item.get("zdzh")
+                                item -> item.get("lxbs") + "-" + item.get("qdzh") + "-" + item.get("zdzh")
                         ));
         List<Map<String, Object>> toBeRemoved = new ArrayList<>();
         for (Map.Entry<String, List<Map<String, Object>>> entry : groupedData.entrySet()) {
@@ -339,8 +439,8 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
         Collections.sort(dataLists, new Comparator<Map<String, Object>>() {
             @Override
             public int compare(Map<String, Object> o1, Map<String, Object> o2) {
-                String name1 = o1.get("name").toString();
-                String name2 = o2.get("name").toString();
+                String name1 = o1.get("lxbs").toString();
+                String name2 = o2.get("lxbs").toString();
                 // 按照名字进行排序
                 int cmp = name1.compareTo(name2);
                 if (cmp != 0) {
@@ -802,56 +902,116 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
      * @param sheetname
      * @param cdsl
      * @param sjz
-     * @param zx
      * @throws ParseException
      */
-    private void DBtoExcelLM(String proname, String htd, List<Map<String, Object>> data, XSSFWorkbook wb, String sheetname, int cdsl, String sjz, String zx) throws ParseException {
-        Collections.sort(data, new Comparator<Map<String, Object>>() {
-            @Override
-            public int compare(Map<String, Object> o1, Map<String, Object> o2) {
-                // 名字相同时按照 qdzh 排序
-                Double qdzh1 = Double.parseDouble(o1.get("qdzh").toString());
-                Double qdzh2 = Double.parseDouble(o2.get("qdzh").toString());
-                return qdzh1.compareTo(qdzh2);
-            }
-        });
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        SimpleDateFormat outputDateFormat = new SimpleDateFormat("yyyy.MM.dd");
-        if (data != null && !data.isEmpty()) {
-            createTable(getNum(data,cdsl)/2+1, wb, sheetname, cdsl);
-            XSSFSheet sheet = wb.getSheet(sheetname);
-
-            String time = String.valueOf(data.get(0).get("createTime")) ;
-            Date parse = simpleDateFormat.parse(time);
-            String sj = outputDateFormat.format(parse);
-
-            String fbgcname = "桥面系";
-
-            String name = data.get(0).get("name").toString();
-            sheet.getRow(1).getCell(5).setCellValue(proname);
-            sheet.getRow(1).getCell(cdsl*4+4).setCellValue(htd);
-            sheet.getRow(2).getCell(5).setCellValue("路面工程");
-            sheet.getRow(3).getCell(cdsl*4+4).setCellValue(sj);
-            sheet.getRow(2).getCell(cdsl*4+4).setCellValue(fbgcname+"("+zx+")");
-            sheet.getRow(3).getCell(5).setCellValue(Double.parseDouble(sjz));
-
-            //List<Map<String, Object>> lmdata = handleLmData(data,sdqlData);
-
-            List<Map<String, Object>> zf = new ArrayList<>();
-            List<Map<String, Object>> yf = new ArrayList<>();
-            for (Map<String, Object> stringObjectMap : data) {
-                if (stringObjectMap.get("cd").toString().equals("左幅")){
-                    zf.add(stringObjectMap);
-                }
-                if (stringObjectMap.get("cd").toString().equals("右幅")){
-                    yf.add(stringObjectMap);
-                }
-            }
-            writezyf(sheet,zf,proname, htd, name,sj,sheetname,cdsl,sjz);
-            writezyf(sheet,yf,proname, htd, name,sj,sheetname,cdsl,sjz);
+    private void DBtoExcel(String proname, String htd, List<Map<String, Object>> data, XSSFWorkbook wb, String sheetname, int cdsl, String sjz) throws ParseException {
+        int b = 0;
+        if (cdsl == 2){
+            b=40;
+        }else if (cdsl == 3){
+            b=20;
+        }else if (cdsl == 4 || cdsl ==5){
+            b=30;
+        }
+        if (data!=null && !data.isEmpty()){
+            //List<Map<String, Object>> maps = mergedList(data,cdsl);
+            createTable(getNum(data,cdsl),wb,sheetname,cdsl);
+            writesdqlzyf(wb,data,proname, htd,sheetname,cdsl,sjz,b);
 
         }
     }
+
+    /**
+     *
+     * @param wb
+     * @param data
+     * @param proname
+     * @param htd
+     * @param sheetname
+     * @param cdsl
+     * @param sjz
+     * @param b
+     * @throws ParseException
+     */
+    private void writesdqlzyf(XSSFWorkbook wb, List<Map<String, Object>> data, String proname, String htd, String sheetname, int cdsl, String sjz,int b) throws ParseException {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat outputDateFormat  = new SimpleDateFormat("yyyy.MM.dd");
+        XSSFSheet sheet = wb.getSheet(sheetname);
+        String time = String.valueOf(data.get(0).get("createTime")) ;
+        Date parse = simpleDateFormat.parse(time);
+        String sj = outputDateFormat.format(parse);
+
+        sheet.getRow(1).getCell(5).setCellValue(proname);
+        sheet.getRow(2).getCell(5).setCellValue("隧道工程");
+        sheet.getRow(3).getCell(5).setCellValue(Double.parseDouble(sjz));
+
+        sheet.getRow(3).getCell(cdsl*4+4).setCellValue(sj);
+        sheet.getRow(1).getCell(cdsl*4+4).setCellValue(htd);
+        String name = data.get(0).get("lxbs").toString();
+        String fbgcname = "隧道路面";
+        sheet.getRow(2).getCell(cdsl*4+4).setCellValue(fbgcname+"("+name+")");
+        int index = 0;
+        int tableNum = 0;
+
+        for(int i =0; i < data.size(); i++){
+            if (name.equals(data.get(i).get("lxbs"))){
+                if(index > b){
+                    tableNum ++;
+                    fillTitleCellData(sheet, tableNum, proname, htd, name,sj,sheetname,cdsl,sjz);
+                    index = 0;
+                }
+                fillCommonCellData(sheet, tableNum, index, data.get(i),cdsl);
+                index ++;
+            }else {
+                name = data.get(i).get("lxbs").toString();
+                tableNum ++;
+                index = 0;
+                fillTitleCellData(sheet, tableNum, proname, htd, name,sj,sheetname,cdsl,sjz);
+                fillCommonCellData(sheet, tableNum, index, data.get(i),cdsl);
+                index += 1;
+            }
+        }
+    }
+
+    /**
+     *
+     * @param sheet
+     * @param tableNum
+     * @param index
+     * @param row
+     * @param cdsl
+     */
+    private void fillCommonCellData(XSSFSheet sheet, int tableNum, int index, Map<String, Object> row, int cdsl) {
+        int a = 0;
+        int b = 0;
+        if (cdsl == 2){
+            a = 47;
+            b=40;
+        }else if (cdsl == 3){
+            a = 27;
+            b=20;
+        }else if (cdsl == 4 || cdsl ==5){
+            a = 37;
+            b=30;
+        }
+        double n = Double.valueOf(row.get("zdzh").toString()) / 1000;
+        int m = (int) n;
+        sheet.getRow(tableNum * a + 7 + index % b).getCell(0).setCellValue(m);
+        sheet.getRow(tableNum * a + 7 + index % b).getCell(4).setCellValue(Double.valueOf(row.get("zdzh").toString()));
+        String[] sfc = row.get("iri").toString().split(",");
+        if (!sfc[0].isEmpty()) {
+            for (int i = 0 ; i < sfc.length ; i++) {
+                if (!sfc[i].equals("-")){
+                    sheet.getRow(tableNum * a + 7 + index % b).getCell(cdsl*i+5).setCellValue(Double.parseDouble(sfc[i]));
+                }else {
+                    sheet.getRow(tableNum * a + 7 + index % b).getCell(cdsl*i+5).setCellValue(sfc[i]);
+                }
+
+            }
+        }
+
+    }
+
 
     /**
      *
@@ -993,7 +1153,7 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
         }
         Map<String, Integer> resultMap = new HashMap<>();
         for (Map<String, Object> map : data) {
-            String name = map.get("name").toString();
+            String name = map.get("lxbs").toString();
             if (resultMap.containsKey(name)) {
                 resultMap.put(name, resultMap.get(name) + 1);
             } else {
@@ -1048,7 +1208,7 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
         // 按照 name 进行分组
         Map<String, List<Map<String, Object>>> groupMap = new HashMap<>();
         for (Map<String, Object> data : dataList) {
-            String name = (String) data.get("name");
+            String name = (String) data.get("lxbs");
             if (groupMap.containsKey(name)) {
                 groupMap.get(name).add(data);
             } else {
@@ -1105,8 +1265,8 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
             map.put("createTime",mapList.get(0).get("createTime"));
             map.put("zdbs",mapList.get(0).get("zdbs"));
             map.put("iri",iri);
-            map.put("name",mapList.get(0).get("name"));
-            map.put("pzlx",mapList.get(0).get("pzlx"));
+           /* map.put("name",mapList.get(0).get("name"));
+            map.put("pzlx",mapList.get(0).get("pzlx"));*/
             map.put("qdzh",Double.parseDouble(String.valueOf(i-100)));
             map.put("zdzh",Double.parseDouble(String.valueOf(i)));
             zhlist.add(map);
@@ -1122,8 +1282,8 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
             map.put("createTime",mapList.get(0).get("createTime"));
             map.put("zdbs",mapList.get(0).get("zdbs"));
             map.put("iri",iri);
-            map.put("name",mapList.get(0).get("name"));
-            map.put("pzlx",mapList.get(0).get("pzlx"));
+            /*map.put("name",mapList.get(0).get("name"));
+            map.put("pzlx",mapList.get(0).get("pzlx"));*/
             map.put("zdzh",Double.parseDouble(String.valueOf(i+100)));
             map.put("qdzh",Double.parseDouble(String.valueOf(i)));
             finzdzhlist.add(map);
@@ -1191,8 +1351,8 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
                     if (item.get("qdzh").toString().equals(entry.getKey())) {
                         map.put("qdzh", item.get("qdzh"));
                         map.put("zdzh", item.get("zdzh"));
-                        map.put("pzlx", item.get("pzlx"));
-                        map.put("name", item.get("name"));
+                       /* map.put("pzlx", item.get("pzlx"));
+                        map.put("name", item.get("name"));*/
                         map.put("cd", item.get("cd").toString().substring(0,2));
                         map.put("createTime", item.get("createTime"));
                         break;

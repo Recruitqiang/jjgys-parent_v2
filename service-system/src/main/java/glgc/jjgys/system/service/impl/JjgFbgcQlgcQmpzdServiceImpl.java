@@ -223,7 +223,14 @@ public class JjgFbgcQlgcQmpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcQmpzdMap
      */
     private boolean DBtoExcel(List<JjgFbgcQlgcQmpzd> data, XSSFWorkbook wb,String qlmc) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy.MM.dd");
+        String lmlx = data.get(0).getLmlx();
         XSSFSheet sheet = wb.getSheet("平整度");
+        if (lmlx.contains("水泥")){
+            sheet.getRow(0).getCell(0).setCellValue("混凝土水泥路面平整度质量鉴定表");
+        }else if (lmlx.contains("沥青")){
+            sheet.getRow(0).getCell(0).setCellValue("沥青路面平整度质量鉴定表");
+        }
+
         sheet.getRow(1).getCell(1).setCellValue(data.get(0).getProname());
         sheet.getRow(1).getCell(4).setCellValue(data.get(0).getHtd());
         sheet.getRow(2).getCell(1).setCellValue(qlmc);

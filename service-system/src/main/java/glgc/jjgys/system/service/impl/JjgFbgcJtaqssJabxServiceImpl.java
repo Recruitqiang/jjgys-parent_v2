@@ -229,7 +229,7 @@ public class JjgFbgcJtaqssJabxServiceImpl extends ServiceImpl<JjgFbgcJtaqssJabxM
      */
     public void fillhxCommonCellData(XSSFSheet sheet, int tableNum, int index,JjgFbgcJtaqssJabx row) {
         sheet.getRow(index).getCell(0).setCellValue(row.getWz());  //位置
-        sheet.getRow(index).getCell(2).setCellValue(row.getBxlx());
+        sheet.getRow(index).getCell(2).setCellValue("黄"+row.getBxlx());
         if(row.getHxnfsxsgdz() != null && !"".equals(row.getHxnfsxsgdz())){
             sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(row.getHxnfsxsgdz()));
         }else {
@@ -600,7 +600,7 @@ public class JjgFbgcJtaqssJabxServiceImpl extends ServiceImpl<JjgFbgcJtaqssJabxM
      */
     public void fillCommonCellData(XSSFSheet sheet, int tableNum, int index,JjgFbgcJtaqssJabx row) {
         sheet.getRow(index).getCell(0).setCellValue(row.getWz());  //位置
-        sheet.getRow(index).getCell(2).setCellValue(row.getBxlx());
+        sheet.getRow(index).getCell(2).setCellValue("白"+row.getBxlx());
         sheet.getRow(index).getCell(3).setCellValue(Double.valueOf(row.getBxnfsxsgdz()));
         if(row.getBxscz1() != null && !"".equals(row.getBxscz1())){//第1条线
 
@@ -842,7 +842,14 @@ public class JjgFbgcJtaqssJabxServiceImpl extends ServiceImpl<JjgFbgcJtaqssJabxM
                 sheet.getRow(index+7).getCell(0).setCellValue(data.get(i).getWz());
             }
             sheet.getRow(index+7).getCell(1).setCellValue(Double.valueOf((i%5+1)));//序号
-            sheet.getRow(index+7).getCell(2).setCellValue(data.get(i).getBxlx());
+            if (data.get(i).getBxscz1()!=null || !"".equals(data.get(i).getBxscz1())){
+                sheet.getRow(index+7).getCell(2).setCellValue("白"+data.get(i).getBxlx());
+            }else if (data.get(i).getHxscz1()!=null || !"".equals(data.get(i).getHxscz1())){
+                sheet.getRow(index+7).getCell(2).setCellValue("黄"+data.get(i).getBxlx());
+            }else {
+                sheet.getRow(index+7).getCell(2).setCellValue(data.get(i).getBxlx());
+            }
+
             sheet.getRow(index+7).getCell(3).setCellValue(Double.valueOf(data.get(i).getHdgdz()));
             if(!" ".equals(data.get(i).getHdscz1()) && data.get(i).getHdscz1() !=null){//厚度实测值1
                 sheet.getRow(index+7).getCell(4).setCellValue(Double.valueOf(data.get(i).getHdscz1()));

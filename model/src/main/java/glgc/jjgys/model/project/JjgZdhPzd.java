@@ -53,8 +53,6 @@ public class JjgZdhPzd implements Serializable {
     /**
      * 右IRI
      */
-    @TableField("yiri")
-    private String yiri;
 
     /**
      * 车道
