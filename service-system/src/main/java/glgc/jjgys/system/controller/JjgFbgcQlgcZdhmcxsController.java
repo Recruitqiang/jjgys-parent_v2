@@ -56,12 +56,22 @@ public class JjgFbgcQlgcZdhmcxsController {
 
     @RequestMapping(value = "/download", method = RequestMethod.GET)
     public void downloadExport(HttpServletRequest request, HttpServletResponse response, String proname, String htd) throws IOException {
-        String fileName = "36桥面摩擦系数.xlsx";
+        /*String fileName = "36桥面摩擦系数.xlsx";
         String p = filespath+ File.separator+proname+File.separator+htd+File.separator+fileName;
         File file = new File(p);
         if (file.exists()){
             JjgFbgcCommonUtils.download(response,p,fileName);
+        }*/
+        List<Map<String,Object>> lxlist = jjgFbgcQlgcZdhmcxsService.selectlx(proname,htd);
+        List<String> fileName = new ArrayList<>();
+        for (Map<String, Object> map : lxlist) {
+            String lxbs = map.get("lxbs").toString();
+
+            fileName.add("36桥面摩擦系数-"+lxbs);
+
         }
+        String zipname = "桥面摩擦系数鉴定表";
+        JjgFbgcCommonUtils.batchDowndFile(response,zipname,fileName,filespath+File.separator+proname+File.separator+htd);
     }
 
     @ApiOperation("生成桥面摩擦系数鉴定表")

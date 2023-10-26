@@ -122,38 +122,46 @@ public class JjgFbgcSdgcLmssxsServiceImpl extends ServiceImpl<JjgFbgcSdgcLmssxsM
                 //创建文件根目录
                 fdir.mkdirs();
             }
-            File directory = new File("service-system/src/main/resources/static");
-            String reportPath = directory.getCanonicalPath();
-            String path = reportPath + File.separator + "沥青路面渗水系数.xlsx";
-            Files.copy(Paths.get(path), new FileOutputStream(f));
-            FileInputStream out = new FileInputStream(f);
-            wb = new XSSFWorkbook(out);
-            createTable(gettableNum(zxzfdata.size()),wb,"沥青路面(左幅)");
-            createTable(gettableNum(zxyfdata.size()),wb,"沥青路面(右幅)");
-            createTable(gettableNum(sdzfdata.size()),wb,"隧道路面(左幅)");
-            createTable(gettableNum(sdyfdata.size()),wb,"隧道路面(右幅)");
-            createTable(gettableNum(zddata.size()),wb,"匝道路面");
+            try {
+                File directory = new File("service-system/src/main/resources/static");
+                String reportPath = directory.getCanonicalPath();
+                String path = reportPath + File.separator + "沥青路面渗水系数.xlsx";
+                Files.copy(Paths.get(path), new FileOutputStream(f));
+                FileInputStream out = new FileInputStream(f);
+                wb = new XSSFWorkbook(out);
+                createTable(gettableNum(zxzfdata.size()),wb,"沥青路面(左幅)");
+                createTable(gettableNum(zxyfdata.size()),wb,"沥青路面(右幅)");
+                createTable(gettableNum(sdzfdata.size()),wb,"隧道路面(左幅)");
+                createTable(gettableNum(sdyfdata.size()),wb,"隧道路面(右幅)");
+                createTable(gettableNum(zddata.size()),wb,"匝道路面");
 
-            DBtoExcel(zxzfdata,wb,"沥青路面(左幅)");
-            DBtoExcel(zxyfdata,wb,"沥青路面(右幅)");
-            DBtoExcel(sdzfdata,wb,"隧道路面(左幅)");
-            DBtoExcel(sdyfdata,wb,"隧道路面(右幅)");
-            DBtoExcel(zddata,wb,"匝道路面");
-            for (int j = 0; j < wb.getNumberOfSheets(); j++) {
-                if (shouldBeCalculate(wb.getSheetAt(j))) {
-                    calculateOneSheet(wb.getSheetAt(j));
+                DBtoExcel(zxzfdata,wb,"沥青路面(左幅)");
+                DBtoExcel(zxyfdata,wb,"沥青路面(右幅)");
+                DBtoExcel(sdzfdata,wb,"隧道路面(左幅)");
+                DBtoExcel(sdyfdata,wb,"隧道路面(右幅)");
+                DBtoExcel(zddata,wb,"匝道路面");
+                for (int j = 0; j < wb.getNumberOfSheets(); j++) {
+                    if (shouldBeCalculate(wb.getSheetAt(j))) {
+                        calculateOneSheet(wb.getSheetAt(j));
+                    }
                 }
+                for (int j = 0; j < wb.getNumberOfSheets(); j++) {
+                    JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
+                }
+                JjgFbgcCommonUtils.deleteEmptySheets(wb);
+                FileOutputStream fileOut = new FileOutputStream(f);
+                wb.write(fileOut);
+                fileOut.flush();
+                fileOut.close();
+                out.close();
+                wb.close();
+            }catch (Exception e) {
+                if(f.exists()){
+                    f.delete();
+                }
+                throw new JjgysException(20001, "生成鉴定表错误，请检查数据的正确性");
             }
-            for (int j = 0; j < wb.getNumberOfSheets(); j++) {
-                JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
-            }
-            JjgFbgcCommonUtils.deleteEmptySheets(wb);
-            FileOutputStream fileOut = new FileOutputStream(f);
-            wb.write(fileOut);
-            fileOut.flush();
-            fileOut.close();
-            out.close();
-            wb.close();
+
         }
 
     }
@@ -461,8 +469,36 @@ public class JjgFbgcSdgcLmssxsServiceImpl extends ServiceImpl<JjgFbgcSdgcLmssxsM
                             new ExcelHandler<JjgFbgcSdgcLmssxsVo>(JjgFbgcSdgcLmssxsVo.class) {
                                 @Override
                                 public void handle(List<JjgFbgcSdgcLmssxsVo> dataList) {
+                                    int rowNumber=2;
                                     for(JjgFbgcSdgcLmssxsVo lmssxsVo: dataList)
                                     {
+                                        if (StringUtils.isEmpty(lmssxsVo.getSdmc())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，隧道名称为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(lmssxsVo.getLzdsd())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，路匝道隧道为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(lmssxsVo.getZh())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，桩号为空，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(lmssxsVo.getCds()) || StringUtils.isEmpty(lmssxsVo.getCds())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，初读数有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(lmssxsVo.getOfzds()) || StringUtils.isEmpty(lmssxsVo.getOfzds())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，第一分钟读数值有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(lmssxsVo.getTfzds()) || StringUtils.isEmpty(lmssxsVo.getTfzds())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，第二分钟读数值有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(lmssxsVo.getSl()) || StringUtils.isEmpty(lmssxsVo.getSl())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，水量值有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(lmssxsVo.getSj()) || StringUtils.isEmpty(lmssxsVo.getSj())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，时间值有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(lmssxsVo.getSsxsgdz()) || StringUtils.isEmpty(lmssxsVo.getSsxsgdz())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，深水系数规定值有误，请修改后重新上传");
+                                        }
                                         JjgFbgcSdgcLmssxs lmssxs = new JjgFbgcSdgcLmssxs();
                                         BeanUtils.copyProperties(lmssxsVo,lmssxs);
                                         lmssxs.setCreatetime(new Date());
@@ -470,6 +506,7 @@ public class JjgFbgcSdgcLmssxsServiceImpl extends ServiceImpl<JjgFbgcSdgcLmssxsM
                                         lmssxs.setHtd(commonInfoVo.getHtd());
                                         lmssxs.setFbgc(commonInfoVo.getFbgc());
                                         jjgFbgcSdgcLmssxsMapper.insert(lmssxs);
+                                        rowNumber++;
                                     }
                                 }
                             }

@@ -101,37 +101,45 @@ public class JjgFbgcSdgcCqhdServiceImpl extends ServiceImpl<JjgFbgcSdgcCqhdMappe
                 //创建文件根目录
                 fdir.mkdirs();
             }
-            File directory = new File("service-system/src/main/resources/static");
-            String reportPath = directory.getCanonicalPath();
-            String name = "隧道衬砌厚度.xlsx";
-            String path = reportPath + File.separator + name;
-            Files.copy(Paths.get(path), new FileOutputStream(f));
-            FileInputStream out = new FileInputStream(f);
-            wb = new XSSFWorkbook(out);
+            try {
+                File directory = new File("service-system/src/main/resources/static");
+                String reportPath = directory.getCanonicalPath();
+                String name = "隧道衬砌厚度.xlsx";
+                String path = reportPath + File.separator + name;
+                Files.copy(Paths.get(path), new FileOutputStream(f));
+                FileInputStream out = new FileInputStream(f);
+                wb = new XSSFWorkbook(out);
 
-            if (cd == 2){
-                createTable2(gettableNum(data.size()),wb,sheetname);
-                DBtoExcel2(data,wb,sheetname,sdmc);
+                if (cd == 2){
+                    createTable2(gettableNum(data.size()),wb,sheetname);
+                    DBtoExcel2(data,wb,sheetname,sdmc);
 
-            }else if (cd ==3) {
-                createTable3(gettableNum(data.size()),wb,sheetname);
-                DBtoExcel3(data,wb,sheetname,sdmc);
+                }else if (cd ==3) {
+                    createTable3(gettableNum(data.size()),wb,sheetname);
+                    DBtoExcel3(data,wb,sheetname,sdmc);
 
-            }else if (cd ==4){
-                createTable4(gettable4(data.size()),wb,sheetname);
-                DBtoExcel4(data,wb,sheetname,sdmc);
+                }else if (cd ==4){
+                    createTable4(gettable4(data.size()),wb,sheetname);
+                    DBtoExcel4(data,wb,sheetname,sdmc);
 
+                }
+                for (int j = 0; j < wb.getNumberOfSheets(); j++) {
+                    JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
+                }
+                JjgFbgcCommonUtils.deleteEmptySheets(wb);
+                FileOutputStream fileOut = new FileOutputStream(f);
+                wb.write(fileOut);
+                fileOut.flush();
+                fileOut.close();
+                out.close();
+                wb.close();
+            }catch (Exception e) {
+                if(f.exists()){
+                    f.delete();
+                }
+                throw new JjgysException(20001, "生成鉴定表错误，请检查数据的正确性");
             }
-            for (int j = 0; j < wb.getNumberOfSheets(); j++) {
-                JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
-            }
-            JjgFbgcCommonUtils.deleteEmptySheets(wb);
-            FileOutputStream fileOut = new FileOutputStream(f);
-            wb.write(fileOut);
-            fileOut.flush();
-            fileOut.close();
-            out.close();
-            wb.close();
+
         }
 
     }
@@ -467,8 +475,30 @@ public class JjgFbgcSdgcCqhdServiceImpl extends ServiceImpl<JjgFbgcSdgcCqhdMappe
                             new ExcelHandler<JjgFbgcSdgcCqhdVo>(JjgFbgcSdgcCqhdVo.class) {
                                 @Override
                                 public void handle(List<JjgFbgcSdgcCqhdVo> dataList) {
+                                    int rowNumber=2;
                                     for(JjgFbgcSdgcCqhdVo sdgcCqhdVo: dataList)
                                     {
+                                        if (StringUtils.isEmpty(sdgcCqhdVo.getSdmc())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，隧道名称为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(sdgcCqhdVo.getZh())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，桩号为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(sdgcCqhdVo.getWz())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，位置为空，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(sdgcCqhdVo.getSjhd()) || StringUtils.isEmpty(sdgcCqhdVo.getSjhd())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，设计厚度值有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(sdgcCqhdVo.getZgy1()) || StringUtils.isEmpty(sdgcCqhdVo.getZgy1())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，左拱腰1值有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(sdgcCqhdVo.getYgy1()) || StringUtils.isEmpty(sdgcCqhdVo.getYgy1())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，右拱腰1值有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(sdgcCqhdVo.getGd()) || StringUtils.isEmpty(sdgcCqhdVo.getGd())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，拱顶值有误，请修改后重新上传");
+                                        }
                                         JjgFbgcSdgcCqhd fbgcSdgcCqhd = new JjgFbgcSdgcCqhd();
                                         BeanUtils.copyProperties(sdgcCqhdVo,fbgcSdgcCqhd);
                                         fbgcSdgcCqhd.setCreatetime(new Date());
@@ -476,6 +506,7 @@ public class JjgFbgcSdgcCqhdServiceImpl extends ServiceImpl<JjgFbgcSdgcCqhdMappe
                                         fbgcSdgcCqhd.setHtd(commonInfoVo.getHtd());
                                         fbgcSdgcCqhd.setFbgc(commonInfoVo.getFbgc());
                                         jjgFbgcSdgcCqhdMapper.insert(fbgcSdgcCqhd);
+                                        rowNumber++;
                                     }
                                 }
                             }

@@ -32,4 +32,5 @@ public interface JjgFbgcQlgcZdhpzdService extends IService<JjgFbgcQlgcZdhpzd> {
 
     List<Map<String, Object>> selectlx(String proname, String htd);
 
+    List<Map<String, Object>> lookJdb(CommonInfoVo commonInfoVo, String value) throws IOException;
 }

@@ -13,6 +13,7 @@ import glgc.jjgys.system.mapper.JjgFbgcJtaqssJabxMapper;
 import glgc.jjgys.system.service.JjgFbgcJtaqssJabxService;
 import glgc.jjgys.system.utils.JjgFbgcCommonUtils;
 import glgc.jjgys.system.utils.RowCopy;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -77,38 +78,43 @@ public class JjgFbgcJtaqssJabxServiceImpl extends ServiceImpl<JjgFbgcJtaqssJabxM
                 //创建文件根目录
                 fdir.mkdirs();
             }
-            File directory = new File("service-system/src/main/resources");
-            String reportPath = directory.getCanonicalPath();
-            String path = reportPath + "/static/交安标线厚度新.xlsx";
-            Files.copy(Paths.get(path), new FileOutputStream(f));
-            FileInputStream out = new FileInputStream(f);
-            wb = new XSSFWorkbook(out);
-            createTable(gettableNum(data.size()),wb);
-            if(DBtoExcel(data,wb,proname,htd,fbgc)){
-                for (int j = 0; j < wb.getNumberOfSheets(); j++) {
-                    calculateOneSheet(wb.getSheetAt(j));
+            try {
+                File directory = new File("service-system/src/main/resources");
+                String reportPath = directory.getCanonicalPath();
+                String path = reportPath + "/static/交安标线厚度新.xlsx";
+                Files.copy(Paths.get(path), new FileOutputStream(f));
+                FileInputStream out = new FileInputStream(f);
+                wb = new XSSFWorkbook(out);
+                createTable(gettableNum(data.size()),wb);
+                if(DBtoExcel(data,wb,proname,htd,fbgc)){
+                    for (int j = 0; j < wb.getNumberOfSheets(); j++) {
+                        calculateOneSheet(wb.getSheetAt(j));
+                    }
+                    for (int j = 0; j < wb.getNumberOfSheets(); j++) {   //表内公式  计算 显示结果
+                        JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
+                    }
+                    FileOutputStream fileOut = new FileOutputStream(f);
+                    wb.write(fileOut);
+                    fileOut.flush();
+                    fileOut.close();
                 }
-                for (int j = 0; j < wb.getNumberOfSheets(); j++) {   //表内公式  计算 显示结果
-                    JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
+                out.close();
+                wb.close();
+                //查询是否有白线逆反射系数
+                List<JjgFbgcJtaqssJabx> bxnfsxsdata = jjgFbgcJtaqssJabxMapper.selectbxnfsxs(proname,htd,fbgc);
+                List<JjgFbgcJtaqssJabx> hxnfsxsdata = jjgFbgcJtaqssJabxMapper.selecthxnfsxs(proname,htd,fbgc);
+                if (bxnfsxsdata !=null && bxnfsxsdata.size()>0){
+                    bxnfsxs(data);
                 }
-                FileOutputStream fileOut = new FileOutputStream(f);
-                wb.write(fileOut);
-                fileOut.flush();
-                fileOut.close();
+                if (hxnfsxsdata !=null && hxnfsxsdata.size()>0){
+                    hxnfsxs(data);
+                }
+            }catch (Exception e) {
+                if(f.exists()){
+                    f.delete();
+                }
+                throw new JjgysException(20001, "生成鉴定表错误，请检查数据的正确性");
             }
-            out.close();
-            wb.close();
-            //查询是否有白线逆反射系数
-            List<JjgFbgcJtaqssJabx> bxnfsxsdata = jjgFbgcJtaqssJabxMapper.selectbxnfsxs(proname,htd,fbgc);
-            List<JjgFbgcJtaqssJabx> hxnfsxsdata = jjgFbgcJtaqssJabxMapper.selecthxnfsxs(proname,htd,fbgc);
-            if (bxnfsxsdata !=null && bxnfsxsdata.size()>0){
-                bxnfsxs(data);
-            }
-            if (hxnfsxsdata !=null && hxnfsxsdata.size()>0){
-                hxnfsxs(data);
-            }
-
-
         }
 
     }
@@ -1012,8 +1018,25 @@ public class JjgFbgcJtaqssJabxServiceImpl extends ServiceImpl<JjgFbgcJtaqssJabxM
                             new ExcelHandler<JjgFbgcJtaqssJabxVo>(JjgFbgcJtaqssJabxVo.class) {
                                 @Override
                                 public void handle(List<JjgFbgcJtaqssJabxVo> dataList) {
+                                    int rowNumber=2;
                                     for(JjgFbgcJtaqssJabxVo jabxVo: dataList)
                                     {
+                                        if (StringUtils.isEmpty(jabxVo.getBxlx())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，标线类型为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(jabxVo.getWz())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，位置为空，请修改后重新上传");
+                                        }
+
+                                        if (!StringUtils.isNumeric(jabxVo.getHdgdz()) || StringUtils.isEmpty(jabxVo.getHdgdz())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，厚度规定值有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(jabxVo.getHdyxpsz()) || StringUtils.isEmpty(jabxVo.getHdyxpsz())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，厚度允许偏差+值有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(jabxVo.getBxnfsxsgdz()) || StringUtils.isEmpty(jabxVo.getBxnfsxsgdz())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，白线逆反射系数规定值有误，请修改后重新上传");
+                                        }
                                         JjgFbgcJtaqssJabx fbgcJtaqssJabx = new JjgFbgcJtaqssJabx();
                                         BeanUtils.copyProperties(jabxVo,fbgcJtaqssJabx);
                                         fbgcJtaqssJabx.setCreatetime(new Date());
@@ -1021,6 +1044,7 @@ public class JjgFbgcJtaqssJabxServiceImpl extends ServiceImpl<JjgFbgcJtaqssJabxM
                                         fbgcJtaqssJabx.setHtd(commonInfoVo.getHtd());
                                         fbgcJtaqssJabx.setFbgc(commonInfoVo.getFbgc());
                                         jjgFbgcJtaqssJabxMapper.insert(fbgcJtaqssJabx);
+                                        rowNumber++;
                                     }
                                 }
                             }

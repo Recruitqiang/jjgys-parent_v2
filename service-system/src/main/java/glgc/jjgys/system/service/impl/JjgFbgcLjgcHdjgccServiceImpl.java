@@ -13,6 +13,7 @@ import glgc.jjgys.system.service.JjgFbgcLjgcHdjgccService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import glgc.jjgys.system.utils.JjgFbgcCommonUtils;
 import glgc.jjgys.system.utils.RowCopy;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
@@ -73,27 +74,35 @@ public class JjgFbgcLjgcHdjgccServiceImpl extends ServiceImpl<JjgFbgcLjgcHdjgccM
                 //创建文件根目录
                 fdir.mkdirs();
             }
-            File directory = new File("service-system/src/main/resources/static");
-            String reportPath = directory.getCanonicalPath();
-            String name = "涵洞结构尺寸.xlsx";
-            String path =reportPath+File.separator+name;
-            Files.copy(Paths.get(path), new FileOutputStream(f));
-            FileInputStream in = new FileInputStream(f);
-            wb = new XSSFWorkbook(in);
-            createTable(gettableNum(data.size()));
-            String sheetname = "涵洞结构尺寸";
-            if(DBtoExcel(data,proname,htd,fbgc,sheetname)){
-                calculateSheet(wb.getSheet("涵洞结构尺寸"));
-                for (int j = 0; j < wb.getNumberOfSheets(); j++) {   //表内公式  计算 显示结果
-                    JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
+            try {
+                File directory = new File("service-system/src/main/resources/static");
+                String reportPath = directory.getCanonicalPath();
+                String name = "涵洞结构尺寸.xlsx";
+                String path =reportPath+File.separator+name;
+                Files.copy(Paths.get(path), new FileOutputStream(f));
+                FileInputStream in = new FileInputStream(f);
+                wb = new XSSFWorkbook(in);
+                createTable(gettableNum(data.size()));
+                String sheetname = "涵洞结构尺寸";
+                if(DBtoExcel(data,proname,htd,fbgc,sheetname)){
+                    calculateSheet(wb.getSheet("涵洞结构尺寸"));
+                    for (int j = 0; j < wb.getNumberOfSheets(); j++) {   //表内公式  计算 显示结果
+                        JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
+                    }
+                    FileOutputStream fileOut = new FileOutputStream(f);
+                    wb.write(fileOut);
+                    fileOut.flush();
+                    fileOut.close();
                 }
-                FileOutputStream fileOut = new FileOutputStream(f);
-                wb.write(fileOut);
-                fileOut.flush();
-                fileOut.close();
+                in.close();
+                wb.close();
+            }catch (Exception e) {
+                if(f.exists()){
+                    f.delete();
+                }
+                throw new JjgysException(20001, "生成鉴定表错误，请检查数据的正确性");
             }
-            in.close();
-            wb.close();
+
         }
     }
 
@@ -115,8 +124,25 @@ public class JjgFbgcLjgcHdjgccServiceImpl extends ServiceImpl<JjgFbgcLjgcHdjgccM
                             new ExcelHandler<JjgFbgcLjgcHdjgccVo>(JjgFbgcLjgcHdjgccVo.class) {
                                 @Override
                                 public void handle(List<JjgFbgcLjgcHdjgccVo> dataList) {
+                                    int rowNumber=2;
                                     for(JjgFbgcLjgcHdjgccVo hdjgccVo: dataList)
                                     {
+                                        if (StringUtils.isEmpty(hdjgccVo.getZh())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，桩号为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(hdjgccVo.getBw())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，部位值为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(hdjgccVo.getLb())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，类别为空，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(hdjgccVo.getSjz()) || StringUtils.isEmpty(hdjgccVo.getSjz())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，设计值有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(hdjgccVo.getScz()) || StringUtils.isEmpty(hdjgccVo.getScz())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，实测值有误，请修改后重新上传");
+                                        }
+
                                         JjgFbgcLjgcHdjgcc fbgcLjgcHdjgcc = new JjgFbgcLjgcHdjgcc();
                                         BeanUtils.copyProperties(hdjgccVo,fbgcLjgcHdjgcc);
                                         fbgcLjgcHdjgcc.setCreatetime(new Date());
@@ -124,6 +150,7 @@ public class JjgFbgcLjgcHdjgccServiceImpl extends ServiceImpl<JjgFbgcLjgcHdjgccM
                                         fbgcLjgcHdjgcc.setHtd(commonInfoVo.getHtd());
                                         fbgcLjgcHdjgcc.setFbgc(commonInfoVo.getFbgc());
                                         jjgFbgcLjgcHdjgccMapper.insert(fbgcLjgcHdjgcc);
+                                        rowNumber++;
                                     }
                                 }
                             }

@@ -41,16 +41,6 @@ public class JjgFbgcGenerateTableController {
     @Value(value = "${jjgys.path.filepath}")
     private String filespath;
 
-    /**
-     *[
-     * {
-     * proname:陕西高速，
-     * htds:[LJ-1,LJ-2]
-     * }
-     * ]
-     */
-
-
     @ApiOperation("生成评定表")
     @PostMapping("generatePdb")
     //public Result generatePdb(@RequestParam(value = "proname") String proname ,@RequestBody List<String> htds) throws IOException {

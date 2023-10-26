@@ -45,20 +45,33 @@ public class JjgZdhMcxsJgfcController {
     @Value(value = "${jjgys.path.jgfilepath}")
     private String jgfilepath;
 
+    @ApiOperation("查看平均值")
+    @GetMapping("lookpjz")
+    public Result lookpjz(@RequestParam String proname) throws IOException {
+        List<Map<String,Object>> list = jjgZdhMcxsJgfcService.lookpjz(proname);
+        return Result.ok(list);
+    }
+
     @RequestMapping(value = "/download", method = RequestMethod.GET)
-    public void downloadExport(HttpServletRequest request, HttpServletResponse response, String proname, String htd) throws IOException {
-        List<Map<String,Object>> lxlist = jjgZdhMcxsJgfcService.selectlx(proname,htd);
+    public void downloadExport(HttpServletRequest request, HttpServletResponse response, String proname) throws IOException {
+        List<Map<String,Object>> htdList = jjgZdhMcxsJgfcService.selecthtd(proname);
         List<String> fileName = new ArrayList<>();
-        for (Map<String, Object> map : lxlist) {
-            String lxbs = map.get("lxbs").toString();
-            if (lxbs.equals("主线")){
-                fileName.add("19路面摩擦系数");;
-            }else {
-                fileName.add("62互通摩擦系数-"+lxbs);
+        if (htdList!=null){
+            for (Map<String, Object> map1 : htdList) {
+                String htd = map1.get("htd").toString();
+                List<Map<String,Object>> lxlist = jjgZdhMcxsJgfcService.selectlx(proname,htd);
+                for (Map<String, Object> map : lxlist) {
+                    String lxbs = map.get("lxbs").toString();
+                    if (lxbs.equals("主线")){
+                        fileName.add(htd+File.separator+"19路面摩擦系数");
+                    }else {
+                        fileName.add(htd+File.separator+"62互通摩擦系数-"+lxbs);
+                    }
+                }
             }
         }
         String zipname = "摩擦系数鉴定表";
-        JjgFbgcCommonUtils.batchDowndFile(response,zipname,fileName,jgfilepath+ File.separator+proname+File.separator+htd);
+        JjgFbgcCommonUtils.batchDowndFile(response,zipname,fileName,jgfilepath+ File.separator+proname);
     }
 
     @ApiOperation("生成摩擦系数鉴定表")
@@ -91,7 +104,6 @@ public class JjgZdhMcxsJgfcController {
         if (jjgZdhMcxs != null) {
             QueryWrapper<JjgZdhMcxsJgfc> wrapper = new QueryWrapper<>();
             wrapper.like("proname", jjgZdhMcxs.getProname());
-            wrapper.like("htd", jjgZdhMcxs.getHtd());
 
             //调用方法分页查询
             IPage<JjgZdhMcxsJgfc> pageModel = jjgZdhMcxsJgfcService.page(pageParam, wrapper);

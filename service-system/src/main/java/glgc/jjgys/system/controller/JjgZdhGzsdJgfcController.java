@@ -45,20 +45,33 @@ public class JjgZdhGzsdJgfcController {
     @Value(value = "${jjgys.path.jgfilepath}")
     private String jgfilepath;
 
+    @ApiOperation("查看平均值")
+    @GetMapping("lookpjz")
+    public Result lookpjz(@RequestParam String proname) throws IOException {
+        List<Map<String,Object>> list = jjgZdhGzsdJgfcService.lookpjz(proname);
+        return Result.ok(list);
+    }
+
     @RequestMapping(value = "/download", method = RequestMethod.GET)
-    public void downloadExport(HttpServletResponse response, String proname, String htd) throws IOException {
-        List<Map<String,Object>> lxlist = jjgZdhGzsdJgfcService.selectlx(proname,htd);
+    public void downloadExport(HttpServletResponse response, String proname) throws IOException {
+        List<Map<String,Object>> htdList = jjgZdhGzsdJgfcService.selecthtd(proname);
         List<String> fileName = new ArrayList<>();
-        for (Map<String, Object> map : lxlist) {
-            String lxbs = map.get("lxbs").toString();
-            if (lxbs.equals("主线")){
-                fileName.add("20路面构造深度");;
-            }else {
-                fileName.add("63互通构造深度-"+lxbs);
+        if (htdList!=null){
+            for (Map<String, Object> map1 : htdList) {
+                String htd = map1.get("htd").toString();
+                List<Map<String,Object>> lxlist = jjgZdhGzsdJgfcService.selectlx(proname,htd);
+                for (Map<String, Object> map : lxlist) {
+                    String lxbs = map.get("lxbs").toString();
+                    if (lxbs.equals("主线")){
+                        fileName.add(htd+File.separator+"20路面构造深度");
+                    }else {
+                        fileName.add(htd+File.separator+"63互通构造深度-"+lxbs);
+                    }
+                }
             }
         }
         String zipname = "构造深度鉴定表";
-        JjgFbgcCommonUtils.batchDowndFile(response,zipname,fileName,jgfilepath+ File.separator+proname+File.separator+htd);
+        JjgFbgcCommonUtils.batchDowndFile(response,zipname,fileName,jgfilepath+ File.separator+proname);
     }
 
     @ApiOperation("生成构造深度鉴定表")
@@ -91,7 +104,6 @@ public class JjgZdhGzsdJgfcController {
         if (jjgZdhGzsd != null) {
             QueryWrapper<JjgZdhGzsdJgfc> wrapper = new QueryWrapper<>();
             wrapper.like("proname", jjgZdhGzsd.getProname());
-            wrapper.like("htd", jjgZdhGzsd.getHtd());
 
             //调用方法分页查询
             IPage<JjgZdhGzsdJgfc> pageModel = jjgZdhGzsdJgfcService.page(pageParam, wrapper);

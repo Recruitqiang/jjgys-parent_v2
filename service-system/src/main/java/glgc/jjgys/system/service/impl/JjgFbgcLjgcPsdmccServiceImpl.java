@@ -16,6 +16,7 @@ import glgc.jjgys.system.service.JjgFbgcLjgcPsdmccService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import glgc.jjgys.system.utils.JjgFbgcCommonUtils;
 import glgc.jjgys.system.utils.RowCopy;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Font;
@@ -78,27 +79,35 @@ public class JjgFbgcLjgcPsdmccServiceImpl extends ServiceImpl<JjgFbgcLjgcPsdmccM
                 //创建文件根目录
                 fdir.mkdirs();
             }
-            File directory = new File("service-system/src/main/resources/static");
-            String reportPath = directory.getCanonicalPath();
-            String name = "排水断面尺寸.xlsx";
-            String path =reportPath+File.separator+name;
-            Files.copy(Paths.get(path), new FileOutputStream(f));
-            FileInputStream in = new FileInputStream(f);
-            wb = new XSSFWorkbook(in);
-            createTable(gettableNum(data.size()));
-            String sheetname = "排水断面尺寸";
-            if(DBtoExcel(data,proname,htd,fbgc,sheetname)){
-                calculateSheet(wb.getSheet("排水断面尺寸"));
-                for (int j = 0; j < wb.getNumberOfSheets(); j++) {   //表内公式  计算 显示结果
-                    JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
+            try {
+                File directory = new File("service-system/src/main/resources/static");
+                String reportPath = directory.getCanonicalPath();
+                String name = "排水断面尺寸.xlsx";
+                String path =reportPath+File.separator+name;
+                Files.copy(Paths.get(path), new FileOutputStream(f));
+                FileInputStream in = new FileInputStream(f);
+                wb = new XSSFWorkbook(in);
+                createTable(gettableNum(data.size()));
+                String sheetname = "排水断面尺寸";
+                if(DBtoExcel(data,proname,htd,fbgc,sheetname)){
+                    calculateSheet(wb.getSheet("排水断面尺寸"));
+                    for (int j = 0; j < wb.getNumberOfSheets(); j++) {   //表内公式  计算 显示结果
+                        JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
+                    }
+                    FileOutputStream fileOut = new FileOutputStream(f);
+                    wb.write(fileOut);
+                    fileOut.flush();
+                    fileOut.close();
                 }
-                FileOutputStream fileOut = new FileOutputStream(f);
-                wb.write(fileOut);
-                fileOut.flush();
-                fileOut.close();
+                in.close();
+                wb.close();
+            }catch (Exception e) {
+                if(f.exists()){
+                    f.delete();
+                }
+                throw new JjgysException(20001, "生成鉴定表错误，请检查数据的正确性");
             }
-            in.close();
-            wb.close();
+
 
         }
 
@@ -368,8 +377,30 @@ public class JjgFbgcLjgcPsdmccServiceImpl extends ServiceImpl<JjgFbgcLjgcPsdmccM
                             new ExcelHandler<JjgFbgcLjgcPsdmccVo>(JjgFbgcLjgcPsdmccVo.class) {
                                 @Override
                                 public void handle(List<JjgFbgcLjgcPsdmccVo> dataList) {
+                                    int rowNumber=2;
                                     for(JjgFbgcLjgcPsdmccVo psdmccVo: dataList)
                                     {
+                                        if (StringUtils.isEmpty(psdmccVo.getZh())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，桩号为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(psdmccVo.getBw())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，部位值为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(psdmccVo.getLb())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，类别为空，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(psdmccVo.getSjz()) || StringUtils.isEmpty(psdmccVo.getSjz())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，设计值有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(psdmccVo.getScz()) || StringUtils.isEmpty(psdmccVo.getScz())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，实测值有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(psdmccVo.getYxwcz()) || StringUtils.isEmpty(psdmccVo.getYxwcz())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，允许误差+值有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(psdmccVo.getYxwcf()) || StringUtils.isEmpty(psdmccVo.getYxwcf())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，允许误差-值有误，请修改后重新上传");
+                                        }
                                         JjgFbgcLjgcPsdmcc jjgFbgcLjgcPsdmcc = new JjgFbgcLjgcPsdmcc();
                                         BeanUtils.copyProperties(psdmccVo,jjgFbgcLjgcPsdmcc);
                                         jjgFbgcLjgcPsdmcc.setCreatetime(new Date());
@@ -377,6 +408,7 @@ public class JjgFbgcLjgcPsdmccServiceImpl extends ServiceImpl<JjgFbgcLjgcPsdmccM
                                         jjgFbgcLjgcPsdmcc.setHtd(commonInfoVo.getHtd());
                                         jjgFbgcLjgcPsdmcc.setFbgc(commonInfoVo.getFbgc());
                                         jjgFbgcLjgcPsdmccMapper.insert(jjgFbgcLjgcPsdmcc);
+                                        rowNumber++;
                                     }
                                 }
                             }

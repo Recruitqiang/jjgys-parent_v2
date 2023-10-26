@@ -20,8 +20,10 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -42,18 +44,23 @@ public class JjgFbgcLmgcLmgzsdsgpsfJgfcController {
     private String jgfilepath;
 
     @RequestMapping(value = "/download", method = RequestMethod.GET)
-    public void downloadExport(HttpServletResponse response, String proname, String htd) throws IOException {
-        String fileName = "20构造深度手工铺沙法.xlsx";
-        String p = jgfilepath+ File.separator+proname+File.separator+htd+File.separator+fileName;
-        File file = new File(p);
-        if (file.exists()){
-            JjgFbgcCommonUtils.download(response,p,fileName);
+    public void downloadExport(HttpServletResponse response, String proname) throws IOException {
+        List<Map<String,Object>> htdList = jjgFbgcLmgcLmgzsdsgpsfJgfcService.selecthtd(proname);
+        List<String> fileName = new ArrayList<>();
+        if (htdList!=null){
+            for (Map<String, Object> map1 : htdList) {
+                String htd = map1.get("htd").toString();
+                fileName.add(htd+File.separator+"20构造深度手工铺沙法");
+            }
         }
+        String zipname = "构造深度手工铺沙法";
+        JjgFbgcCommonUtils.batchDowndFile(response,zipname,fileName,jgfilepath+ File.separator+proname);
     }
 
     @ApiOperation("生成构造深度手工铺沙法鉴定表")
     @PostMapping("generateJdb")
-    public void generateJdb(String proname) throws Exception {
+    public void generateJdb(@RequestBody CommonInfoVo commonInfoVo) throws Exception {
+        String proname = commonInfoVo.getProname();
         jjgFbgcLmgcLmgzsdsgpsfJgfcService.generateJdb(proname);
 
     }
@@ -81,8 +88,8 @@ public class JjgFbgcLmgcLmgzsdsgpsfJgfcController {
         if (jjgFbgcLmgcLmgzsdsgpsf != null){
             QueryWrapper<JjgFbgcLmgcLmgzsdsgpsfJgfc> wrapper=new QueryWrapper<>();
             wrapper.like("proname",jjgFbgcLmgcLmgzsdsgpsf.getProname());
-            wrapper.like("htd",jjgFbgcLmgcLmgzsdsgpsf.getHtd());
-            wrapper.like("fbgc",jjgFbgcLmgcLmgzsdsgpsf.getFbgc());
+           /* wrapper.like("htd",jjgFbgcLmgcLmgzsdsgpsf.getHtd());
+            wrapper.like("fbgc",jjgFbgcLmgcLmgzsdsgpsf.getFbgc());*/
             Date jcsj = jjgFbgcLmgcLmgzsdsgpsf.getJcsj();
             if (!StringUtils.isEmpty(jcsj)){
                 wrapper.like("jcsj",jcsj);

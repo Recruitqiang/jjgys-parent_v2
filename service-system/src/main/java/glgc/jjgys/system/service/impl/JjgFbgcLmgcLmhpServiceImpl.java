@@ -14,6 +14,7 @@ import glgc.jjgys.system.service.JjgFbgcLmgcLmhpService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import glgc.jjgys.system.utils.JjgFbgcCommonUtils;
 import glgc.jjgys.system.utils.RowCopy;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -115,145 +116,151 @@ public class JjgFbgcLmgcLmhpServiceImpl extends ServiceImpl<JjgFbgcLmgcLmhpMappe
                 //创建文件根目录
                 fdir.mkdirs();
             }
-            File directory = new File("service-system/src/main/resources/static");
-            String reportPath = directory.getCanonicalPath();
-            String path = reportPath + File.separator + "横坡.xlsx";
-            Files.copy(Paths.get(path), new FileOutputStream(f));
-            FileInputStream out = new FileInputStream(f);
-            wb = new XSSFWorkbook(out);
+            try {
+                File directory = new File("service-system/src/main/resources/static");
+                String reportPath = directory.getCanonicalPath();
+                String path = reportPath + File.separator + "横坡.xlsx";
+                Files.copy(Paths.get(path), new FileOutputStream(f));
+                FileInputStream out = new FileInputStream(f);
+                wb = new XSSFWorkbook(out);
 
-            QueryWrapper<JjgLqsSd> wrappersdzf = new QueryWrapper<>();
-            wrappersdzf.like("proname",proname);
-            wrappersdzf.like("lf","左幅");
-            wrappersdzf.like("wz","主线");
-            List<JjgLqsSd> jjgLqsSdzf = jjgLqsSdMapper.selectList(wrappersdzf);
+                QueryWrapper<JjgLqsSd> wrappersdzf = new QueryWrapper<>();
+                wrappersdzf.like("proname",proname);
+                wrappersdzf.like("lf","左幅");
+                wrappersdzf.like("wz","主线");
+                List<JjgLqsSd> jjgLqsSdzf = jjgLqsSdMapper.selectList(wrappersdzf);
 
-            QueryWrapper<JjgLqsSd> wrappersdyf = new QueryWrapper<>();
-            wrappersdyf.like("proname",proname);
-            wrappersdyf.like("lf","右幅");
-            wrappersdyf.like("wz","主线");
-            List<JjgLqsSd> jjgLqsSdyf = jjgLqsSdMapper.selectList(wrappersdyf);
+                QueryWrapper<JjgLqsSd> wrappersdyf = new QueryWrapper<>();
+                wrappersdyf.like("proname",proname);
+                wrappersdyf.like("lf","右幅");
+                wrappersdyf.like("wz","主线");
+                List<JjgLqsSd> jjgLqsSdyf = jjgLqsSdMapper.selectList(wrappersdyf);
 
-            QueryWrapper<JjgLqsQl> wrapperqlzf = new QueryWrapper<>();
-            wrapperqlzf.like("proname",proname);
-            wrapperqlzf.like("lf","左幅");
-            wrapperqlzf.like("wz","主线");
-            List<JjgLqsQl> jjgLqsQlzf = jjgLqsQlMapper.selectList(wrapperqlzf);
+                QueryWrapper<JjgLqsQl> wrapperqlzf = new QueryWrapper<>();
+                wrapperqlzf.like("proname",proname);
+                wrapperqlzf.like("lf","左幅");
+                wrapperqlzf.like("wz","主线");
+                List<JjgLqsQl> jjgLqsQlzf = jjgLqsQlMapper.selectList(wrapperqlzf);
 
-            QueryWrapper<JjgLqsQl> wrapperqlyf = new QueryWrapper<>();
-            wrapperqlyf.like("proname",proname);
-            wrapperqlyf.like("lf","右幅");
-            wrapperqlyf.like("wz","主线");
-            List<JjgLqsQl> jjgLqsQlyf = jjgLqsQlMapper.selectList(wrapperqlyf);
-            /**
-             * 把基础表中所以有隧道的数据查询出来，然后根据起止桩号去在横坡实测数据匹配，是的话就是哪个隧道
-             */
+                QueryWrapper<JjgLqsQl> wrapperqlyf = new QueryWrapper<>();
+                wrapperqlyf.like("proname",proname);
+                wrapperqlyf.like("lf","右幅");
+                wrapperqlyf.like("wz","主线");
+                List<JjgLqsQl> jjgLqsQlyf = jjgLqsQlMapper.selectList(wrapperqlyf);
+                /**
+                 * 把基础表中所以有隧道的数据查询出来，然后根据起止桩号去在横坡实测数据匹配，是的话就是哪个隧道
+                 */
 
-            List<Map<String,String>> allData = new ArrayList<>();
-            //隧道左幅
-            List<Map<String,String>> hpsdzfdata = new ArrayList<>();
-            if (jjgLqsSdzf.size()>0){
-                for (JjgLqsSd jjgLqsSd : jjgLqsSdzf) {
-                    hpsdzfdata.addAll(jjgFbgcLmgcLmhpMapper.selectSdZfData(proname,htd,fbgc,String.valueOf(jjgLqsSd.getZhq()),String.valueOf(jjgLqsSd.getZhz())));
-                    allData.addAll(jjgFbgcLmgcLmhpMapper.selectSdZfData(proname,htd,fbgc,String.valueOf(jjgLqsSd.getZhq()),String.valueOf(jjgLqsSd.getZhz())));
+                List<Map<String,String>> allData = new ArrayList<>();
+                //隧道左幅
+                List<Map<String,String>> hpsdzfdata = new ArrayList<>();
+                if (jjgLqsSdzf.size()>0){
+                    for (JjgLqsSd jjgLqsSd : jjgLqsSdzf) {
+                        hpsdzfdata.addAll(jjgFbgcLmgcLmhpMapper.selectSdZfData(proname,htd,fbgc,String.valueOf(jjgLqsSd.getZhq()),String.valueOf(jjgLqsSd.getZhz())));
+                        allData.addAll(jjgFbgcLmgcLmhpMapper.selectSdZfData(proname,htd,fbgc,String.valueOf(jjgLqsSd.getZhq()),String.valueOf(jjgLqsSd.getZhz())));
+                    }
                 }
-            }
 
-            //隧道右幅
-            List<Map<String,String>> hpsdyfdata = new ArrayList<>();
-            if (jjgLqsSdyf.size()>0){
-                for (JjgLqsSd jjgLqsSd : jjgLqsSdyf) {
-                    hpsdyfdata.addAll(jjgFbgcLmgcLmhpMapper.selectSdYfData(proname,htd,fbgc,String.valueOf(jjgLqsSd.getZhq()),String.valueOf(jjgLqsSd.getZhz())));
-                    allData.addAll(jjgFbgcLmgcLmhpMapper.selectSdYfData(proname,htd,fbgc,String.valueOf(jjgLqsSd.getZhq()),String.valueOf(jjgLqsSd.getZhz())));
+                //隧道右幅
+                List<Map<String,String>> hpsdyfdata = new ArrayList<>();
+                if (jjgLqsSdyf.size()>0){
+                    for (JjgLqsSd jjgLqsSd : jjgLqsSdyf) {
+                        hpsdyfdata.addAll(jjgFbgcLmgcLmhpMapper.selectSdYfData(proname,htd,fbgc,String.valueOf(jjgLqsSd.getZhq()),String.valueOf(jjgLqsSd.getZhz())));
+                        allData.addAll(jjgFbgcLmgcLmhpMapper.selectSdYfData(proname,htd,fbgc,String.valueOf(jjgLqsSd.getZhq()),String.valueOf(jjgLqsSd.getZhz())));
+                    }
                 }
-            }
 
-            //桥梁左幅
-            List<Map<String,String>> hpqlzfdata = new ArrayList<>();
-            if (jjgLqsQlzf.size()>0){
-                for (JjgLqsQl jjgLqsQl : jjgLqsQlzf) {
-                    hpqlzfdata.addAll(jjgFbgcLmgcLmhpMapper.selectQlZfData(proname,htd,fbgc,String.valueOf(jjgLqsQl.getZhq()),String.valueOf(jjgLqsQl.getZhz())));
-                    allData.addAll(jjgFbgcLmgcLmhpMapper.selectQlZfData(proname,htd,fbgc,String.valueOf(jjgLqsQl.getZhq()),String.valueOf(jjgLqsQl.getZhz())));
+                //桥梁左幅
+                List<Map<String,String>> hpqlzfdata = new ArrayList<>();
+                if (jjgLqsQlzf.size()>0){
+                    for (JjgLqsQl jjgLqsQl : jjgLqsQlzf) {
+                        hpqlzfdata.addAll(jjgFbgcLmgcLmhpMapper.selectQlZfData(proname,htd,fbgc,String.valueOf(jjgLqsQl.getZhq()),String.valueOf(jjgLqsQl.getZhz())));
+                        allData.addAll(jjgFbgcLmgcLmhpMapper.selectQlZfData(proname,htd,fbgc,String.valueOf(jjgLqsQl.getZhq()),String.valueOf(jjgLqsQl.getZhz())));
+                    }
                 }
-            }
 
-            //桥梁右幅
-            List<Map<String,String>> hpqlyfdata = new ArrayList<>();
-            if (jjgLqsQlyf.size()>0){
-                for (JjgLqsQl jjgLqsQl : jjgLqsQlyf) {
-                    hpqlyfdata.addAll(jjgFbgcLmgcLmhpMapper.selectQlYfData(proname,htd,fbgc,String.valueOf(jjgLqsQl.getZhq()),String.valueOf(jjgLqsQl.getZhz())));
-                    allData.addAll(jjgFbgcLmgcLmhpMapper.selectQlYfData(proname,htd,fbgc,String.valueOf(jjgLqsQl.getZhq()),String.valueOf(jjgLqsQl.getZhz())));
+                //桥梁右幅
+                List<Map<String,String>> hpqlyfdata = new ArrayList<>();
+                if (jjgLqsQlyf.size()>0){
+                    for (JjgLqsQl jjgLqsQl : jjgLqsQlyf) {
+                        hpqlyfdata.addAll(jjgFbgcLmgcLmhpMapper.selectQlYfData(proname,htd,fbgc,String.valueOf(jjgLqsQl.getZhq()),String.valueOf(jjgLqsQl.getZhz())));
+                        allData.addAll(jjgFbgcLmgcLmhpMapper.selectQlYfData(proname,htd,fbgc,String.valueOf(jjgLqsQl.getZhq()),String.valueOf(jjgLqsQl.getZhz())));
+                    }
                 }
-            }
 
 
-            List<Map<String,String>> hpalldata = jjgFbgcLmgcLmhpMapper.selectAllList(proname,htd,fbgc);
-            //路面
-            List<Map<String, String>> lmdata = diff(allData, hpalldata);
-            for (Map<String, String> lmdatum : lmdata) {
-                lmdatum.put("name","主线");
-            }
-            //路面左幅
-            List<Map<String,String>> lmzfdata = new ArrayList<>();
-            //路面右幅
-            List<Map<String,String>> lmyfdata = new ArrayList<>();
-
-            for (Map<String, String> lmdatum : lmdata) {
-                if (lmdatum.get("wz").equals("左幅")){
-                    lmzfdata.add(lmdatum);
-                }else if (lmdatum.get("wz").equals("右幅")){
-                    lmyfdata.add(lmdatum);
+                List<Map<String,String>> hpalldata = jjgFbgcLmgcLmhpMapper.selectAllList(proname,htd,fbgc);
+                //路面
+                List<Map<String, String>> lmdata = diff(allData, hpalldata);
+                for (Map<String, String> lmdatum : lmdata) {
+                    lmdatum.put("name","主线");
                 }
-            }
+                //路面左幅
+                List<Map<String,String>> lmzfdata = new ArrayList<>();
+                //路面右幅
+                List<Map<String,String>> lmyfdata = new ArrayList<>();
 
-            if (hpsdzfdata.size()>0 && hpsdzfdata.get(0).get("lmlx").contains("沥青")){
-                sdqlDBtoExcel(wb,hpsdzfdata,"沥青隧道左幅");
-            }else {
-                sdqlDBtoExcel(wb,hpsdzfdata,"混凝土隧道左幅");
-            }
+                for (Map<String, String> lmdatum : lmdata) {
+                    if (lmdatum.get("wz").equals("左幅")){
+                        lmzfdata.add(lmdatum);
+                    }else if (lmdatum.get("wz").equals("右幅")){
+                        lmyfdata.add(lmdatum);
+                    }
+                }
 
-            if (hpsdyfdata.size()>0 && hpsdyfdata.get(0).get("lmlx").contains("沥青")){
-                sdqlDBtoExcel(wb,hpsdyfdata,"沥青隧道右幅");
-            }else {
-                sdqlDBtoExcel(wb,hpsdyfdata,"混凝土隧道右幅");
-            }
+                if (hpsdzfdata.size()>0 && hpsdzfdata.get(0).get("lmlx").contains("沥青")){
+                    sdqlDBtoExcel(wb,hpsdzfdata,"沥青隧道左幅");
+                }else {
+                    sdqlDBtoExcel(wb,hpsdzfdata,"混凝土隧道左幅");
+                }
 
-            if (hpqlzfdata.size()>0 && hpqlzfdata.get(0).get("lmlx").contains("沥青")){
-                sdqlDBtoExcel(wb,hpqlzfdata,"沥青桥面左幅");
-            }else {
-                sdqlDBtoExcel(wb,hpqlzfdata,"混凝土桥面左幅");
-            }
-            if (hpqlyfdata.size()>0 && hpqlyfdata.get(0).get("lmlx").contains("沥青")){
-                sdqlDBtoExcel(wb,hpqlyfdata,"沥青桥面右幅");
-            }else {
-                sdqlDBtoExcel(wb,hpqlyfdata,"混凝土桥面右幅");
-            }
+                if (hpsdyfdata.size()>0 && hpsdyfdata.get(0).get("lmlx").contains("沥青")){
+                    sdqlDBtoExcel(wb,hpsdyfdata,"沥青隧道右幅");
+                }else {
+                    sdqlDBtoExcel(wb,hpsdyfdata,"混凝土隧道右幅");
+                }
 
-            if (lmzfdata.size()>0 && lmzfdata.get(0).get("lmlx").contains("沥青")){
-                lmDBtoExcel(wb,lmzfdata,"沥青路面左幅");
-            }else {
-                lmDBtoExcel(wb,lmzfdata,"混凝土路面左幅");
-            }
+                if (hpqlzfdata.size()>0 && hpqlzfdata.get(0).get("lmlx").contains("沥青")){
+                    sdqlDBtoExcel(wb,hpqlzfdata,"沥青桥面左幅");
+                }else {
+                    sdqlDBtoExcel(wb,hpqlzfdata,"混凝土桥面左幅");
+                }
+                if (hpqlyfdata.size()>0 && hpqlyfdata.get(0).get("lmlx").contains("沥青")){
+                    sdqlDBtoExcel(wb,hpqlyfdata,"沥青桥面右幅");
+                }else {
+                    sdqlDBtoExcel(wb,hpqlyfdata,"混凝土桥面右幅");
+                }
 
-            if (lmyfdata.size()>0 && lmyfdata.get(0).get("lmlx").contains("沥青")){
-                lmDBtoExcel(wb,lmyfdata,"沥青路面右幅");
-            }else {
-                lmDBtoExcel(wb,lmyfdata,"混凝土路面右幅");
-            }
+                if (lmzfdata.size()>0 && lmzfdata.get(0).get("lmlx").contains("沥青")){
+                    lmDBtoExcel(wb,lmzfdata,"沥青路面左幅");
+                }else {
+                    lmDBtoExcel(wb,lmzfdata,"混凝土路面左幅");
+                }
 
-            //设置公式
-            for (int j = 0; j < wb.getNumberOfSheets(); j++) {
-                calculateThicknessSheet(wb.getSheetAt(j));
-                JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
-            }
-            JjgFbgcCommonUtils.deleteEmptySheets(wb);
-            FileOutputStream fileOut = new FileOutputStream(f);
-            wb.write(fileOut);
-            fileOut.flush();
-            fileOut.close();
-            out.close();
-            wb.close();
+                if (lmyfdata.size()>0 && lmyfdata.get(0).get("lmlx").contains("沥青")){
+                    lmDBtoExcel(wb,lmyfdata,"沥青路面右幅");
+                }else {
+                    lmDBtoExcel(wb,lmyfdata,"混凝土路面右幅");
+                }
 
+                //设置公式
+                for (int j = 0; j < wb.getNumberOfSheets(); j++) {
+                    calculateThicknessSheet(wb.getSheetAt(j));
+                    JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
+                }
+                JjgFbgcCommonUtils.deleteEmptySheets(wb);
+                FileOutputStream fileOut = new FileOutputStream(f);
+                wb.write(fileOut);
+                fileOut.flush();
+                fileOut.close();
+                out.close();
+                wb.close();
+            }catch (Exception e) {
+                if(f.exists()){
+                    f.delete();
+                }
+                throw new JjgysException(20001, "生成鉴定表错误，请检查数据的正确性");
+            }
 
         }else {
             /**
@@ -385,41 +392,46 @@ public class JjgFbgcLmgcLmhpServiceImpl extends ServiceImpl<JjgFbgcLmgcLmhpMappe
             //创建文件根目录
             fdir.mkdirs();
         }
-        File directory = new File("service-system/src/main/resources/static");
-        String reportPath = directory.getCanonicalPath();
-        String path = reportPath + File.separator + "横坡.xlsx";
-        Files.copy(Paths.get(path), new FileOutputStream(f));
-        FileInputStream out = new FileInputStream(f);
-        wb = new XSSFWorkbook(out);
+        try {
+            File directory = new File("service-system/src/main/resources/static");
+            String reportPath = directory.getCanonicalPath();
+            String path = reportPath + File.separator + "横坡.xlsx";
+            Files.copy(Paths.get(path), new FileOutputStream(f));
+            FileInputStream out = new FileInputStream(f);
+            wb = new XSSFWorkbook(out);
 
-        writeData(wb,lqlmzfdata,"沥青路面左幅");
-        writeData(wb,lqlmyfdata,"沥青路面右幅");
-        writeDataQlAndSd(wb,lqqmzfdata,"沥青桥面左幅");
-        writeDataQlAndSd(wb,lqqmyfdata,"沥青桥面右幅");
-        writeDataQlAndSd(wb,lqsdzfdata,"沥青隧道左幅");
-        writeDataQlAndSd(wb,lqsdyfdata,"沥青隧道右幅");
+            writeData(wb,lqlmzfdata,"沥青路面左幅");
+            writeData(wb,lqlmyfdata,"沥青路面右幅");
+            writeDataQlAndSd(wb,lqqmzfdata,"沥青桥面左幅");
+            writeDataQlAndSd(wb,lqqmyfdata,"沥青桥面右幅");
+            writeDataQlAndSd(wb,lqsdzfdata,"沥青隧道左幅");
+            writeDataQlAndSd(wb,lqsdyfdata,"沥青隧道右幅");
 
-        writeData(wb,snlmzfdata,"混凝土路面左幅");
-        writeData(wb,snlmyfdata,"混凝土路面右幅");
-        writeDataQlAndSd(wb,snqmzfdata,"混凝土桥面左幅");
-        writeDataQlAndSd(wb,snqmyfdata,"混凝土桥面右幅");
-        writeDataQlAndSd(wb,snsdzfdata,"混凝土隧道左幅");
-        writeDataQlAndSd(wb,snsdyfdata,"混凝土隧道右幅");
+            writeData(wb,snlmzfdata,"混凝土路面左幅");
+            writeData(wb,snlmyfdata,"混凝土路面右幅");
+            writeDataQlAndSd(wb,snqmzfdata,"混凝土桥面左幅");
+            writeDataQlAndSd(wb,snqmyfdata,"混凝土桥面右幅");
+            writeDataQlAndSd(wb,snsdzfdata,"混凝土隧道左幅");
+            writeDataQlAndSd(wb,snsdyfdata,"混凝土隧道右幅");
 
-        for (int j = 0; j < wb.getNumberOfSheets(); j++) {
-            calculateThicknessSheet(wb.getSheetAt(j));
-            JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
+            for (int j = 0; j < wb.getNumberOfSheets(); j++) {
+                calculateThicknessSheet(wb.getSheetAt(j));
+                JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
+            }
+            JjgFbgcCommonUtils.deletehpEmptySheets(wb);
+
+            FileOutputStream fileOut = new FileOutputStream(f);
+            wb.write(fileOut);
+            fileOut.flush();
+            fileOut.close();
+            out.close();
+            wb.close();
+        }catch (Exception e) {
+            if(f.exists()){
+                f.delete();
+            }
+            throw new JjgysException(20001, "生成鉴定表错误，请检查数据的正确性");
         }
-        JjgFbgcCommonUtils.deletehpEmptySheets(wb);
-
-        FileOutputStream fileOut = new FileOutputStream(f);
-        wb.write(fileOut);
-        fileOut.flush();
-        fileOut.close();
-        out.close();
-        wb.close();
-
-
     }
 
     /**
@@ -1251,8 +1263,39 @@ public class JjgFbgcLmgcLmhpServiceImpl extends ServiceImpl<JjgFbgcLmgcLmhpMappe
                             new ExcelHandler<JjgFbgcLmgcLmhpVo>(JjgFbgcLmgcLmhpVo.class) {
                                 @Override
                                 public void handle(List<JjgFbgcLmgcLmhpVo> dataList) {
+                                    int rowNumber=2;
                                     for(JjgFbgcLmgcLmhpVo lmgcLmhpVo: dataList)
                                     {
+                                        if (StringUtils.isEmpty(lmgcLmhpVo.getZh())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，桩号为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(lmgcLmhpVo.getLmlx())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，路面类型为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(lmgcLmhpVo.getLxlx())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，路线类型为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(lmgcLmhpVo.getZy())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，Z/Y为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(lmgcLmhpVo.getWz())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，位置为空，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(lmgcLmhpVo.getQsds()) || StringUtils.isEmpty(lmgcLmhpVo.getQsds())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，前视读数值有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(lmgcLmhpVo.getHsds()) || StringUtils.isEmpty(lmgcLmhpVo.getHsds())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，后视读数值有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(lmgcLmhpVo.getLength()) || StringUtils.isEmpty(lmgcLmhpVo.getLength())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，长值有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(lmgcLmhpVo.getSjz()) || StringUtils.isEmpty(lmgcLmhpVo.getSjz())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，设计值有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(lmgcLmhpVo.getYxps()) || StringUtils.isEmpty(lmgcLmhpVo.getYxps())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中允许偏差值有误，请修改后重新上传");
+                                        }
                                         JjgFbgcLmgcLmhp lmhp = new JjgFbgcLmgcLmhp();
                                         BeanUtils.copyProperties(lmgcLmhpVo,lmhp);
                                         double zh = Double.parseDouble(lmgcLmhpVo.getZh().replaceAll("[^0-9]", ""));
@@ -1262,6 +1305,7 @@ public class JjgFbgcLmgcLmhpServiceImpl extends ServiceImpl<JjgFbgcLmgcLmhpMappe
                                         lmhp.setHtd(commonInfoVo.getHtd());
                                         lmhp.setFbgc(commonInfoVo.getFbgc());
                                         jjgFbgcLmgcLmhpMapper.insert(lmhp);
+                                        rowNumber++;
                                     }
                                 }
                             }

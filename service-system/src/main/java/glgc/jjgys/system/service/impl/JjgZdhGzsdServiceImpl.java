@@ -516,141 +516,149 @@ public class JjgZdhGzsdServiceImpl extends ServiceImpl<JjgZdhGzsdMapper, JjgZdhG
             //创建文件根目录
             fdir.mkdirs();
         }
-        File directory = new File("service-system/src/main/resources/static");
-        String reportPath = directory.getCanonicalPath();
-        String filename = "";
-        String sheetlmname = "";
-        String sheetqname = "";
-        String sheetsname = "";
+        try {
+            File directory = new File("service-system/src/main/resources/static");
+            String reportPath = directory.getCanonicalPath();
+            String filename = "";
+            String sheetlmname = "";
+            String sheetqname = "";
+            String sheetsname = "";
 
-        if (cdsl == 5){
-            filename = "构造深度-5车道.xlsx";
-        }else if (cdsl == 4){
-            filename = "构造深度-4车道.xlsx";
-        }else if (cdsl == 3){
-            filename = "构造深度-3车道.xlsx";
-        }else if (cdsl == 2){
-            filename = "构造深度-2车道.xlsx";
-        }
-        if (zx.equals("主线") || zx.contains("连接线")){
-            sheetlmname="路面";
-            sheetqname="桥";
-            sheetsname="隧道";
-        }else {
-            sheetlmname="匝道路面";
-            sheetqname="匝道桥";
-            sheetsname="匝道隧道";
-        }
-
-        String path = reportPath + File.separator + filename;
-        Files.copy(Paths.get(path), new FileOutputStream(f));
-        FileInputStream out = new FileInputStream(f);
-        wb = new XSSFWorkbook(out);
-
-        List<Map<String,Object>> zfsdqlData = new ArrayList<>();
-        List<Map<String,Object>> yfsdqlData = new ArrayList<>();
-
-        if (sdzxList.size() >0 && !sdzxList.isEmpty()){
-            for (Map<String, Object> map : sdzxList) {
-                Map<String,Object> map1 = new HashMap<>();
-                map1.put("zh",map.get("qdzh").toString());
-                map1.put("name",map.get("name").toString());
-                map1.put("cd","左幅");
-                if (map.get("zdbs")!=null){
-                    map1.put("zdbs",map.get("zdbs").toString());
-                }
-                zfsdqlData.add(map1);
+            if (cdsl == 5){
+                filename = "构造深度-5车道.xlsx";
+            }else if (cdsl == 4){
+                filename = "构造深度-4车道.xlsx";
+            }else if (cdsl == 3){
+                filename = "构造深度-3车道.xlsx";
+            }else if (cdsl == 2){
+                filename = "构造深度-2车道.xlsx";
             }
-            DBtoExcel(proname,htd,sdzxList,wb,"左幅-"+sheetsname,cdsl,sjz,zx);
-        }
-
-        if (sdyxList.size() >0 && !sdyxList.isEmpty()){
-            for (Map<String, Object> map : sdyxList) {
-                Map<String,Object> map1 = new HashMap<>();
-                map1.put("zh",map.get("qdzh").toString());
-                map1.put("name",map.get("name").toString());
-                map1.put("cd","右幅");
-                if (map.get("zdbs")!=null){
-                    map1.put("zdbs",map.get("zdbs").toString());
-                }
-                yfsdqlData.add(map1);
-            }
-            DBtoExcel(proname,htd,sdyxList,wb,"右幅-"+sheetsname,cdsl,sjz,zx);
-        }
-        if (qlzxList.size() >0 && !qlzxList.isEmpty()){
-            for (Map<String, Object> map : qlzxList) {
-                Map<String,Object> map1 = new HashMap<>();
-                map1.put("zh",map.get("qdzh").toString());
-                map1.put("name",map.get("name").toString());
-                map1.put("cd","左幅");
-                if (map.get("zdbs")!=null){
-                    map1.put("zdbs",map.get("zdbs").toString());
-                }
-                zfsdqlData.add(map1);
-            }
-            DBtoExcel(proname,htd,qlzxList,wb,"左幅-"+sheetqname,cdsl,sjz,zx);
-        }
-        if (qlyxList.size() >0 && !qlyxList.isEmpty()){
-            for (Map<String, Object> map : qlyxList) {
-                Map<String,Object> map1 = new HashMap<>();
-                map1.put("zh",map.get("qdzh").toString());
-                map1.put("name",map.get("name").toString());
-                map1.put("cd","右幅");
-                if (map.get("zdbs")!=null){
-                    map1.put("zdbs",map.get("zdbs").toString());
-                }
-                yfsdqlData.add(map1);
-            }
-            DBtoExcel(proname,htd,qlyxList,wb,"右幅-"+sheetqname,cdsl,sjz,zx);
-        }
-
-
-        List<Map<String, Object>> zsdql = sortList(zfsdqlData);
-        List<Map<String, Object>> ysdql = sortList(yfsdqlData);
-
-        /**
-         * 这块需要分别将隧道和桥梁的桩号取出，给写入路面的时候使用
-         */
-
-        if (lmzflist.size() >0 && !lmzflist.isEmpty()){
-            if (zx.equals("主线")){
-                DBtoExcelLm(proname,htd,lmzflist,zsdql,wb,"左幅-"+sheetlmname,cdsl,sjz);
+            if (zx.equals("主线") || zx.contains("连接线")){
+                sheetlmname="路面";
+                sheetqname="桥";
+                sheetsname="隧道";
             }else {
-                DBtoExcelZd(proname,htd,lmzflist,zsdql,wb,"左幅-"+sheetlmname,cdsl,sjz,zx);
+                sheetlmname="匝道路面";
+                sheetqname="匝道桥";
+                sheetsname="匝道隧道";
             }
 
-        }
-        if (lmyflist.size() >0 && !lmyflist.isEmpty()){
-            if (zx.equals("主线")){
-                DBtoExcelLm(proname,htd,lmyflist,ysdql,wb,"右幅-"+sheetlmname,cdsl,sjz);
-            }else {
-                DBtoExcelZd(proname,htd,lmyflist,ysdql,wb,"右幅-"+sheetlmname,cdsl,sjz,zx);
+            String path = reportPath + File.separator + filename;
+            Files.copy(Paths.get(path), new FileOutputStream(f));
+            FileInputStream out = new FileInputStream(f);
+            wb = new XSSFWorkbook(out);
+
+            List<Map<String,Object>> zfsdqlData = new ArrayList<>();
+            List<Map<String,Object>> yfsdqlData = new ArrayList<>();
+
+            if (sdzxList.size() >0 && !sdzxList.isEmpty()){
+                for (Map<String, Object> map : sdzxList) {
+                    Map<String,Object> map1 = new HashMap<>();
+                    map1.put("zh",map.get("qdzh").toString());
+                    map1.put("name",map.get("name").toString());
+                    map1.put("cd","左幅");
+                    if (map.get("zdbs")!=null){
+                        map1.put("zdbs",map.get("zdbs").toString());
+                    }
+                    zfsdqlData.add(map1);
+                }
+                DBtoExcel(proname,htd,sdzxList,wb,"左幅-"+sheetsname,cdsl,sjz,zx);
             }
 
-        }
-        String[] arr = {"右幅-匝道路面","左幅-匝道路面","右幅-匝道隧道","左幅-匝道隧道","左幅-匝道桥","右幅-匝道桥","左幅-路面","右幅-路面","左幅-隧道","右幅-隧道","左幅-桥","右幅-桥"};
-        for (int i = 0; i < arr.length; i++) {
-            if (shouldBeCalculate(wb.getSheet(arr[i]))) {
-                if (arr[i].contains("路面")) {
-                    calculatePavementSheet(wb, wb.getSheet(arr[i]), cdsl);
+            if (sdyxList.size() >0 && !sdyxList.isEmpty()){
+                for (Map<String, Object> map : sdyxList) {
+                    Map<String,Object> map1 = new HashMap<>();
+                    map1.put("zh",map.get("qdzh").toString());
+                    map1.put("name",map.get("name").toString());
+                    map1.put("cd","右幅");
+                    if (map.get("zdbs")!=null){
+                        map1.put("zdbs",map.get("zdbs").toString());
+                    }
+                    yfsdqlData.add(map1);
+                }
+                DBtoExcel(proname,htd,sdyxList,wb,"右幅-"+sheetsname,cdsl,sjz,zx);
+            }
+            if (qlzxList.size() >0 && !qlzxList.isEmpty()){
+                for (Map<String, Object> map : qlzxList) {
+                    Map<String,Object> map1 = new HashMap<>();
+                    map1.put("zh",map.get("qdzh").toString());
+                    map1.put("name",map.get("name").toString());
+                    map1.put("cd","左幅");
+                    if (map.get("zdbs")!=null){
+                        map1.put("zdbs",map.get("zdbs").toString());
+                    }
+                    zfsdqlData.add(map1);
+                }
+                DBtoExcel(proname,htd,qlzxList,wb,"左幅-"+sheetqname,cdsl,sjz,zx);
+            }
+            if (qlyxList.size() >0 && !qlyxList.isEmpty()){
+                for (Map<String, Object> map : qlyxList) {
+                    Map<String,Object> map1 = new HashMap<>();
+                    map1.put("zh",map.get("qdzh").toString());
+                    map1.put("name",map.get("name").toString());
+                    map1.put("cd","右幅");
+                    if (map.get("zdbs")!=null){
+                        map1.put("zdbs",map.get("zdbs").toString());
+                    }
+                    yfsdqlData.add(map1);
+                }
+                DBtoExcel(proname,htd,qlyxList,wb,"右幅-"+sheetqname,cdsl,sjz,zx);
+            }
+
+
+            List<Map<String, Object>> zsdql = sortList(zfsdqlData);
+            List<Map<String, Object>> ysdql = sortList(yfsdqlData);
+
+            /**
+             * 这块需要分别将隧道和桥梁的桩号取出，给写入路面的时候使用
+             */
+
+            if (lmzflist.size() >0 && !lmzflist.isEmpty()){
+                if (zx.equals("主线")){
+                    DBtoExcelLm(proname,htd,lmzflist,zsdql,wb,"左幅-"+sheetlmname,cdsl,sjz);
+                }else {
+                    DBtoExcelZd(proname,htd,lmzflist,zsdql,wb,"左幅-"+sheetlmname,cdsl,sjz,zx);
+                }
+
+            }
+            if (lmyflist.size() >0 && !lmyflist.isEmpty()){
+                if (zx.equals("主线")){
+                    DBtoExcelLm(proname,htd,lmyflist,ysdql,wb,"右幅-"+sheetlmname,cdsl,sjz);
+                }else {
+                    DBtoExcelZd(proname,htd,lmyflist,ysdql,wb,"右幅-"+sheetlmname,cdsl,sjz,zx);
+                }
+
+            }
+            String[] arr = {"右幅-匝道路面","左幅-匝道路面","右幅-匝道隧道","左幅-匝道隧道","左幅-匝道桥","右幅-匝道桥","左幅-路面","右幅-路面","左幅-隧道","右幅-隧道","左幅-桥","右幅-桥"};
+            for (int i = 0; i < arr.length; i++) {
+                if (shouldBeCalculate(wb.getSheet(arr[i]))) {
+                    if (arr[i].contains("路面")) {
+                        calculatePavementSheet(wb, wb.getSheet(arr[i]), cdsl);
+                    } else {
+                        calculateTunnelAndBridgeSheet(wb, wb.getSheet(arr[i]), cdsl);
+                        calculateTotalForEvaluate(wb, wb.getSheet(arr[i]), cdsl);
+                    }
+                    JjgFbgcCommonUtils.updateFormula(wb, wb.getSheet(arr[i]));
                 } else {
-                    calculateTunnelAndBridgeSheet(wb, wb.getSheet(arr[i]), cdsl);
-                    calculateTotalForEvaluate(wb, wb.getSheet(arr[i]), cdsl);
+                    wb.removeSheetAt(wb.getSheetIndex(arr[i]));
                 }
-                JjgFbgcCommonUtils.updateFormula(wb, wb.getSheet(arr[i]));
-            } else {
-                wb.removeSheetAt(wb.getSheetIndex(arr[i]));
             }
-        }
-        //}
-        //wb.removeSheetAt(wb.getSheetIndex("保证率系数"));
+            //}
+            //wb.removeSheetAt(wb.getSheetIndex("保证率系数"));
 
-        FileOutputStream fileOut = new FileOutputStream(f);
-        wb.write(fileOut);
-        fileOut.flush();
-        fileOut.close();
-        out.close();
-        wb.close();
+            FileOutputStream fileOut = new FileOutputStream(f);
+            wb.write(fileOut);
+            fileOut.flush();
+            fileOut.close();
+            out.close();
+            wb.close();
+        }catch (Exception e) {
+            if(f.exists()){
+                f.delete();
+            }
+            throw new JjgysException(20001, "生成鉴定表错误，请检查数据的正确性");
+        }
+
     }
 
     /**

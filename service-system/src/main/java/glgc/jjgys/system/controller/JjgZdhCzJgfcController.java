@@ -44,29 +44,38 @@ public class JjgZdhCzJgfcController {
 
     @ApiOperation("查看平均值")
     @GetMapping("lookpjz")
-    public void lookpjz(@RequestParam String proname) {
-        //jjgZdhCzJgfcService.lookpjz(proname);
+    public Result lookpjz(@RequestParam String proname) throws IOException {
+        List<Map<String,Object>> list = jjgZdhCzJgfcService.lookpjz(proname);
+        return Result.ok(list);
     }
 
     @RequestMapping(value = "/download", method = RequestMethod.GET)
-    public void downloadExport(HttpServletResponse response, String proname, String htd) throws IOException {
-        List<Map<String,Object>> lxlist = jjgZdhCzJgfcService.selectlx(proname,htd);
+    public void downloadExport(HttpServletResponse response, String proname) throws IOException {
+        List<Map<String,Object>> htdList = jjgZdhCzJgfcService.selecthtd(proname);
         List<String> fileName = new ArrayList<>();
-        for (Map<String, Object> map : lxlist) {
-            String lxbs = map.get("lxbs").toString();
-            if (lxbs.equals("主线")){
-                fileName.add("14路面车辙");;
-            }else {
-                fileName.add("69互通车辙-"+lxbs);
+        if (htdList!=null){
+            for (Map<String, Object> map1 : htdList) {
+                String htd = map1.get("htd").toString();
+                List<Map<String,Object>> lxlist = jjgZdhCzJgfcService.selectlx(proname,htd);
+                for (Map<String, Object> map : lxlist) {
+                    String lxbs = map.get("lxbs").toString();
+                    if (lxbs.equals("主线")){
+                        fileName.add(htd+File.separator+"14路面车辙");
+                    }else {
+                        fileName.add(htd+File.separator+"69互通车辙-"+lxbs);
+                    }
+                }
             }
         }
         String zipname = "车辙鉴定表";
-        JjgFbgcCommonUtils.batchDowndFile(response,zipname,fileName,jgfilepath+ File.separator+proname+File.separator+htd);
+        JjgFbgcCommonUtils.batchDowndFile(response,zipname,fileName,jgfilepath+ File.separator+proname);
     }
 
     @ApiOperation("生成车辙鉴定表")
     @PostMapping("generateJdb")
-    public void generateJdb(String proname,String sjz) throws Exception {
+    public void generateJdb(@RequestBody CommonInfoVo commonInfoVo) throws Exception {
+        String proname = commonInfoVo.getProname();
+        String sjz = commonInfoVo.getSjz();
         jjgZdhCzJgfcService.generateJdb(proname,sjz);
 
     }

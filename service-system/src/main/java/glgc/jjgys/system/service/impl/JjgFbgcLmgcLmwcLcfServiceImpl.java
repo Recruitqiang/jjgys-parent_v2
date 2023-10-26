@@ -77,35 +77,43 @@ public class JjgFbgcLmgcLmwcLcfServiceImpl extends ServiceImpl<JjgFbgcLmgcLmwcLc
                 //创建文件根目录
                 fdir.mkdirs();
             }
-            File directory = new File("service-system/src/main/resources/static");
-            String reportPath = directory.getCanonicalPath();
-            String path = reportPath + File.separator + "路面弯沉17规范落锤法.xlsx";
-            Files.copy(Paths.get(path), new FileOutputStream(f));
-            FileInputStream out = new FileInputStream(f);
-            wb = new XSSFWorkbook(out);
-            ArrayList<String[]> ref = createTemperatureSheet(wb.getSheet("温度修正"),wdata);
-            int num = gettableNum(proname, htd, fbgc);
-            createTable(num,wb);
-            if(DBtoExcel(data,wb)){
-                //右侧的数据
-                calculateTempDate(wb);
-                ArrayList<String> totalref = getTotalMark(wb.getSheet("路面弯沉"));
-                String time = getLastTime(wb.getSheet("路面弯沉"));
-                //创建“评定单元”sheet
-                createEvaluateTable(totalref,wb);
-                //引用数据，然后计算
-                completeTotleTable(totalref, time,wb,proname,htd,fbgc);
-                for (int j = 0; j < wb.getNumberOfSheets(); j++) {
-                    JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
-                }
-                FileOutputStream fileOut = new FileOutputStream(f);
-                wb.write(fileOut);
-                fileOut.flush();
-                fileOut.close();
+            try {
+                File directory = new File("service-system/src/main/resources/static");
+                String reportPath = directory.getCanonicalPath();
+                String path = reportPath + File.separator + "路面弯沉17规范落锤法.xlsx";
+                Files.copy(Paths.get(path), new FileOutputStream(f));
+                FileInputStream out = new FileInputStream(f);
+                wb = new XSSFWorkbook(out);
+                ArrayList<String[]> ref = createTemperatureSheet(wb.getSheet("温度修正"),wdata);
+                int num = gettableNum(proname, htd, fbgc);
+                createTable(num,wb);
+                if(DBtoExcel(data,wb)){
+                    //右侧的数据
+                    calculateTempDate(wb);
+                    ArrayList<String> totalref = getTotalMark(wb.getSheet("路面弯沉"));
+                    String time = getLastTime(wb.getSheet("路面弯沉"));
+                    //创建“评定单元”sheet
+                    createEvaluateTable(totalref,wb);
+                    //引用数据，然后计算
+                    completeTotleTable(totalref, time,wb,proname,htd,fbgc);
+                    for (int j = 0; j < wb.getNumberOfSheets(); j++) {
+                        JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
+                    }
+                    FileOutputStream fileOut = new FileOutputStream(f);
+                    wb.write(fileOut);
+                    fileOut.flush();
+                    fileOut.close();
 
+                }
+                out.close();
+                wb.close();
+            }catch (Exception e) {
+                if(f.exists()){
+                    f.delete();
+                }
+                throw new JjgysException(20001, "生成鉴定表错误，请检查数据的正确性");
             }
-            out.close();
-            wb.close();
+
         }
 
 
@@ -863,8 +871,66 @@ public class JjgFbgcLmgcLmwcLcfServiceImpl extends ServiceImpl<JjgFbgcLmgcLmwcLc
                             new ExcelHandler<JjgFbgcLmgcLmwcLcfVo>(JjgFbgcLmgcLmwcLcfVo.class) {
                                 @Override
                                 public void handle(List<JjgFbgcLmgcLmwcLcfVo> dataList) {
+                                    int rowNumber=2;
                                     for(JjgFbgcLmgcLmwcLcfVo lmwcLcfVo: dataList)
                                     {
+                                        if (StringUtils.isEmpty(lmwcLcfVo.getZh())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，桩号为空，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(lmwcLcfVo.getYswcz()) || StringUtils.isEmpty(lmwcLcfVo.getYswcz())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，验收弯沉值有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(lmwcLcfVo.getMbkkzb()) || StringUtils.isEmpty(lmwcLcfVo.getMbkkzb())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，目标可靠指标值有误，请修改后重新上传");
+                                        }
+
+                                        if (!StringUtils.isNumeric(lmwcLcfVo.getSdyxxs()) || StringUtils.isEmpty(lmwcLcfVo.getSdyxxs())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，湿度影响系数值有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(lmwcLcfVo.getJjyxxs()) || StringUtils.isEmpty(lmwcLcfVo.getJjyxxs())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，季节影响系数值有误，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(lmwcLcfVo.getJglx())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，结构类型为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(lmwcLcfVo.getJgcc())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，结构层次为空，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(lmwcLcfVo.getLcz()) || StringUtils.isEmpty(lmwcLcfVo.getLcz())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，落锤重值有误，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(lmwcLcfVo.getGcbw())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，工程部位为空，请修改后重新上传");
+                                        }
+
+                                        if (StringUtils.isEmpty(lmwcLcfVo.getCd())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，车道为空，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(lmwcLcfVo.getClchd()) || StringUtils.isEmpty(lmwcLcfVo.getClchd())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，材料层厚度值有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(lmwcLcfVo.getLjdmhtml()) || StringUtils.isEmpty(lmwcLcfVo.getLjdmhtml())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，路基顶面回弹模量值有误，请修改后重新上传");
+                                        }
+
+                                        if (!StringUtils.isNumeric(lmwcLcfVo.getScwcz()) || StringUtils.isEmpty(lmwcLcfVo.getScwcz())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，实测弯沉值有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(lmwcLcfVo.getLbwd()) || StringUtils.isEmpty(lmwcLcfVo.getLbwd())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，路表温度值有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(lmwcLcfVo.getLqczhd()) || StringUtils.isEmpty(lmwcLcfVo.getLqczhd())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，沥青层总厚度值有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(lmwcLcfVo.getLqbmwd()) || StringUtils.isEmpty(lmwcLcfVo.getLqbmwd())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，沥青表面温度值有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(lmwcLcfVo.getCqpjwd()) || StringUtils.isEmpty(lmwcLcfVo.getCqpjwd())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，测前5h平均温度值有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(lmwcLcfVo.getXh()) || StringUtils.isEmpty(lmwcLcfVo.getXh())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，序号值有误，请修改后重新上传");
+                                        }
                                         JjgFbgcLmgcLmwcLcf lmwcLcf = new JjgFbgcLmgcLmwcLcf();
                                         BeanUtils.copyProperties(lmwcLcfVo,lmwcLcf);
                                         lmwcLcf.setCreatetime(new Date());
@@ -872,6 +938,7 @@ public class JjgFbgcLmgcLmwcLcfServiceImpl extends ServiceImpl<JjgFbgcLmgcLmwcLc
                                         lmwcLcf.setHtd(commonInfoVo.getHtd());
                                         lmwcLcf.setFbgc(commonInfoVo.getFbgc());
                                         jjgFbgcLmgcLmwcLcfMapper.insert(lmwcLcf);
+                                        rowNumber++;
                                     }
                                 }
                             }

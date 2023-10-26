@@ -205,68 +205,104 @@ public class JjgJgjcsjServiceImpl extends ServiceImpl<JjgJgjcsjMapper, JjgJgjcsj
             //创建文件根目录
             fdir.mkdirs();
         }
-        File directory = new File("service-system/src/main/resources/static");
-        String reportPath = directory.getCanonicalPath();
-        String name = "评定表(旧).xlsx";
-        String path = reportPath + File.separator + name;
-        Files.copy(Paths.get(path), new FileOutputStream(f));
-        FileInputStream out = new FileInputStream(f);
-        wb = new XSSFWorkbook(out);
+        try {
+            File directory = new File("service-system/src/main/resources/static");
+            String reportPath = directory.getCanonicalPath();
+            String name = "评定表(旧).xlsx";
+            String path = reportPath + File.separator + name;
+            Files.copy(Paths.get(path), new FileOutputStream(f));
+            FileInputStream out = new FileInputStream(f);
+            wb = new XSSFWorkbook(out);
 
-        Map<String, List<Map<String,Object>>> groupedData = data.stream()
-                .collect(Collectors.groupingBy(m -> m.get("dwgc").toString()));
-        for (String key : groupedData.keySet()) {
-            List<Map<String,Object>> list = groupedData.get(key);
+            Map<String, List<Map<String,Object>>> groupedData = data.stream()
+                    .collect(Collectors.groupingBy(m -> m.get("dwgc").toString()));
+            // 对key进行排序
+            List<String> sortedKeys = groupedData.keySet().stream()
+                    .sorted(new Comparator<String>() {
+                        @Override
+                        public int compare(String o1, String o2) {
+                            // 判断包含关键字的顺序
+                            List<String> keywords = Arrays.asList("路面工程", "交安工程","路基工程", "桥", "隧道");
+                            for (String keyword : keywords) {
+                                if (o1.contains(keyword) && !o2.contains(keyword)) {
+                                    return -1; // o1包含关键字，o2不包含，则o1排在前面
+                                } else if (!o1.contains(keyword) && o2.contains(keyword)) {
+                                    return 1; // o1不包含关键字，o2包含，则o2排在前面
+                                }
+                            }
+                            // 如果没有关键字，按字典序排列
+                            return o1.compareTo(o2);
+                        }
+                    })
+                    .collect(Collectors.toList());
 
-            if (key.equals("路基工程")){
-                writeDataOld(wb,list,"分部-路基",proname,htd);
-            }else if (key.equals("路面工程")){
+            // 按关键字排序后的数据
+            Map<String, List<Map<String, Object>>> sortedData = new LinkedHashMap<>();
 
-                writeDataOld(wb,list,"分部-路面",proname,htd);
-            }else if (key.equals("交安工程")){
-                writeDataOld(wb,list,"分部-交安",proname,htd);
+            // 按排序后的key遍历原始数据
+            for (String key : sortedKeys) {
+                List<Map<String, Object>> dataList = groupedData.get(key);
+                sortedData.put(key, dataList);
+            }
+            for (String key : sortedData.keySet()) {
+                List<Map<String,Object>> list = groupedData.get(key);
+
+                if (key.equals("路基工程")){
+                    writeDataOld(wb,list,"分部-路基",proname,htd);
+                }else if (key.equals("路面工程")){
+
+                    writeDataOld(wb,list,"分部-路面",proname,htd);
+                }else if (key.equals("交安工程")){
+                    writeDataOld(wb,list,"分部-交安",proname,htd);
+                }else {
+                    //桥梁和隧道
+                    writeDataOld(wb,list,"分部-"+key,proname,htd);
+                }
+
+            }
+
+            //单位工程
+            List<Map<String, Object>> dwgclist = new ArrayList<>();
+            for (Sheet sheet : wb) {
+                String sheetName = sheet.getSheetName();
+                // 检查工作表名是否以"分部-"开头
+                if (sheetName.startsWith("分部-")) {
+                    // 处理工作表数据
+                    List<Map<String, Object>> list = processSheetold(sheet);
+                    dwgclist.addAll(list);
+                }
+            }
+            writedwgcDataold(wb,dwgclist);
+
+            //合同段
+            List<Map<String, Object>> list = processhtdSheetold(proname,wb);
+            //查询内页资料扣分
+            QueryWrapper<JjgNyzlkf> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("proname",proname);
+            queryWrapper.eq("htd",htd);
+            List<JjgNyzlkf> list1 = jjgNyzlkfService.list(queryWrapper);
+            String kf = "";
+            if (list1!=null && list1.size()>0){
+                kf = list1.get(0).getKf();
             }else {
-                //桥梁和隧道
-                writeDataOld(wb,list,"分部-"+key,proname,htd);
+                kf = "0";
+
             }
+            writedhtdDataold(wb,list,kf);
 
-        }
-
-        //单位工程
-        List<Map<String, Object>> dwgclist = new ArrayList<>();
-        for (Sheet sheet : wb) {
-            String sheetName = sheet.getSheetName();
-            // 检查工作表名是否以"分部-"开头
-            if (sheetName.startsWith("分部-")) {
-                // 处理工作表数据
-                List<Map<String, Object>> list = processSheetold(sheet);
-                dwgclist.addAll(list);
+            FileOutputStream fileOut = new FileOutputStream(f);
+            wb.write(fileOut);
+            fileOut.flush();
+            fileOut.close();
+            out.close();
+            wb.close();
+        }catch (Exception e) {
+            if(f.exists()){
+                f.delete();
             }
+            throw new JjgysException(20001, "生成评定表错误，请检查数据的正确性");
         }
-        writedwgcDataold(wb,dwgclist);
 
-        //合同段
-        List<Map<String, Object>> list = processhtdSheetold(proname,wb);
-        //查询内页资料扣分
-        QueryWrapper<JjgNyzlkf> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("proname",proname);
-        queryWrapper.eq("htd",htd);
-        List<JjgNyzlkf> list1 = jjgNyzlkfService.list(queryWrapper);
-        String kf = "";
-        if (list1!=null && list1.size()>0){
-            kf = list1.get(0).getKf();
-        }else {
-            kf = "0";
-
-        }
-        writedhtdDataold(wb,list,kf);
-
-        FileOutputStream fileOut = new FileOutputStream(f);
-        wb.write(fileOut);
-        fileOut.flush();
-        fileOut.close();
-        out.close();
-        wb.close();
 
     }
 
@@ -404,12 +440,26 @@ public class JjgJgjcsjServiceImpl extends ServiceImpl<JjgJgjcsjMapper, JjgJgjcsj
      * @param htd
      */
     private void writeDataOld(XSSFWorkbook wb, List<Map<String,Object>> data, String sheetname, String proname, String htd) {
-        Collections.sort(data, new Comparator<Map<String, Object>>() {
+        /*Collections.sort(data, new Comparator<Map<String, Object>>() {
             @Override
             public int compare(Map<String, Object> obj1, Map<String, Object> obj2) {
                 String fbgc1 = (String) obj1.get("fbgc");
                 String fbgc2 = (String) obj2.get("fbgc");
                 return fbgc1.compareTo(fbgc2);
+            }
+        });*/
+        Collections.sort(data, new Comparator<Map<String, Object>>() {
+            @Override
+            public int compare(Map<String, Object> obj1, Map<String, Object> obj2) {
+                String fbgc1 = (String) obj1.get("fbgc");
+                String fbgc2 = (String) obj2.get("fbgc");
+                int result = fbgc1.compareTo(fbgc2);
+                if (result != 0) {
+                    return result;
+                }
+                String ccxm1 = (String) obj1.get("ccxm");
+                String ccxm2 = (String) obj2.get("ccxm");
+                return ccxm1.compareTo(ccxm2);
             }
         });
         copySheet(wb,sheetname);
@@ -426,7 +476,13 @@ public class JjgJgjcsjServiceImpl extends ServiceImpl<JjgJgjcsjMapper, JjgJgjcsj
 
         int index = 0;
         int tableNum = 0;
-
+        int startRow = -1, endRow = -1, startCol = -1, endCol = -1, startCols = -1, endCols = -1, startColhgl = -1, endColhgl = -1, startColzl = -1, endColzl = -1, startColjq = -1, endColjq = -1;
+        List<Map<String, Object>> rowAndcol = new ArrayList<>();
+        List<Map<String, Object>> rowAndcol1 = new ArrayList<>();
+        List<Map<String, Object>> rowAndcolhgl = new ArrayList<>();
+        List<Map<String, Object>> rowAndcolzl = new ArrayList<>();
+        List<Map<String, Object>> rowAndcoljq = new ArrayList<>();
+        String ccname = data.get(0).get("ccxm").toString();
         //处理数据，加上外观扣分
         List<Map<String,Object>> hdata = handleData(proname,data);
         Collections.sort(hdata, new Comparator<Map<String, Object>>() {
@@ -446,23 +502,457 @@ public class JjgJgjcsjServiceImpl extends ServiceImpl<JjgJgjcsjMapper, JjgJgjcsj
             }
             if (fbgc.equals(datum.get("fbgc").toString())){
                 fillTitleData(sheet,tableNum,proname,htd,htdlist,datum.get("fbgc").toString());
+                if (ccname.equals(datum.get("ccxm").toString())){
+                    startRow = tableNum * 22 + 6 + index % 16 ;
+                    endRow = tableNum * 22 + 6 + index % 16 ;
+
+                    startCol = 2;
+                    endCol = 5;
+
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("startRow",startRow);
+                    map.put("endRow",endRow);
+                    map.put("startCol",startCol);
+                    map.put("endCol",endCol);
+                    map.put("name",ccname);
+                    map.put("tableNum",tableNum);
+                    rowAndcol.add(map);
+
+                    startCols = 7;
+                    endCols = 16;
+                    Map<String, Object> map1 = new HashMap<>();
+                    map1.put("startRow",startRow);
+                    map1.put("endRow",endRow);
+                    map1.put("startCol",startCols);
+                    map1.put("endCol",endCols);
+                    map1.put("name",ccname);
+                    map1.put("tableNum",tableNum);
+                    rowAndcol1.add(map1);
+
+                    startColhgl = 18;
+                    endColhgl = 18;
+                    Map<String, Object> map2 = new HashMap<>();
+                    map2.put("startRow",startRow);
+                    map2.put("endRow",endRow);
+                    map2.put("startCol",startColhgl);
+                    map2.put("endCol",endColhgl);
+                    map2.put("name",ccname);
+                    map2.put("tableNum",tableNum);
+                    rowAndcolhgl.add(map2);
+
+                    startColzl = 19;
+                    endColzl = 19;
+                    Map<String, Object> map3 = new HashMap<>();
+                    map3.put("startRow",startRow);
+                    map3.put("endRow",endRow);
+                    map3.put("startCol",startColzl);
+                    map3.put("endCol",endColzl);
+                    map3.put("name",ccname);
+                    map3.put("tableNum",tableNum);
+                    rowAndcolzl.add(map3);
+
+                    startColjq = 20;
+                    endColjq = 20;
+                    Map<String, Object> map4 = new HashMap<>();
+                    map4.put("startRow",startRow);
+                    map4.put("endRow",endRow);
+                    map4.put("startCol",startColjq);
+                    map4.put("endCol",endColjq);
+                    map4.put("name",ccname);
+                    map4.put("tableNum",tableNum);
+                    rowAndcoljq.add(map4);
+                }else {
+                    ccname = datum.get("ccxm").toString();startRow = tableNum * 22 + 6 + index % 16 ;
+                    endRow = tableNum * 22 + 6 + index % 16 ;
+
+                    startCol = 2;
+                    endCol = 5;
+
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("startRow",startRow);
+                    map.put("endRow",endRow);
+                    map.put("startCol",startCol);
+                    map.put("endCol",endCol);
+                    map.put("name",ccname);
+                    map.put("tableNum",tableNum);
+                    rowAndcol.add(map);
+
+                    startCols = 7;
+                    endCols = 16;
+                    Map<String, Object> map1 = new HashMap<>();
+                    map1.put("startRow",startRow);
+                    map1.put("endRow",endRow);
+                    map1.put("startCol",startCols);
+                    map1.put("endCol",endCols);
+                    map1.put("name",ccname);
+                    map1.put("tableNum",tableNum);
+                    rowAndcol1.add(map1);
+
+                    startColhgl = 18;
+                    endColhgl = 18;
+                    Map<String, Object> map2 = new HashMap<>();
+                    map2.put("startRow",startRow);
+                    map2.put("endRow",endRow);
+                    map2.put("startCol",startColhgl);
+                    map2.put("endCol",endColhgl);
+                    map2.put("name",ccname);
+                    map2.put("tableNum",tableNum);
+                    rowAndcolhgl.add(map2);
+
+                    startColzl = 19;
+                    endColzl = 19;
+                    Map<String, Object> map3 = new HashMap<>();
+                    map3.put("startRow",startRow);
+                    map3.put("endRow",endRow);
+                    map3.put("startCol",startColzl);
+                    map3.put("endCol",endColzl);
+                    map3.put("name",ccname);
+                    map3.put("tableNum",tableNum);
+                    rowAndcolzl.add(map3);
+
+                    startColjq = 20;
+                    endColjq = 20;
+                    Map<String, Object> map4 = new HashMap<>();
+                    map4.put("startRow",startRow);
+                    map4.put("endRow",endRow);
+                    map4.put("startCol",startColjq);
+                    map4.put("endCol",endColjq);
+                    map4.put("name",ccname);
+                    map4.put("tableNum",tableNum);
+                    rowAndcoljq.add(map4);
+                }
                 fillCommonDataOld(sheet,tableNum,index,datum);
                 index++;
             }else {
                 fbgc = datum.get("fbgc").toString();
                 tableNum ++;
                 index = 0;
+                ccname = datum.get("ccxm").toString();
                 fillTitleData(sheet,tableNum,proname,htd,htdlist,datum.get("fbgc").toString());
+                if (ccname.equals(datum.get("ccxm").toString())) {
+                    startRow = tableNum * 22 + 6 + index % 16;
+                    endRow = tableNum * 22 + 6 + index % 16;
+
+                    startCol = 2;
+                    endCol = 5;
+
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("startRow", startRow);
+                    map.put("endRow", endRow);
+                    map.put("startCol", startCol);
+                    map.put("endCol", endCol);
+                    map.put("name", ccname);
+                    map.put("tableNum", tableNum);
+                    rowAndcol.add(map);
+
+                    startCols = 7;
+                    endCols = 16;
+                    Map<String, Object> map1 = new HashMap<>();
+                    map1.put("startRow",startRow);
+                    map1.put("endRow",endRow);
+                    map1.put("startCol",startCols);
+                    map1.put("endCol",endCols);
+                    map1.put("name",ccname);
+                    map1.put("tableNum",tableNum);
+                    rowAndcol1.add(map1);
+
+                    startColhgl = 18;
+                    endColhgl = 18;
+                    Map<String, Object> map2 = new HashMap<>();
+                    map2.put("startRow",startRow);
+                    map2.put("endRow",endRow);
+                    map2.put("startCol",startColhgl);
+                    map2.put("endCol",endColhgl);
+                    map2.put("name",ccname);
+                    map2.put("tableNum",tableNum);
+                    rowAndcolhgl.add(map2);
+
+                    startColzl = 19;
+                    endColzl = 19;
+                    Map<String, Object> map3 = new HashMap<>();
+                    map3.put("startRow",startRow);
+                    map3.put("endRow",endRow);
+                    map3.put("startCol",startColzl);
+                    map3.put("endCol",endColzl);
+                    map3.put("name",ccname);
+                    map3.put("tableNum",tableNum);
+                    rowAndcolzl.add(map3);
+
+                    startColjq = 20;
+                    endColjq = 20;
+                    Map<String, Object> map4 = new HashMap<>();
+                    map4.put("startRow",startRow);
+                    map4.put("endRow",endRow);
+                    map4.put("startCol",startColjq);
+                    map4.put("endCol",endColjq);
+                    map4.put("name",ccname);
+                    map4.put("tableNum",tableNum);
+                    rowAndcoljq.add(map4);
+                }
                 fillCommonDataOld(sheet,tableNum,index,datum);
                 index += 1;
             }
+            ccname = datum.get("ccxm").toString();
 
+        }
+
+        List<Map<String, Object>> maps = mergeCells(rowAndcol);
+        List<Map<String, Object>> mapss = mergeCells(rowAndcol1);
+        List<Map<String, Object>> maphgl = mergeCellsRow(rowAndcolhgl);
+        List<Map<String, Object>> mapzl = mergeCellsRow(rowAndcolzl);
+        List<Map<String, Object>> mapjq = mergeCellsRow(rowAndcoljq);
+
+        for (Map<String, Object> map : maps) {
+            int startRow1 = Integer.parseInt(map.get("startRow").toString());
+            int endRow1 = Integer.parseInt(map.get("endRow").toString());
+            int startCol1 = Integer.parseInt(map.get("startCol").toString());
+            int endCol1 = Integer.parseInt(map.get("endCol").toString());
+            CellRangeAddress newRegion = new CellRangeAddress(startRow1, endRow1, startCol1, endCol1);
+            // 检查是否存在重叠的合并区域
+            List<CellRangeAddress> mergedRegions = sheet.getMergedRegions();
+            for (int i = mergedRegions.size() - 1; i >= 0; i--) {
+                CellRangeAddress mergedRegion = mergedRegions.get(i);
+                if (mergedRegion.intersects(newRegion)){
+                    sheet.removeMergedRegion(i);
+                }
+            }
+            sheet.addMergedRegion(new CellRangeAddress(Integer.parseInt(map.get("startRow").toString()), Integer.parseInt(map.get("endRow").toString()), Integer.parseInt(map.get("startCol").toString()), Integer.parseInt(map.get("endCol").toString())));
+        }
+        for (Map<String, Object> map : mapss) {
+            int startRow1 = Integer.parseInt(map.get("startRow").toString());
+            int endRow1 = Integer.parseInt(map.get("endRow").toString());
+            int startCol1 = Integer.parseInt(map.get("startCol").toString());
+            int endCol1 = Integer.parseInt(map.get("endCol").toString());
+            CellRangeAddress newRegion = new CellRangeAddress(startRow1, endRow1, startCol1, endCol1);
+            // 检查是否存在重叠的合并区域
+            List<CellRangeAddress> mergedRegions = sheet.getMergedRegions();
+            for (int i = mergedRegions.size() - 1; i >= 0; i--) {
+                CellRangeAddress mergedRegion = mergedRegions.get(i);
+                if (mergedRegion.intersects(newRegion)){
+                    sheet.removeMergedRegion(i);
+                }
+            }
+            sheet.addMergedRegion(new CellRangeAddress(Integer.parseInt(map.get("startRow").toString()), Integer.parseInt(map.get("endRow").toString()), Integer.parseInt(map.get("startCol").toString()), Integer.parseInt(map.get("endCol").toString())));
+        }
+        for (Map<String, Object> map : maphgl) {
+            int startRow1 = Integer.parseInt(map.get("startRow").toString());
+            int endRow1 = Integer.parseInt(map.get("endRow").toString());
+            int startCol1 = Integer.parseInt(map.get("startCol").toString());
+            int endCol1 = Integer.parseInt(map.get("endCol").toString());
+            CellRangeAddress newRegion = new CellRangeAddress(startRow1, endRow1, startCol1, endCol1);
+            // 检查是否存在重叠的合并区域
+            List<CellRangeAddress> mergedRegions = sheet.getMergedRegions();
+            for (int i = mergedRegions.size() - 1; i >= 0; i--) {
+                CellRangeAddress mergedRegion = mergedRegions.get(i);
+                if (mergedRegion.intersects(newRegion)){
+                    sheet.removeMergedRegion(i);
+                }
+            }
+            // 不需要合并单元格的情况
+            if (map.get("startRow").equals(map.get("endRow")) && map.get("startCol").equals(map.get("endCol"))) {
+                continue;
+            } else {
+                sheet.addMergedRegion(new CellRangeAddress(
+                        Integer.parseInt(map.get("startRow").toString()),
+                        Integer.parseInt(map.get("endRow").toString()),
+                        Integer.parseInt(map.get("startCol").toString()),
+                        Integer.parseInt(map.get("endCol").toString())
+                ));
+            }
+            //sheet.addMergedRegion(new CellRangeAddress(Integer.parseInt(map.get("startRow").toString()), Integer.parseInt(map.get("endRow").toString()), Integer.parseInt(map.get("startCol").toString()), Integer.parseInt(map.get("endCol").toString())));
+        }
+
+        for (Map<String, Object> map : mapzl) {
+            int startRow1 = Integer.parseInt(map.get("startRow").toString());
+            int endRow1 = Integer.parseInt(map.get("endRow").toString());
+            int startCol1 = Integer.parseInt(map.get("startCol").toString());
+            int endCol1 = Integer.parseInt(map.get("endCol").toString());
+            CellRangeAddress newRegion = new CellRangeAddress(startRow1, endRow1, startCol1, endCol1);
+            // 检查是否存在重叠的合并区域
+            List<CellRangeAddress> mergedRegions = sheet.getMergedRegions();
+            for (int i = mergedRegions.size() - 1; i >= 0; i--) {
+                CellRangeAddress mergedRegion = mergedRegions.get(i);
+                if (mergedRegion.intersects(newRegion)){
+                    sheet.removeMergedRegion(i);
+                }
+            }
+            // 不需要合并单元格的情况
+            if (map.get("startRow").equals(map.get("endRow")) && map.get("startCol").equals(map.get("endCol"))) {
+                continue;
+            } else {
+                sheet.addMergedRegion(new CellRangeAddress(
+                        Integer.parseInt(map.get("startRow").toString()),
+                        Integer.parseInt(map.get("endRow").toString()),
+                        Integer.parseInt(map.get("startCol").toString()),
+                        Integer.parseInt(map.get("endCol").toString())
+                ));
+            }
+            //sheet.addMergedRegion(new CellRangeAddress(Integer.parseInt(map.get("startRow").toString()), Integer.parseInt(map.get("endRow").toString()), Integer.parseInt(map.get("startCol").toString()), Integer.parseInt(map.get("endCol").toString())));
+        }
+        for (Map<String, Object> map : mapjq) {
+            int startRow1 = Integer.parseInt(map.get("startRow").toString());
+            int endRow1 = Integer.parseInt(map.get("endRow").toString());
+            int startCol1 = Integer.parseInt(map.get("startCol").toString());
+            int endCol1 = Integer.parseInt(map.get("endCol").toString());
+            CellRangeAddress newRegion = new CellRangeAddress(startRow1, endRow1, startCol1, endCol1);
+            // 检查是否存在重叠的合并区域
+            List<CellRangeAddress> mergedRegions = sheet.getMergedRegions();
+            for (int i = mergedRegions.size() - 1; i >= 0; i--) {
+                CellRangeAddress mergedRegion = mergedRegions.get(i);
+                if (mergedRegion.intersects(newRegion)){
+                    sheet.removeMergedRegion(i);
+                }
+            }
+            // 不需要合并单元格的情况
+            if (map.get("startRow").equals(map.get("endRow")) && map.get("startCol").equals(map.get("endCol"))) {
+                continue;
+            } else {
+                sheet.addMergedRegion(new CellRangeAddress(
+                        Integer.parseInt(map.get("startRow").toString()),
+                        Integer.parseInt(map.get("endRow").toString()),
+                        Integer.parseInt(map.get("startCol").toString()),
+                        Integer.parseInt(map.get("endCol").toString())
+                ));
+            }
+            //sheet.addMergedRegion(new CellRangeAddress(Integer.parseInt(map.get("startRow").toString()), Integer.parseInt(map.get("endRow").toString()), Integer.parseInt(map.get("startCol").toString()), Integer.parseInt(map.get("endCol").toString())));
         }
         //写完当前工作簿的数据后，就要插入公式计算了
         calculateFbgcSheetOLd(sheet);
         for (int j = 0; j < wb.getNumberOfSheets(); j++) {
             JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
         }
+    }
+
+    private List<Map<String, Object>> mergeCellsRow(List<Map<String, Object>> rowAndcol) {
+        List<Map<String, Object>> result = new ArrayList<>();
+        int currentEndRow = -1;
+        int currentStartRow = -1;
+        int currentStartCol = -1;
+        int currentEndCol = -1;
+        String currentNameAndCol = null;
+        int currentTableNum = -1;
+        for (Map<String, Object> row : rowAndcol) {
+            int tableNum = (int) row.get("tableNum");
+            int startRow = (int) row.get("startRow");
+            int endRow = (int) row.get("endRow");
+            int startCol = (int) row.get("startCol");
+            int endCol = (int) row.get("endCol");
+            String name = (String) row.get("name");
+            if (currentNameAndCol == null || !currentNameAndCol.equals(name + "-" + startCol + "-" + endCol) || currentTableNum != tableNum) {
+                if (currentStartRow != -1) {
+                    for (int i = currentStartRow; i <= currentEndRow && i < result.size(); i++) {
+                        Map<String, Object> newRow = new HashMap<>();
+                        newRow.put("name", currentNameAndCol.split("-")[0]);
+                        newRow.put("startRow", currentStartRow);
+                        newRow.put("endRow", currentEndRow);
+                        newRow.put("tableNum", currentTableNum);
+                        for (Map.Entry<String, Object> entry : result.get(i).entrySet()) {
+                            String key = entry.getKey();
+                            if (!key.equals("startCol") && !key.equals("endCol")) {
+                                newRow.put(key, entry.getValue());
+                            }
+                        }
+                        result.set(i, newRow);
+                    }
+                }
+                currentNameAndCol = name + "-" + startCol + "-" + endCol;
+                currentStartCol = startCol;
+                currentEndCol = endCol;
+                currentTableNum = tableNum;
+                currentStartRow = startRow;
+                currentEndRow = endRow;
+                result.add(row);
+            } else {
+                Map<String, Object> lastRow = result.get(result.size() - 1);
+                if (currentEndCol < endCol) {
+                    lastRow.put("endCol", endCol);
+                    currentEndCol = endCol;
+                }
+                lastRow.put("endRow", endRow);
+                currentEndRow = endRow;
+            }
+        }
+        if (currentStartRow != -1) {
+            for (int i = currentStartRow; i <= currentEndRow && i < result.size(); i++) {
+                Map<String, Object> newRow = new HashMap<>();
+                newRow.put("name", currentNameAndCol.split("-")[0]);
+                newRow.put("startRow", currentStartRow);
+                newRow.put("endRow", currentEndRow);
+                newRow.put("tableNum", currentTableNum);
+                for (Map.Entry<String, Object> entry : result.get(i).entrySet()) {
+                    String key = entry.getKey();
+                    if (!key.equals("startCol") && !key.equals("endCol")) {
+                        newRow.put(key, entry.getValue());
+                    }
+                }
+                result.set(i, newRow);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * 合并单元格
+     * @param rowAndcol
+     * @return
+     */
+    private List<Map<String, Object>> mergeCells(List<Map<String, Object>> rowAndcol) {
+        List<Map<String, Object>> result = new ArrayList<>();
+        int currentEndRow = -1;
+        int currentStartRow = -1;
+        int currentStartCol = -1;
+        int currentEndCol = -1;
+        String currentName = null;
+        int currentTableNum = -1;
+        for (Map<String, Object> row : rowAndcol) {
+            int tableNum = (int) row.get("tableNum");
+            int startRow = (int) row.get("startRow");
+            int endRow = (int) row.get("endRow");
+            int startCol = (int) row.get("startCol");
+            int endCol = (int) row.get("endCol");
+            String name = (String) row.get("name");
+            if (currentName == null || !currentName.equals(name) || currentStartCol != startCol || currentEndCol != endCol || currentTableNum != tableNum) {
+                if (currentStartRow != -1) {
+                    for (int i = currentStartRow; i <= currentEndRow && i < result.size(); i++) {
+                        Map<String, Object> newRow = new HashMap<>();
+                        newRow.put("name", currentName);
+                        newRow.put("startRow", currentStartRow);
+                        newRow.put("endRow", currentEndRow);
+                        newRow.put("startCol", currentStartCol);
+                        newRow.put("endCol", currentEndCol);
+                        newRow.put("tableNum", currentTableNum);
+                        newRow.putAll(result.get(i));
+                        result.set(i, newRow);
+                    }
+                }
+                currentName = name;
+                currentStartCol = startCol;
+                currentEndCol = endCol;
+                currentTableNum = tableNum;
+                currentStartRow = startRow;
+                currentEndRow = endRow;
+                result.add(row);
+            } else {
+                Map<String, Object> lastRow = result.get(result.size() - 1);
+                lastRow.put("endRow", endRow);
+                currentEndRow = endRow;
+            }
+        }
+        if (currentStartRow != -1) {
+            for (int i = currentStartRow; i <= currentEndRow && i < result.size(); i++) {
+                Map<String, Object> newRow = new HashMap<>();
+                newRow.put("name", currentName);
+                newRow.put("startRow", currentStartRow);
+                newRow.put("endRow", currentEndRow);
+                newRow.put("startCol", currentStartCol);
+                newRow.put("endCol", currentEndCol);
+                newRow.put("tableNum", currentTableNum);
+                newRow.putAll(result.get(i));
+                result.set(i, newRow);
+            }
+        }
+        return result;
     }
 
     /**
@@ -560,56 +1050,93 @@ public class JjgJgjcsjServiceImpl extends ServiceImpl<JjgJgjcsjMapper, JjgJgjcsj
             //创建文件根目录
             fdir.mkdirs();
         }
-        File directory = new File("service-system/src/main/resources/static");
-        String reportPath = directory.getCanonicalPath();
-        String name = "合同段评定表.xlsx";
-        String path = reportPath + File.separator + name;
-        Files.copy(Paths.get(path), new FileOutputStream(f));
-        FileInputStream out = new FileInputStream(f);
-        wb = new XSSFWorkbook(out);
+        try {
+            File directory = new File("service-system/src/main/resources/static");
+            String reportPath = directory.getCanonicalPath();
+            String name = "合同段评定表.xlsx";
+            String path = reportPath + File.separator + name;
+            Files.copy(Paths.get(path), new FileOutputStream(f));
+            FileInputStream out = new FileInputStream(f);
+            wb = new XSSFWorkbook(out);
 
-        Map<String, List<Map<String,Object>>> groupedData = data.stream()
-                .collect(Collectors.groupingBy(m -> m.get("dwgc").toString()));
-        for (String key : groupedData.keySet()) {
-            List<Map<String,Object>> list = groupedData.get(key);
+            Map<String, List<Map<String,Object>>> groupedData = data.stream()
+                    .collect(Collectors.groupingBy(m -> m.get("dwgc").toString()));
+            // 对key进行排序
+            List<String> sortedKeys = groupedData.keySet().stream()
+                    .sorted(new Comparator<String>() {
+                        @Override
+                        public int compare(String o1, String o2) {
+                            // 判断包含关键字的顺序
+                            List<String> keywords = Arrays.asList("路面工程", "交安工程","路基工程", "桥", "隧道");
+                            for (String keyword : keywords) {
+                                if (o1.contains(keyword) && !o2.contains(keyword)) {
+                                    return -1; // o1包含关键字，o2不包含，则o1排在前面
+                                } else if (!o1.contains(keyword) && o2.contains(keyword)) {
+                                    return 1; // o1不包含关键字，o2包含，则o2排在前面
+                                }
+                            }
+                            // 如果没有关键字，按字典序排列
+                            return o1.compareTo(o2);
+                        }
+                    })
+                    .collect(Collectors.toList());
 
-            if (key.equals("路基工程")){
-                writeData(wb,list,"分部-路基",proname,htd);
-            }else if (key.equals("路面工程")){
+            // 按关键字排序后的数据
+            Map<String, List<Map<String, Object>>> sortedData = new LinkedHashMap<>();
 
-                writeData(wb,list,"分部-路面",proname,htd);
-            }else if (key.equals("交安工程")){
-                writeData(wb,list,"分部-交安",proname,htd);
-            }else {
-                //桥梁和隧道
-                writeData(wb,list,key,proname,htd);
+            // 按排序后的key遍历原始数据
+            for (String key : sortedKeys) {
+                List<Map<String, Object>> dataList = groupedData.get(key);
+                sortedData.put(key, dataList);
             }
 
-        }
+            for (String key : sortedData.keySet()) {
+                List<Map<String,Object>> list = groupedData.get(key);
 
-        //单位工程
-        List<Map<String, Object>> dwgclist = new ArrayList<>();
-        for (Sheet sheet : wb) {
-            String sheetName = sheet.getSheetName();
-            // 检查工作表名是否以"分部-"开头
-            if (sheetName.startsWith("分部-")) {
-                // 处理工作表数据
-                List<Map<String, Object>> list = processSheet(sheet);
-                dwgclist.addAll(list);
+                if (key.equals("路基工程")){
+                    writeData(wb,list,"分部-路基",proname,htd);
+                }else if (key.equals("路面工程")){
+
+                    writeData(wb,list,"分部-路面",proname,htd);
+                }else if (key.equals("交安工程")){
+                    writeData(wb,list,"分部-交安",proname,htd);
+                }else {
+                    //桥梁和隧道
+                    writeData(wb,list,key,proname,htd);
+                }
+
             }
+
+            //单位工程
+            List<Map<String, Object>> dwgclist = new ArrayList<>();
+            for (Sheet sheet : wb) {
+                String sheetName = sheet.getSheetName();
+                // 检查工作表名是否以"分部-"开头
+                if (sheetName.startsWith("分部-")) {
+                    // 处理工作表数据
+                    List<Map<String, Object>> list = processSheet(sheet);
+                    dwgclist.addAll(list);
+                }
+            }
+            writedwgcData(wb,dwgclist);
+
+            //合同段
+            List<Map<String, Object>> list = processhtdSheet(wb);
+            writedhtdData(wb,list);
+
+            FileOutputStream fileOut = new FileOutputStream(f);
+            wb.write(fileOut);
+            fileOut.flush();
+            fileOut.close();
+            out.close();
+            wb.close();
+        }catch (Exception e) {
+            if(f.exists()){
+                f.delete();
+            }
+            throw new JjgysException(20001, "生成评定表错误，请检查数据的正确性");
         }
-        writedwgcData(wb,dwgclist);
 
-        //合同段
-        List<Map<String, Object>> list = processhtdSheet(wb);
-        writedhtdData(wb,list);
-
-        FileOutputStream fileOut = new FileOutputStream(f);
-        wb.write(fileOut);
-        fileOut.flush();
-        fileOut.close();
-        out.close();
-        wb.close();
     }
 
     /**
@@ -1144,7 +1671,7 @@ public class JjgJgjcsjServiceImpl extends ServiceImpl<JjgJgjcsjMapper, JjgJgjcsj
                 map.put("htd",row.getCell(2).getStringCellValue());
                 map.put("fbgc",row.getCell(8).getStringCellValue());
                 map.put("jsxm",row.getCell(15).getStringCellValue());
-
+                map.put("proname",row.getCell(15).getStringCellValue());
                 map.put("gcbw",sheet.getRow(i+1).getCell(2).getStringCellValue());
                 map.put("sgbw",sheet.getRow(i+1).getCell(8).getStringCellValue());
                 map.put("jldw",sheet.getRow(i+1).getCell(15).getStringCellValue());
@@ -1170,12 +1697,26 @@ public class JjgJgjcsjServiceImpl extends ServiceImpl<JjgJgjcsjMapper, JjgJgjcsj
      * @param htd
      */
     private void writeData(XSSFWorkbook wb, List<Map<String,Object>> data, String sheetname, String proname, String htd) {
-        Collections.sort(data, new Comparator<Map<String, Object>>() {
+        /*Collections.sort(data, new Comparator<Map<String, Object>>() {
             @Override
             public int compare(Map<String, Object> obj1, Map<String, Object> obj2) {
                 String fbgc1 = (String) obj1.get("fbgc");
                 String fbgc2 = (String) obj2.get("fbgc");
                 return fbgc1.compareTo(fbgc2);
+            }
+        });*/
+        Collections.sort(data, new Comparator<Map<String, Object>>() {
+            @Override
+            public int compare(Map<String, Object> obj1, Map<String, Object> obj2) {
+                String fbgc1 = (String) obj1.get("fbgc");
+                String fbgc2 = (String) obj2.get("fbgc");
+                int result = fbgc1.compareTo(fbgc2);
+                if (result != 0) {
+                    return result;
+                }
+                String ccxm1 = (String) obj1.get("ccxm");
+                String ccxm2 = (String) obj2.get("ccxm");
+                return ccxm1.compareTo(ccxm2);
             }
         });
         copySheet(wb,sheetname);
@@ -1192,6 +1733,12 @@ public class JjgJgjcsjServiceImpl extends ServiceImpl<JjgJgjcsjMapper, JjgJgjcsj
 
         int index = 0;
         int tableNum = 0;
+        int startRow = -1, endRow = -1, startCol = -1, endCol = -1, startCols = -1, endCols = -1, startColhgl = -1, endColhgl = -1, startColzl = -1, endColzl = -1;
+        List<Map<String, Object>> rowAndcol = new ArrayList<>();
+        List<Map<String, Object>> rowAndcol1 = new ArrayList<>();
+        List<Map<String, Object>> rowAndcolhgl = new ArrayList<>();
+        List<Map<String, Object>> rowAndcolzl = new ArrayList<>();
+        String ccname = data.get(0).get("ccxm").toString();
         String fbgc = data.get(0).get("fbgc").toString();
         for (Map<String,Object> datum : data) {
             if (index % 15 == 0 && index!=0){
@@ -1201,6 +1748,104 @@ public class JjgJgjcsjServiceImpl extends ServiceImpl<JjgJgjcsjMapper, JjgJgjcsj
             }
             if (fbgc.equals(datum.get("fbgc").toString())){
                 fillTitleData(sheet,tableNum,proname,htd,htdlist,datum.get("fbgc").toString());
+                if (ccname.equals(datum.get("ccxm").toString())){
+                    startRow = tableNum * 22 + 6 + index % 16 ;
+                    endRow = tableNum * 22 + 6 + index % 16 ;
+
+                    startCol = 2;
+                    endCol = 5;
+
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("startRow",startRow);
+                    map.put("endRow",endRow);
+                    map.put("startCol",startCol);
+                    map.put("endCol",endCol);
+                    map.put("name",ccname);
+                    map.put("tableNum",tableNum);
+                    rowAndcol.add(map);
+
+                    startCols = 7;
+                    endCols = 16;
+                    Map<String, Object> map1 = new HashMap<>();
+                    map1.put("startRow",startRow);
+                    map1.put("endRow",endRow);
+                    map1.put("startCol",startCols);
+                    map1.put("endCol",endCols);
+                    map1.put("name",ccname);
+                    map1.put("tableNum",tableNum);
+                    rowAndcol1.add(map1);
+
+                    startColhgl = 17;
+                    endColhgl = 18;
+                    Map<String, Object> map2 = new HashMap<>();
+                    map2.put("startRow",startRow);
+                    map2.put("endRow",endRow);
+                    map2.put("startCol",startColhgl);
+                    map2.put("endCol",endColhgl);
+                    map2.put("name",ccname);
+                    map2.put("tableNum",tableNum);
+                    rowAndcolhgl.add(map2);
+
+                    startColzl = 19;
+                    endColzl = 20;
+                    Map<String, Object> map3 = new HashMap<>();
+                    map3.put("startRow",startRow);
+                    map3.put("endRow",endRow);
+                    map3.put("startCol",startColzl);
+                    map3.put("endCol",endColzl);
+                    map3.put("name",ccname);
+                    map3.put("tableNum",tableNum);
+                    rowAndcolzl.add(map3);
+                }else {
+                    ccname = datum.get("ccxm").toString();startRow = tableNum * 22 + 6 + index % 16 ;
+                    endRow = tableNum * 22 + 6 + index % 16 ;
+
+                    startCol = 2;
+                    endCol = 5;
+
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("startRow",startRow);
+                    map.put("endRow",endRow);
+                    map.put("startCol",startCol);
+                    map.put("endCol",endCol);
+                    map.put("name",ccname);
+                    map.put("tableNum",tableNum);
+                    rowAndcol.add(map);
+
+                    startCols = 7;
+                    endCols = 16;
+                    Map<String, Object> map1 = new HashMap<>();
+                    map1.put("startRow",startRow);
+                    map1.put("endRow",endRow);
+                    map1.put("startCol",startCols);
+                    map1.put("endCol",endCols);
+                    map1.put("name",ccname);
+                    map1.put("tableNum",tableNum);
+                    rowAndcol1.add(map1);
+
+                    startColhgl = 17;
+                    endColhgl = 18;
+                    Map<String, Object> map2 = new HashMap<>();
+                    map2.put("startRow",startRow);
+                    map2.put("endRow",endRow);
+                    map2.put("startCol",startColhgl);
+                    map2.put("endCol",endColhgl);
+                    map2.put("name",ccname);
+                    map2.put("tableNum",tableNum);
+                    rowAndcolhgl.add(map2);
+
+                    startColzl = 19;
+                    endColzl = 20;
+                    Map<String, Object> map3 = new HashMap<>();
+                    map3.put("startRow",startRow);
+                    map3.put("endRow",endRow);
+                    map3.put("startCol",startColzl);
+                    map3.put("endCol",endColzl);
+                    map3.put("name",ccname);
+                    map3.put("tableNum",tableNum);
+                    rowAndcolzl.add(map3);
+                }
+
                 fillCommonData(sheet,tableNum,index,datum);
                 index++;
             }else {
@@ -1208,10 +1853,131 @@ public class JjgJgjcsjServiceImpl extends ServiceImpl<JjgJgjcsjMapper, JjgJgjcsj
                 tableNum ++;
                 index = 0;
                 fillTitleData(sheet,tableNum,proname,htd,htdlist,datum.get("fbgc").toString());
+                ccname = datum.get("ccxm").toString();
+                if (ccname.equals(datum.get("ccxm").toString())) {
+                    startRow = tableNum * 22 + 6 + index % 16;
+                    endRow = tableNum * 22 + 6 + index % 16;
+
+                    startCol = 2;
+                    endCol = 5;
+
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("startRow", startRow);
+                    map.put("endRow", endRow);
+                    map.put("startCol", startCol);
+                    map.put("endCol", endCol);
+                    map.put("name", ccname);
+                    map.put("tableNum", tableNum);
+                    rowAndcol.add(map);
+
+                    startCols = 7;
+                    endCols = 16;
+                    Map<String, Object> map1 = new HashMap<>();
+                    map1.put("startRow",startRow);
+                    map1.put("endRow",endRow);
+                    map1.put("startCol",startCols);
+                    map1.put("endCol",endCols);
+                    map1.put("name",ccname);
+                    map1.put("tableNum",tableNum);
+                    rowAndcol1.add(map1);
+
+                    startColhgl = 17;
+                    endColhgl = 18;
+                    Map<String, Object> map2 = new HashMap<>();
+                    map2.put("startRow",startRow);
+                    map2.put("endRow",endRow);
+                    map2.put("startCol",startColhgl);
+                    map2.put("endCol",endColhgl);
+                    map2.put("name",ccname);
+                    map2.put("tableNum",tableNum);
+                    rowAndcolhgl.add(map2);
+
+                    startColzl = 19;
+                    endColzl = 20;
+                    Map<String, Object> map3 = new HashMap<>();
+                    map3.put("startRow",startRow);
+                    map3.put("endRow",endRow);
+                    map3.put("startCol",startColzl);
+                    map3.put("endCol",endColzl);
+                    map3.put("name",ccname);
+                    map3.put("tableNum",tableNum);
+                    rowAndcolzl.add(map3);
+                }
                 fillCommonData(sheet,tableNum,index,datum);
                 index += 1;
             }
+            ccname = datum.get("ccxm").toString();
 
+        }
+        List<Map<String, Object>> maps = mergeCells(rowAndcol);
+        List<Map<String, Object>> mapss = mergeCells(rowAndcol1);
+        List<Map<String, Object>> maphgl = mergeCells(rowAndcolhgl);
+        List<Map<String, Object>> mapzl = mergeCells(rowAndcolzl);
+
+        for (Map<String, Object> map : maps) {
+            int startRow1 = Integer.parseInt(map.get("startRow").toString());
+            int endRow1 = Integer.parseInt(map.get("endRow").toString());
+            int startCol1 = Integer.parseInt(map.get("startCol").toString());
+            int endCol1 = Integer.parseInt(map.get("endCol").toString());
+            CellRangeAddress newRegion = new CellRangeAddress(startRow1, endRow1, startCol1, endCol1);
+            // 检查是否存在重叠的合并区域
+            List<CellRangeAddress> mergedRegions = sheet.getMergedRegions();
+            for (int i = mergedRegions.size() - 1; i >= 0; i--) {
+                CellRangeAddress mergedRegion = mergedRegions.get(i);
+                if (mergedRegion.intersects(newRegion)){
+                    sheet.removeMergedRegion(i);
+                }
+            }
+            sheet.addMergedRegion(new CellRangeAddress(Integer.parseInt(map.get("startRow").toString()), Integer.parseInt(map.get("endRow").toString()), Integer.parseInt(map.get("startCol").toString()), Integer.parseInt(map.get("endCol").toString())));
+        }
+        for (Map<String, Object> map : mapss) {
+            int startRow1 = Integer.parseInt(map.get("startRow").toString());
+            int endRow1 = Integer.parseInt(map.get("endRow").toString());
+            int startCol1 = Integer.parseInt(map.get("startCol").toString());
+            int endCol1 = Integer.parseInt(map.get("endCol").toString());
+            CellRangeAddress newRegion = new CellRangeAddress(startRow1, endRow1, startCol1, endCol1);
+            // 检查是否存在重叠的合并区域
+            List<CellRangeAddress> mergedRegions = sheet.getMergedRegions();
+            for (int i = mergedRegions.size() - 1; i >= 0; i--) {
+                CellRangeAddress mergedRegion = mergedRegions.get(i);
+                if (mergedRegion.intersects(newRegion)){
+                    sheet.removeMergedRegion(i);
+                }
+            }
+            sheet.addMergedRegion(new CellRangeAddress(Integer.parseInt(map.get("startRow").toString()), Integer.parseInt(map.get("endRow").toString()), Integer.parseInt(map.get("startCol").toString()), Integer.parseInt(map.get("endCol").toString())));
+        }
+        for (Map<String, Object> map : maphgl) {
+            int startRow1 = Integer.parseInt(map.get("startRow").toString());
+            int endRow1 = Integer.parseInt(map.get("endRow").toString());
+            int startCol1 = Integer.parseInt(map.get("startCol").toString());
+            int endCol1 = Integer.parseInt(map.get("endCol").toString());
+            CellRangeAddress newRegion = new CellRangeAddress(startRow1, endRow1, startCol1, endCol1);
+            // 检查是否存在重叠的合并区域
+            List<CellRangeAddress> mergedRegions = sheet.getMergedRegions();
+            for (int i = mergedRegions.size() - 1; i >= 0; i--) {
+                CellRangeAddress mergedRegion = mergedRegions.get(i);
+                if (mergedRegion.intersects(newRegion)){
+                    sheet.removeMergedRegion(i);
+                }
+            }
+            sheet.addMergedRegion(new CellRangeAddress(Integer.parseInt(map.get("startRow").toString()), Integer.parseInt(map.get("endRow").toString()), Integer.parseInt(map.get("startCol").toString()), Integer.parseInt(map.get("endCol").toString())));
+        }
+
+        for (Map<String, Object> map : mapzl) {
+            int startRow1 = Integer.parseInt(map.get("startRow").toString());
+            int endRow1 = Integer.parseInt(map.get("endRow").toString());
+            int startCol1 = Integer.parseInt(map.get("startCol").toString());
+            int endCol1 = Integer.parseInt(map.get("endCol").toString());
+            CellRangeAddress newRegion = new CellRangeAddress(startRow1, endRow1, startCol1, endCol1);
+            // 检查是否存在重叠的合并区域
+            List<CellRangeAddress> mergedRegions = sheet.getMergedRegions();
+            for (int i = mergedRegions.size() - 1; i >= 0; i--) {
+                CellRangeAddress mergedRegion = mergedRegions.get(i);
+                if (mergedRegion.intersects(newRegion)){
+                    sheet.removeMergedRegion(i);
+                }
+            }
+            sheet.addMergedRegion(new CellRangeAddress(Integer.parseInt(map.get("startRow").toString()), Integer.parseInt(map.get("endRow").toString()), Integer.parseInt(map.get("startCol").toString()), Integer.parseInt(map.get("endCol").toString())));
         }
         //写完当前工作簿的数据后，就要插入公式计算了
         calculateFbgcSheet(sheet);
@@ -1720,7 +2486,7 @@ public class JjgJgjcsjServiceImpl extends ServiceImpl<JjgJgjcsjMapper, JjgJgjcsj
                 result.add(map);
             }else if (fbgc.equals("隧道路面") && ccxm.equals("沥青路面车辙（隧道路面）")){
                 map.put("sheetname","分部-"+data.getDwgc());
-                map.put("filename","详见《》检测"+zds+"点,合格"+hgds+"点");
+                map.put("filename","详见《隧道路面车辙质量鉴定表》检测"+zds+"点,合格"+hgds+"点");
                 map.put("qz","1");
                 map.put("hgl",Double.valueOf(zds)!=0?df.format(Double.valueOf(hgds)/Double.valueOf(zds)*100):0);
                 result.add(map);
@@ -1744,25 +2510,25 @@ public class JjgJgjcsjServiceImpl extends ServiceImpl<JjgJgjcsjMapper, JjgJgjcsj
                 result.add(map);
             }else if (fbgc.equals("隧道路面") && ccxm.equals("平整度（隧道路面沥青）")){
                 map.put("sheetname","分部-"+data.getDwgc());
-                map.put("filename","详见《》检测"+zds+"点,合格"+hgds+"点");
+                map.put("filename","详见《平整度质量鉴定表》检测"+zds+"点,合格"+hgds+"点");
                 map.put("qz","2");
                 map.put("hgl",Double.valueOf(zds)!=0?df.format(Double.valueOf(hgds)/Double.valueOf(zds)*100):0);
                 result.add(map);
             }else if (fbgc.equals("隧道路面") && ccxm.equals("平整度（隧道路面混凝土）")){
                 map.put("sheetname","分部-"+data.getDwgc());
-                map.put("filename","详见《》检测"+zds+"点,合格"+hgds+"点");
+                map.put("filename","详见《平整度质量鉴定表》检测"+zds+"点,合格"+hgds+"点");
                 map.put("qz","2");
                 map.put("hgl",Double.valueOf(zds)!=0?df.format(Double.valueOf(hgds)/Double.valueOf(zds)*100):0);
                 result.add(map);
             }else if (fbgc.equals("隧道路面") && ccxm.equals("构造深度（隧道路面）")){
                 map.put("sheetname","分部-"+data.getDwgc());
-                map.put("filename","详见《》检测"+zds+"点,合格"+hgds+"点");
+                map.put("filename","详见《隧道路面构造深度质量鉴定表》检测"+zds+"点,合格"+hgds+"点");
                 map.put("qz","2");
                 map.put("hgl",Double.valueOf(zds)!=0?df.format(Double.valueOf(hgds)/Double.valueOf(zds)*100):0);
                 result.add(map);
             }else if (fbgc.equals("隧道路面") && ccxm.equals("摩擦系数（隧道路面）")){
                 map.put("sheetname","分部-"+data.getDwgc());
-                map.put("filename","详见《》检测"+zds+"点,合格"+hgds+"点");
+                map.put("filename","详见《隧道路面摩擦系数质量鉴定表》检测"+zds+"点,合格"+hgds+"点");
                 map.put("qz","2");
                 map.put("hgl",Double.valueOf(zds)!=0?df.format(Double.valueOf(hgds)/Double.valueOf(zds)*100):0);
                 result.add(map);
@@ -1780,7 +2546,7 @@ public class JjgJgjcsjServiceImpl extends ServiceImpl<JjgJgjcsjMapper, JjgJgjcsj
                 result.add(map);
             }else if (fbgc.equals("隧道路面") && ccxm.equals("厚度（隧道路面雷达）")){
                 map.put("sheetname","分部-"+data.getDwgc());
-                map.put("filename","详见《》检测"+zds+"点,合格"+hgds+"点");
+                map.put("filename","详见《隧道路面厚度质量鉴定表（雷达法）》检测"+zds+"点,合格"+hgds+"点");
                 map.put("qz","3");
                 map.put("hgl",Double.valueOf(zds)!=0?df.format(Double.valueOf(hgds)/Double.valueOf(zds)*100):0);
                 result.add(map);

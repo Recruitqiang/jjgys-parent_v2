@@ -283,11 +283,14 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
 
             //先删实测数据下面的  name=实测数据，parent_id=proid
             SysMenu scChildrenMenu = sysMenuService.getscChildrenMenu(proid);
-            Long scid = scChildrenMenu.getId();
-            //合同段的菜单数据
-            List<SysMenu> htdlist = sysMenuService.getAllHtd(scid);
-            log.info("删除{}的分部工程和合同段菜单",project.getProName());
-            sysMenuService.removeFbgc(htdlist);//至此，分部工程和合同段的数据删除了
+            if (scChildrenMenu !=null){
+                Long scid = scChildrenMenu.getId();
+                //合同段的菜单数据
+                List<SysMenu> htdlist = sysMenuService.getAllHtd(scid);
+                log.info("删除{}的分部工程和合同段菜单",project.getProName());
+                sysMenuService.removeFbgc(htdlist);//至此，分部工程和合同段的数据删除了
+            }
+
             //然后删除 实测数据，合同段信息，路桥隧信息
             log.info("删除{}的实测数据，合同段信息和路桥隧信息菜单",project.getProName());
             sysMenuService.delectChildrenMenu(proid);

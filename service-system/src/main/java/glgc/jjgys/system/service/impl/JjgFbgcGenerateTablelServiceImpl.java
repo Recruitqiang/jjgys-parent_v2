@@ -1,11 +1,14 @@
 package glgc.jjgys.system.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import glgc.jjgys.model.project.JjgHtd;
 import glgc.jjgys.model.project.JjgLqsQl;
 import glgc.jjgys.model.project.JjgLqsSd;
 import glgc.jjgys.model.projectvo.ljgc.CommonInfoVo;
+import glgc.jjgys.system.exception.JjgysException;
 import glgc.jjgys.system.mapper.JjgFbgcGenerateTableMapper;
+import glgc.jjgys.system.mapper.JjgLqsQlMapper;
 import glgc.jjgys.system.service.*;
 import glgc.jjgys.system.utils.JjgFbgcCommonUtils;
 import glgc.jjgys.system.utils.RowCopy;
@@ -241,6 +244,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
 
     @Autowired
     private JjgFbgcSdgcZdhpzdService jjgFbgcSdgcZdhpzdService;
+
 
 
 
@@ -1059,23 +1063,6 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                     }
                     resultlist.addAll(qlsbbhclist);
                     break;
-                /*case "37桥面构造深度.xlsx":
-                    List<Map<String, Object>> list21 = jjgFbgcQlgcZdhgzsdService.lookJdbjg(commonInfoVo);
-                    List<Map<String, Object>> qmgzsdlist = new ArrayList<>();
-                    for (Map<String, Object> map : list21) {
-                        double z = Double.valueOf(map.get("总点数").toString());
-                        double h = Double.valueOf(map.get("合格点数").toString());
-                        Map map5 = new HashMap();
-                        map5.put("ccname","构造深度");
-                        map5.put("yxps",map.get("设计值"));
-                        map5.put("filename","详见《桥面系构造深度质量鉴定表》检测"+map.get("总点数")+"点,合格"+map.get("合格点数")+"点");
-                        map5.put("sheetname", "分部-"+map.get("qlmc"));
-                        map5.put("fbgc", "桥面系");
-                        map5.put("合格率", (z != 0) ? df.format(h/z*100) : "0");
-                        qmgzsdlist.add(map5);
-                    }
-                    resultlist.addAll(qmgzsdlist);
-                    break;*/
                 case "24路面横坡.xlsx":
                     //工作簿分路面，桥，隧道
                     List<Map<String, String>> list5 = jjgFbgcLmgcLmhpService.lookJdbjg(commonInfoVo);
@@ -1674,7 +1661,73 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                 qhplist.add(map5);
                 resultlist.addAll(qhplist);
 
-            }else if (value.contains("37构造深度手工铺沙法-")){
+            }else if (value.contains("37桥面构造深度-")){
+                List<Map<String, Object>> list =  jjgFbgcQlgcZdhgzsdService.lookJdb(commonInfoVo,value);
+                if (list!=null){
+                    double zds = 0;
+                    double hgds = 0;
+                    for (Map<String, Object> map : list) {
+                        zds += Double.valueOf(map.get("总点数").toString());
+                        hgds += Double.valueOf(map.get("合格点数").toString());
+                    }
+                    List<Map<String, Object>> qhplist = new ArrayList<>();
+                    Map map5 = new HashMap();
+                    map5.put("ccname","构造深度");
+                    map5.put("ccname1","");
+                    map5.put("yxps",list.get(0).get("设计值"));
+                    map5.put("filename","详见《桥面系构造深度质量鉴定表》检测"+decf.format(zds)+"点,合格"+decf.format(hgds)+"点");
+                    map5.put("sheetname", "分部-"+list.get(0).get("检测项目"));
+                    map5.put("fbgc", "桥面系");
+                    map5.put("合格率", (zds != 0) ? df.format(hgds/zds*100) : "0");
+                    qhplist.add(map5);
+                    resultlist.addAll(qhplist);
+                }
+
+            }else if (value.contains("36桥面摩擦系数-")){
+                List<Map<String, Object>> list =  jjgFbgcQlgcZdhmcxsService.lookJdb(commonInfoVo,value);
+                if (list!=null){
+                    double zds = 0;
+                    double hgds = 0;
+                    for (Map<String, Object> map : list) {
+                        zds += Double.valueOf(map.get("总点数").toString());
+                        hgds += Double.valueOf(map.get("合格点数").toString());
+                    }
+                    List<Map<String, Object>> qhplist = new ArrayList<>();
+                    Map map5 = new HashMap();
+                    map5.put("ccname","摩擦系数");
+                    map5.put("ccname1","");
+                    map5.put("yxps",list.get(0).get("设计值"));
+                    map5.put("filename","详见《桥面系摩擦系数质量鉴定表》检测"+decf.format(zds)+"点,合格"+decf.format(hgds)+"点");
+                    map5.put("sheetname", "分部-"+list.get(0).get("检测项目"));
+                    map5.put("fbgc", "桥面系");
+                    map5.put("合格率", (zds != 0) ? df.format(hgds/zds*100) : "0");
+                    qhplist.add(map5);
+                    resultlist.addAll(qhplist);
+                }
+
+            }else if (value.contains("33桥面平整度-")){
+                List<Map<String, Object>> list = jjgFbgcQlgcZdhpzdService.lookJdb(commonInfoVo,value);
+                if (list!=null){
+                    double zds = 0;
+                    double hgds = 0;
+                    for (Map<String, Object> map : list) {
+                        zds += Double.valueOf(map.get("总点数").toString());
+                        hgds += Double.valueOf(map.get("合格点数").toString());
+                    }
+                    List<Map<String, Object>> qhplist = new ArrayList<>();
+                    Map map5 = new HashMap();
+                    map5.put("ccname","平整度");
+                    map5.put("ccname1","");
+                    map5.put("yxps",list.get(0).get("设计值"));
+                    map5.put("filename","详见《桥面平整度质量鉴定表》检测"+decf.format(zds)+"点,合格"+decf.format(hgds)+"点");
+                    map5.put("sheetname", "分部-"+list.get(0).get("检测项目"));
+                    map5.put("fbgc", "桥面系");
+                    map5.put("合格率", (zds != 0) ? df.format(hgds/zds*100) : "0");
+                    qhplist.add(map5);
+                    resultlist.addAll(qhplist);
+                }
+
+            } else if (value.contains("37构造深度手工铺沙法-")){
                 List<Map<String, Object>> list = jjgFbgcQlgcQmgzsdService.lookjg(commonInfoVo,value);
                 List<Map<String, Object>> qgzsdlist = new ArrayList<>();
                 for (Map<String, Object> map : list) {
@@ -1747,7 +1800,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                     double gdz1 = Double.valueOf(sdgdz)+1;
                     String gdz2= String.valueOf(gdz1);
                     Map map = new HashMap();
-                    map.put("ccname","沥青路面压实度(%");
+                    map.put("ccname","沥青路面压实度(%)");
                     map.put("ccname1","隧道路面");
                     map.put("ccname2","");
                     map.put("yxps",gdz2);
@@ -1761,7 +1814,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                     double gdz3 = Double.valueOf(lmgdz)+1;
                     String gdz4 = String.valueOf(gdz3);
                     Map map = new HashMap();
-                    map.put("ccname","沥青路面压实度(%");
+                    map.put("ccname","沥青路面压实度(%)");
                     map.put("ccname1","路面面层");
                     map.put("ccname2","");
                     map.put("yxps",gdz4);
@@ -2153,6 +2206,116 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
 
                 }
 
+            }else if (value.contains("45隧道路面车辙-")){
+                List<Map<String,Object>> list = jjgFbgcSdgcZdhczService.lookJdb(commonInfoVo,value);
+                if (list!=null && list.size()>0){
+                    double zds = 0;
+                    double hgds = 0;
+                    for (Map<String, Object> map : list) {
+                        zds += Double.valueOf(map.get("总点数").toString());
+                        hgds += Double.valueOf(map.get("合格点数").toString());
+                    }
+                    List<Map<String, Object>> qhplist = new ArrayList<>();
+                    Map map5 = new HashMap();
+                    map5.put("ccname","车辙");
+                    map5.put("ccname1","");
+                    map5.put("yxps",list.get(0).get("设计值"));
+                    map5.put("filename","详见《隧道路面车辙质量鉴定表》检测"+decf.format(zds)+"点,合格"+decf.format(hgds)+"点");
+                    map5.put("sheetname", "分部-"+list.get(0).get("检测项目"));
+                    map5.put("fbgc", "路面面层");
+                    map5.put("合格率", (zds != 0) ? df.format(hgds/zds*100) : "0");
+                    qhplist.add(map5);
+                    resultlist.addAll(qhplist);
+                }
+
+            }else if (value.contains("51隧道构造深度-")){
+                List<Map<String,Object>> list = jjgFbgcSdgcZdhgzsdService.lookJdb(commonInfoVo,value);
+                if (list!=null && list.size()>0){
+                    double zds = 0;
+                    double hgds = 0;
+                    for (Map<String, Object> map : list) {
+                        zds += Double.valueOf(map.get("总点数").toString());
+                        hgds += Double.valueOf(map.get("合格点数").toString());
+                    }
+                    List<Map<String, Object>> qhplist = new ArrayList<>();
+                    Map map5 = new HashMap();
+                    map5.put("ccname","构造深度");
+                    map5.put("ccname1","");
+                    map5.put("yxps",list.get(0).get("设计值"));
+                    map5.put("filename","详见《隧道构造深度质量鉴定表》检测"+decf.format(zds)+"点,合格"+decf.format(hgds)+"点");
+                    map5.put("sheetname", "分部-"+list.get(0).get("检测项目"));
+                    map5.put("fbgc", "路面面层");
+                    map5.put("合格率", (zds != 0) ? df.format(hgds/zds*100) : "0");
+                    qhplist.add(map5);
+                    resultlist.addAll(qhplist);
+                }
+
+            }else if (value.contains("52隧道雷达厚度-")){
+                List<Map<String,Object>> list = jjgFbgcSdgcZdhldhdService.lookJdb(commonInfoVo,value);
+                if (list!=null && list.size()>0){
+                    double zds = 0;
+                    double hgds = 0;
+                    for (Map<String, Object> map : list) {
+                        zds += Double.valueOf(map.get("总点数").toString());
+                        hgds += Double.valueOf(map.get("合格点数").toString());
+                    }
+                    List<Map<String, Object>> qhplist = new ArrayList<>();
+                    Map map5 = new HashMap();
+                    map5.put("ccname","雷达厚度");
+                    map5.put("ccname1","");
+                    map5.put("yxps",list.get(0).get("设计值"));
+                    map5.put("filename","详见《隧道雷达厚度质量鉴定表》检测"+decf.format(zds)+"点,合格"+decf.format(hgds)+"点");
+                    map5.put("sheetname", "分部-"+list.get(0).get("检测项目"));
+                    map5.put("fbgc", "路面面层");
+                    map5.put("合格率", (zds != 0) ? df.format(hgds/zds*100) : "0");
+                    qhplist.add(map5);
+                    resultlist.addAll(qhplist);
+                }
+
+
+            }else if (value.contains("50隧道摩擦系数-")){
+                List<Map<String,Object>> list = jjgFbgcSdgcZdhmcxsService.lookJdb(commonInfoVo,value);
+                if (list!=null && list.size()>0){
+                    double zds = 0;
+                    double hgds = 0;
+                    for (Map<String, Object> map : list) {
+                        zds += Double.valueOf(map.get("总点数").toString());
+                        hgds += Double.valueOf(map.get("合格点数").toString());
+                    }
+                    List<Map<String, Object>> qhplist = new ArrayList<>();
+                    Map map5 = new HashMap();
+                    map5.put("ccname","摩擦系数");
+                    map5.put("ccname1","");
+                    map5.put("yxps",list.get(0).get("设计值"));
+                    map5.put("filename","详见《隧道摩擦系数质量鉴定表》检测"+decf.format(zds)+"点,合格"+decf.format(hgds)+"点");
+                    map5.put("sheetname", "分部-"+list.get(0).get("检测项目"));
+                    map5.put("fbgc", "路面面层");
+                    map5.put("合格率", (zds != 0) ? df.format(hgds/zds*100) : "0");
+                    qhplist.add(map5);
+                    resultlist.addAll(qhplist);
+                }
+
+            }else if (value.contains("49隧道路面平整度-")){
+                List<Map<String,Object>> list = jjgFbgcSdgcZdhpzdService.lookJdb(commonInfoVo,value);
+                if (list!=null && list.size()>0){
+                    double zds = 0;
+                    double hgds = 0;
+                    for (Map<String, Object> map : list) {
+                        zds += Double.valueOf(map.get("总点数").toString());
+                        hgds += Double.valueOf(map.get("合格点数").toString());
+                    }
+                    List<Map<String, Object>> qhplist = new ArrayList<>();
+                    Map map5 = new HashMap();
+                    map5.put("ccname","平整度");
+                    map5.put("ccname1","");
+                    map5.put("yxps",list.get(0).get("设计值"));
+                    map5.put("filename","详见《隧道路面平整度质量鉴定表》检测"+decf.format(zds)+"点,合格"+decf.format(hgds)+"点");
+                    map5.put("sheetname", "分部-"+list.get(0).get("检测项目"));
+                    map5.put("fbgc", "路面面层");
+                    map5.put("合格率", (zds != 0) ? df.format(hgds/zds*100) : "0");
+                    qhplist.add(map5);
+                    resultlist.addAll(qhplist);
+                }
             }
 
         }
@@ -2166,7 +2329,6 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                         .thenComparing(map -> (String) ((Map<String, Object>)map).get("ccname")))
                 .collect(Collectors.groupingBy(map -> (String) ((Map<String, Object>)map).get("sheetname")));*/
         //按分组后的数据，每个分组写一个工作簿
-        System.out.println(groupedData);
         DBwriteToExcel(groupedData,proname,htd);
 
     }
@@ -2229,39 +2391,47 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
             //创建文件根目录
             fdir.mkdirs();
         }
-        File directory = new File("service-system/src/main/resources/static");
-        String reportPath = directory.getCanonicalPath();
-        String name = "建设项目质量评定表.xlsx";
-        String path = reportPath + File.separator + name;
-        Files.copy(Paths.get(path), new FileOutputStream(f));
-        FileInputStream out = new FileInputStream(f);
-        wb = new XSSFWorkbook(out);
+        try {
+            File directory = new File("service-system/src/main/resources/static");
+            String reportPath = directory.getCanonicalPath();
+            String name = "建设项目质量评定表.xlsx";
+            String path = reportPath + File.separator + name;
+            Files.copy(Paths.get(path), new FileOutputStream(f));
+            FileInputStream out = new FileInputStream(f);
+            wb = new XSSFWorkbook(out);
 
-        XSSFSheet sheet = wb.getSheet("建设项目");
-        createdJSXMTable(wb,getJSXMNum(mapList.size()));
+            XSSFSheet sheet = wb.getSheet("建设项目");
+            createdJSXMTable(wb,getJSXMNum(mapList.size()));
 
-        sheet.getRow(1).getCell(2).setCellValue(proname);
-        sheet.getRow(1).getCell(6).setCellValue("待确认");
-        sheet.getRow(2).getCell(2).setCellValue(getAllzh(proname));
-        sheet.getRow(2).getCell(6).setCellValue(simpleDateFormat.format(new Date()));
-        int index = 0;
-        for (Map<String, Object> map : mapList) {
-            sheet.getRow(index + 4).getCell(0).setCellValue(map.get("htdValue").toString());
-            sheet.getRow(index + 4).getCell(3).setCellValue(map.get("djValue").toString());
-            index++;
+            sheet.getRow(1).getCell(2).setCellValue(proname);
+            sheet.getRow(1).getCell(6).setCellValue("待确认");
+            sheet.getRow(2).getCell(2).setCellValue(getAllzh(proname));
+            sheet.getRow(2).getCell(6).setCellValue(simpleDateFormat.format(new Date()));
+            int index = 0;
+            for (Map<String, Object> map : mapList) {
+                sheet.getRow(index + 4).getCell(0).setCellValue(map.get("htdValue").toString());
+                sheet.getRow(index + 4).getCell(3).setCellValue(map.get("djValue").toString());
+                index++;
+            }
+
+            calculateJSZLSheet(sheet);
+            for (int j = 0; j < wb.getNumberOfSheets(); j++) {
+                JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
+            }
+
+            FileOutputStream fileOut = new FileOutputStream(f);
+            wb.write(fileOut);
+            fileOut.flush();
+            fileOut.close();
+            out.close();
+            wb.close();
+        }catch (Exception e) {
+            if(f.exists()){
+                f.delete();
+            }
+            throw new JjgysException(20001, "生成建设项目质量评定表错误，请检查数据的正确性");
         }
 
-        calculateJSZLSheet(sheet);
-        for (int j = 0; j < wb.getNumberOfSheets(); j++) {
-            JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
-        }
-
-        FileOutputStream fileOut = new FileOutputStream(f);
-        wb.write(fileOut);
-        fileOut.flush();
-        fileOut.close();
-        out.close();
-        wb.close();
 
 
     }
@@ -2355,55 +2525,91 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
             //创建文件根目录
             fdir.mkdirs();
         }
-        File directory = new File("service-system/src/main/resources/static");
-        String reportPath = directory.getCanonicalPath();
-        String name = "合同段评定表.xlsx";
-        String path = reportPath + File.separator + name;
-        Files.copy(Paths.get(path), new FileOutputStream(f));
-        FileInputStream out = new FileInputStream(f);
-        wb = new XSSFWorkbook(out);
+        try {
+            File directory = new File("service-system/src/main/resources/static");
+            String reportPath = directory.getCanonicalPath();
+            String name = "合同段评定表.xlsx";
+            String path = reportPath + File.separator + name;
+            Files.copy(Paths.get(path), new FileOutputStream(f));
+            FileInputStream out = new FileInputStream(f);
+            wb = new XSSFWorkbook(out);
 
-        //分部工程
-        for (String key : groupedData.keySet()) {
-            List<Map<String, Object>> list = groupedData.get(key);
+            // 对key进行排序
+            List<String> sortedKeys = groupedData.keySet().stream()
+                    .sorted(new Comparator<String>() {
+                        @Override
+                        public int compare(String o1, String o2) {
+                            // 判断包含关键字的顺序
+                            List<String> keywords = Arrays.asList("分部-路面", "分部-交安","分部-路基", "桥", "隧道");
+                            for (String keyword : keywords) {
+                                if (o1.contains(keyword) && !o2.contains(keyword)) {
+                                    return -1; // o1包含关键字，o2不包含，则o1排在前面
+                                } else if (!o1.contains(keyword) && o2.contains(keyword)) {
+                                    return 1; // o1不包含关键字，o2包含，则o2排在前面
+                                }
+                            }
+                            // 如果没有关键字，按字典序排列
+                            return o1.compareTo(o2);
+                        }
+                    })
+                    .collect(Collectors.toList());
 
-            if (key.equals("分部-路基")){
-                writeLJData(wb,list,key,proname,htd);
-            }else if (key.equals("分部-路面")){
-                writeLJData(wb,list,key,proname,htd);
-            }else if (key.equals("分部-交安")){
-                writeLJData(wb,list,key,proname,htd);
-            }else {
-                //桥梁和隧道
-                writeLJData(wb,list,key,proname,htd);
+            // 按关键字排序后的数据
+            Map<String, List<Map<String, Object>>> sortedData = new LinkedHashMap<>();
+
+            // 按排序后的key遍历原始数据
+            for (String key : sortedKeys) {
+                List<Map<String, Object>> dataList = groupedData.get(key);
+                sortedData.put(key, dataList);
             }
-        }
-        //单位工程
-        List<Map<String, Object>> dwgclist = new ArrayList<>();
-        for (Sheet sheet : wb) {
-            String sheetName = sheet.getSheetName();
-            // 检查工作表名是否以"分部-"开头
-            if (sheetName.startsWith("分部-")) {
-                // 处理工作表数据
-                List<Map<String, Object>> list = processSheet(sheet);
-                dwgclist.addAll(list);
+            for (String key : sortedData.keySet()) {
+                List<Map<String, Object>> list = groupedData.get(key);
+
+                if (key.equals("分部-路基")){
+                    writeLJData(wb,list,key,proname,htd);
+                }else if (key.equals("分部-路面")){
+                    writeLJData(wb,list,key,proname,htd);
+                }else if (key.equals("分部-交安")){
+                    writeLJData(wb,list,key,proname,htd);
+                }else {
+                    //桥梁和隧道
+                    writeLJData(wb,list,key,proname,htd);
+                }
             }
+            //单位工程
+            List<Map<String, Object>> dwgclist = new ArrayList<>();
+            for (Sheet sheet : wb) {
+                String sheetName = sheet.getSheetName();
+                // 检查工作表名是否以"分部-"开头
+                if (sheetName.startsWith("分部-")) {
+                    // 处理工作表数据
+                    List<Map<String, Object>> list = processSheet(sheet);
+                    dwgclist.addAll(list);
+                }
+            }
+            writedwgcData(wb,dwgclist);
+
+            //合同段
+            List<Map<String, Object>> list = processhtdSheet(wb);
+            writedhtdData(wb,list);
+
+            FileOutputStream fileOut = new FileOutputStream(f);
+            wb.write(fileOut);
+            fileOut.flush();
+            fileOut.close();
+            out.close();
+            wb.close();
+
+        }catch (Exception e) {
+            if(f.exists()){
+                f.delete();
+            }
+            throw new JjgysException(20001, "生成评定表错误，请检查数据的正确性");
         }
-        writedwgcData(wb,dwgclist);
-
-        //合同段
-        List<Map<String, Object>> list = processhtdSheet(wb);
-        writedhtdData(wb,list);
-
-        FileOutputStream fileOut = new FileOutputStream(f);
-        wb.write(fileOut);
-        fileOut.flush();
-        fileOut.close();
-        out.close();
-        wb.close();
 
 
     }
+
 
     /**
      *
@@ -2572,6 +2778,7 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
             for (Map<String, Object> datum : data) {
                 if (fbgc.equals(datum.get("dwgc"))){
                     fillTitleDwgcData(sheet,tableNum,datum);
+
                     fillCommonDwgcData(sheet,tableNum,index,datum);
                     index++;
                 }else {
@@ -2579,11 +2786,15 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                     tableNum ++;
                     index = 0;
                     fillTitleDwgcData(sheet,tableNum,datum);
+
+
                     fillCommonDwgcData(sheet,tableNum,index,datum);
                     index += 1;
                 }
 
             }
+
+
             calculateDwgcSheet(sheet);
             for (int j = 0; j < wb.getNumberOfSheets(); j++) {
                 JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
@@ -2591,6 +2802,69 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         }
 
 
+    }
+
+    /**
+     * 合并单元格
+     * @param rowAndcol
+     * @return
+     */
+    private List<Map<String, Object>> mergeCells(List<Map<String, Object>> rowAndcol) {
+        List<Map<String, Object>> result = new ArrayList<>();
+        int currentEndRow = -1;
+        int currentStartRow = -1;
+        int currentStartCol = -1;
+        int currentEndCol = -1;
+        String currentName = null;
+        int currentTableNum = -1;
+        for (Map<String, Object> row : rowAndcol) {
+            int tableNum = (int) row.get("tableNum");
+            int startRow = (int) row.get("startRow");
+            int endRow = (int) row.get("endRow");
+            int startCol = (int) row.get("startCol");
+            int endCol = (int) row.get("endCol");
+            String name = (String) row.get("name");
+            if (currentName == null || !currentName.equals(name) || currentStartCol != startCol || currentEndCol != endCol || currentTableNum != tableNum) {
+                if (currentStartRow != -1) {
+                    for (int i = currentStartRow; i <= currentEndRow && i < result.size(); i++) {
+                        Map<String, Object> newRow = new HashMap<>();
+                        newRow.put("name", currentName);
+                        newRow.put("startRow", currentStartRow);
+                        newRow.put("endRow", currentEndRow);
+                        newRow.put("startCol", currentStartCol);
+                        newRow.put("endCol", currentEndCol);
+                        newRow.put("tableNum", currentTableNum);
+                        newRow.putAll(result.get(i));
+                        result.set(i, newRow);
+                    }
+                }
+                currentName = name;
+                currentStartCol = startCol;
+                currentEndCol = endCol;
+                currentTableNum = tableNum;
+                currentStartRow = startRow;
+                currentEndRow = endRow;
+                result.add(row);
+            } else {
+                Map<String, Object> lastRow = result.get(result.size() - 1);
+                lastRow.put("endRow", endRow);
+                currentEndRow = endRow;
+            }
+        }
+        if (currentStartRow != -1) {
+            for (int i = currentStartRow; i <= currentEndRow && i < result.size(); i++) {
+                Map<String, Object> newRow = new HashMap<>();
+                newRow.put("name", currentName);
+                newRow.put("startRow", currentStartRow);
+                newRow.put("endRow", currentEndRow);
+                newRow.put("startCol", currentStartCol);
+                newRow.put("endCol", currentEndCol);
+                newRow.put("tableNum", currentTableNum);
+                newRow.putAll(result.get(i));
+                result.set(i, newRow);
+            }
+        }
+        return result;
     }
 
     /**
@@ -2609,11 +2883,14 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
             if ("单位工程质量等级".equals(row.getCell(0).toString())) {
                 rowstart = sheet.getRow(i-18);
                 rowend = sheet.getRow(i-1);
+                //=IF(COUNTIF(C36:C53,"合格")>0,"合格","不合格")
                 /*row.getCell(1).setCellFormula("IF(COUNTIF("+rowstart.getCell(2).getReference() +":"+rowend.getCell(2).getReference()
                         +",\"<>合格\")=0,\"合格\", \"不合格\")");*///=IF(COUNTIF(C64:C81,"<>合格")=0, "合格", "不合格")
                 row.getCell(1).setCellFormula("IF(COUNTIF("+rowstart.getCell(2).getReference()
-                        +":"+rowend.getCell(2).getReference()+",\"合格\")=COUNTA("+rowstart.getCell(2).getReference()
-                        +":"+rowend.getCell(2).getReference()+"),\"合格\", \"不合格\")");//=IF(COUNTIF(T7:T21, "合格") = COUNTA(T7:T21), "√", "")
+                                +":"+rowend.getCell(2).getReference()+",\"不合格\")>0,\"不合格\",\"合格\")");
+//                row.getCell(1).setCellFormula("IF(COUNTIF("+rowstart.getCell(2).getReference()
+//                        +":"+rowend.getCell(2).getReference()+",\"合格\")=COUNTA("+rowstart.getCell(2).getReference()
+//                        +":"+rowend.getCell(2).getReference()+"),\"合格\", \"不合格\")");//=IF(COUNTIF(T7:T21, "合格") = COUNTA(T7:T21), "√", "")
 
             }
         }
@@ -2754,6 +3031,12 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
 
         int index = 0;
         int tableNum = 0;
+        int startRow = -1, endRow = -1, startCol = -1, endCol = -1, startCols = -1, endCols = -1, startColhgl = -1, endColhgl = -1, startColzl = -1, endColzl = -1;
+        List<Map<String, Object>> rowAndcol = new ArrayList<>();
+        List<Map<String, Object>> rowAndcol1 = new ArrayList<>();
+        List<Map<String, Object>> rowAndcolhgl = new ArrayList<>();
+        List<Map<String, Object>> rowAndcolzl = new ArrayList<>();
+        String ccname = data.get(0).get("ccname").toString();
         String fbgc = data.get(0).get("fbgc").toString();
         for (Map<String, Object> datum : data) {
             if (index % 15 == 0 && index!=0){
@@ -2763,6 +3046,105 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
             }
             if (fbgc.equals(datum.get("fbgc"))){
                 fillTitleData(sheet,tableNum,proname,htd,htdlist,datum.get("fbgc").toString());
+                if (ccname.equals(datum.get("ccname").toString())){
+                    startRow = tableNum * 22 + 6 + index % 16 ;
+                    endRow = tableNum * 22 + 6 + index % 16 ;
+
+                    startCol = 2;
+                    endCol = 5;
+
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("startRow",startRow);
+                    map.put("endRow",endRow);
+                    map.put("startCol",startCol);
+                    map.put("endCol",endCol);
+                    map.put("name",ccname);
+                    map.put("tableNum",tableNum);
+                    rowAndcol.add(map);
+
+                    startCols = 7;
+                    endCols = 16;
+                    Map<String, Object> map1 = new HashMap<>();
+                    map1.put("startRow",startRow);
+                    map1.put("endRow",endRow);
+                    map1.put("startCol",startCols);
+                    map1.put("endCol",endCols);
+                    map1.put("name",ccname);
+                    map1.put("tableNum",tableNum);
+                    rowAndcol1.add(map1);
+
+                    startColhgl = 17;
+                    endColhgl = 18;
+                    Map<String, Object> map2 = new HashMap<>();
+                    map2.put("startRow",startRow);
+                    map2.put("endRow",endRow);
+                    map2.put("startCol",startColhgl);
+                    map2.put("endCol",endColhgl);
+                    map2.put("name",ccname);
+                    map2.put("tableNum",tableNum);
+                    rowAndcolhgl.add(map2);
+
+                    startColzl = 19;
+                    endColzl = 20;
+                    Map<String, Object> map3 = new HashMap<>();
+                    map3.put("startRow",startRow);
+                    map3.put("endRow",endRow);
+                    map3.put("startCol",startColzl);
+                    map3.put("endCol",endColzl);
+                    map3.put("name",ccname);
+                    map3.put("tableNum",tableNum);
+                    rowAndcolzl.add(map3);
+                }else {
+                    ccname = datum.get("ccname").toString();startRow = tableNum * 22 + 6 + index % 16 ;
+                    endRow = tableNum * 22 + 6 + index % 16 ;
+
+                    startCol = 2;
+                    endCol = 5;
+
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("startRow",startRow);
+                    map.put("endRow",endRow);
+                    map.put("startCol",startCol);
+                    map.put("endCol",endCol);
+                    map.put("name",ccname);
+                    map.put("tableNum",tableNum);
+                    rowAndcol.add(map);
+
+                    startCols = 7;
+                    endCols = 16;
+                    Map<String, Object> map1 = new HashMap<>();
+                    map1.put("startRow",startRow);
+                    map1.put("endRow",endRow);
+                    map1.put("startCol",startCols);
+                    map1.put("endCol",endCols);
+                    map1.put("name",ccname);
+                    map1.put("tableNum",tableNum);
+                    rowAndcol1.add(map1);
+
+                    startColhgl = 17;
+                    endColhgl = 18;
+                    Map<String, Object> map2 = new HashMap<>();
+                    map2.put("startRow",startRow);
+                    map2.put("endRow",endRow);
+                    map2.put("startCol",startColhgl);
+                    map2.put("endCol",endColhgl);
+                    map2.put("name",ccname);
+                    map2.put("tableNum",tableNum);
+                    rowAndcolhgl.add(map2);
+
+                    startColzl = 19;
+                    endColzl = 20;
+                    Map<String, Object> map3 = new HashMap<>();
+                    map3.put("startRow",startRow);
+                    map3.put("endRow",endRow);
+                    map3.put("startCol",startColzl);
+                    map3.put("endCol",endColzl);
+                    map3.put("name",ccname);
+                    map3.put("tableNum",tableNum);
+                    rowAndcolzl.add(map3);
+                }
+
+
                 fillCommonData(sheet,tableNum,index,datum);
                 index++;
             }else {
@@ -2770,19 +3152,141 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
                 tableNum ++;
                 index = 0;
                 fillTitleData(sheet,tableNum,proname,htd,htdlist,datum.get("fbgc").toString());
+                ccname = datum.get("ccname").toString();
+                if (ccname.equals(datum.get("ccname").toString())) {
+                    startRow = tableNum * 22 + 6 + index % 16;
+                    endRow = tableNum * 22 + 6 + index % 16;
+
+                    startCol = 2;
+                    endCol = 5;
+
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("startRow", startRow);
+                    map.put("endRow", endRow);
+                    map.put("startCol", startCol);
+                    map.put("endCol", endCol);
+                    map.put("name", ccname);
+                    map.put("tableNum", tableNum);
+                    rowAndcol.add(map);
+
+                    startCols = 7;
+                    endCols = 16;
+                    Map<String, Object> map1 = new HashMap<>();
+                    map1.put("startRow",startRow);
+                    map1.put("endRow",endRow);
+                    map1.put("startCol",startCols);
+                    map1.put("endCol",endCols);
+                    map1.put("name",ccname);
+                    map1.put("tableNum",tableNum);
+                    rowAndcol1.add(map1);
+
+                    startColhgl = 17;
+                    endColhgl = 18;
+                    Map<String, Object> map2 = new HashMap<>();
+                    map2.put("startRow",startRow);
+                    map2.put("endRow",endRow);
+                    map2.put("startCol",startColhgl);
+                    map2.put("endCol",endColhgl);
+                    map2.put("name",ccname);
+                    map2.put("tableNum",tableNum);
+                    rowAndcolhgl.add(map2);
+
+                    startColzl = 19;
+                    endColzl = 20;
+                    Map<String, Object> map3 = new HashMap<>();
+                    map3.put("startRow",startRow);
+                    map3.put("endRow",endRow);
+                    map3.put("startCol",startColzl);
+                    map3.put("endCol",endColzl);
+                    map3.put("name",ccname);
+                    map3.put("tableNum",tableNum);
+                    rowAndcolzl.add(map3);
+                }
+
+
                 fillCommonData(sheet,tableNum,index,datum);
                 index += 1;
             }
+            ccname = datum.get("ccname").toString();
+
 
         }
+        List<Map<String, Object>> maps = mergeCells(rowAndcol);
+        List<Map<String, Object>> mapss = mergeCells(rowAndcol1);
+        List<Map<String, Object>> maphgl = mergeCells(rowAndcolhgl);
+        List<Map<String, Object>> mapzl = mergeCells(rowAndcolzl);
+
+        for (Map<String, Object> map : maps) {
+            int startRow1 = Integer.parseInt(map.get("startRow").toString());
+            int endRow1 = Integer.parseInt(map.get("endRow").toString());
+            int startCol1 = Integer.parseInt(map.get("startCol").toString());
+            int endCol1 = Integer.parseInt(map.get("endCol").toString());
+            CellRangeAddress newRegion = new CellRangeAddress(startRow1, endRow1, startCol1, endCol1);
+            // 检查是否存在重叠的合并区域
+            List<CellRangeAddress> mergedRegions = sheet.getMergedRegions();
+            for (int i = mergedRegions.size() - 1; i >= 0; i--) {
+                CellRangeAddress mergedRegion = mergedRegions.get(i);
+                if (mergedRegion.intersects(newRegion)){
+                    sheet.removeMergedRegion(i);
+                }
+            }
+            sheet.addMergedRegion(new CellRangeAddress(Integer.parseInt(map.get("startRow").toString()), Integer.parseInt(map.get("endRow").toString()), Integer.parseInt(map.get("startCol").toString()), Integer.parseInt(map.get("endCol").toString())));
+        }
+        for (Map<String, Object> map : mapss) {
+            int startRow1 = Integer.parseInt(map.get("startRow").toString());
+            int endRow1 = Integer.parseInt(map.get("endRow").toString());
+            int startCol1 = Integer.parseInt(map.get("startCol").toString());
+            int endCol1 = Integer.parseInt(map.get("endCol").toString());
+            CellRangeAddress newRegion = new CellRangeAddress(startRow1, endRow1, startCol1, endCol1);
+            // 检查是否存在重叠的合并区域
+            List<CellRangeAddress> mergedRegions = sheet.getMergedRegions();
+            for (int i = mergedRegions.size() - 1; i >= 0; i--) {
+                CellRangeAddress mergedRegion = mergedRegions.get(i);
+                if (mergedRegion.intersects(newRegion)){
+                    sheet.removeMergedRegion(i);
+                }
+            }
+            sheet.addMergedRegion(new CellRangeAddress(Integer.parseInt(map.get("startRow").toString()), Integer.parseInt(map.get("endRow").toString()), Integer.parseInt(map.get("startCol").toString()), Integer.parseInt(map.get("endCol").toString())));
+        }
+        for (Map<String, Object> map : maphgl) {
+            int startRow1 = Integer.parseInt(map.get("startRow").toString());
+            int endRow1 = Integer.parseInt(map.get("endRow").toString());
+            int startCol1 = Integer.parseInt(map.get("startCol").toString());
+            int endCol1 = Integer.parseInt(map.get("endCol").toString());
+            CellRangeAddress newRegion = new CellRangeAddress(startRow1, endRow1, startCol1, endCol1);
+            // 检查是否存在重叠的合并区域
+            List<CellRangeAddress> mergedRegions = sheet.getMergedRegions();
+            for (int i = mergedRegions.size() - 1; i >= 0; i--) {
+                CellRangeAddress mergedRegion = mergedRegions.get(i);
+                if (mergedRegion.intersects(newRegion)){
+                    sheet.removeMergedRegion(i);
+                }
+            }
+            sheet.addMergedRegion(new CellRangeAddress(Integer.parseInt(map.get("startRow").toString()), Integer.parseInt(map.get("endRow").toString()), Integer.parseInt(map.get("startCol").toString()), Integer.parseInt(map.get("endCol").toString())));
+        }
+
+        for (Map<String, Object> map : mapzl) {
+            int startRow1 = Integer.parseInt(map.get("startRow").toString());
+            int endRow1 = Integer.parseInt(map.get("endRow").toString());
+            int startCol1 = Integer.parseInt(map.get("startCol").toString());
+            int endCol1 = Integer.parseInt(map.get("endCol").toString());
+            CellRangeAddress newRegion = new CellRangeAddress(startRow1, endRow1, startCol1, endCol1);
+            // 检查是否存在重叠的合并区域
+            List<CellRangeAddress> mergedRegions = sheet.getMergedRegions();
+            for (int i = mergedRegions.size() - 1; i >= 0; i--) {
+                CellRangeAddress mergedRegion = mergedRegions.get(i);
+                if (mergedRegion.intersects(newRegion)){
+                    sheet.removeMergedRegion(i);
+                }
+            }
+            sheet.addMergedRegion(new CellRangeAddress(Integer.parseInt(map.get("startRow").toString()), Integer.parseInt(map.get("endRow").toString()), Integer.parseInt(map.get("startCol").toString()), Integer.parseInt(map.get("endCol").toString())));
+        }
+
         //写完当前工作簿的数据后，就要插入公式计算了
         calculateFbgcSheet(sheet);
         for (int j = 0; j < wb.getNumberOfSheets(); j++) {
             JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
         }
-
-
-
 
     }
 
@@ -3433,203 +3937,211 @@ public class JjgFbgcGenerateTablelServiceImpl extends ServiceImpl<JjgFbgcGenerat
         if (!fdir.exists()) {
             fdir.mkdirs();
         }
-        File directory = new File("service-system/src/main/resources/static");
-        String reportPath = directory.getCanonicalPath();
-        String name = "报告中表格.xlsx";
-        String path = reportPath + File.separator + name;
-        Files.copy(Paths.get(path), new FileOutputStream(f));
-        FileInputStream out = new FileInputStream(f);
-        wb = new XSSFWorkbook(out);
+        try {
+            File directory = new File("service-system/src/main/resources/static");
+            String reportPath = directory.getCanonicalPath();
+            String name = "报告中表格.xlsx";
+            String path = reportPath + File.separator + name;
+            Files.copy(Paths.get(path), new FileOutputStream(f));
+            FileInputStream out = new FileInputStream(f);
+            wb = new XSSFWorkbook(out);
 
-        if (CollectionUtils.isNotEmpty(ljlist)){
-            DBExcelData(wb,ljlist,proname);
-        }
-        if (CollectionUtils.isNotEmpty(ljlist)){
-            DBExcelQlData(wb,qllist,proname);
-        }
-        if (CollectionUtils.isNotEmpty(ljlist)){
-            DBExcelJaData(wb,fhllist,proname);
-        }
-        if (CollectionUtils.isNotEmpty(sdcjqdlist)){
-            DBExcelSdcjData(wb,sdcjqdlist);
-        }
-        if (CollectionUtils.isNotEmpty(tsflist)){
-            DBExceltsfData(wb,tsflist);
-        }
-        if (CollectionUtils.isNotEmpty(pslist)){
-            DBExcelpsData(wb,pslist);
+            if (CollectionUtils.isNotEmpty(ljlist)){
+                DBExcelData(wb,ljlist,proname);
+            }
+            if (CollectionUtils.isNotEmpty(ljlist)){
+                DBExcelQlData(wb,qllist,proname);
+            }
+            if (CollectionUtils.isNotEmpty(ljlist)){
+                DBExcelJaData(wb,fhllist,proname);
+            }
+            if (CollectionUtils.isNotEmpty(sdcjqdlist)){
+                DBExcelSdcjData(wb,sdcjqdlist);
+            }
+            if (CollectionUtils.isNotEmpty(tsflist)){
+                DBExceltsfData(wb,tsflist);
+            }
+            if (CollectionUtils.isNotEmpty(pslist)){
+                DBExcelpsData(wb,pslist);
+            }
+
+            if (CollectionUtils.isNotEmpty(xqlist)){
+                DBExcelxqData(wb,xqlist);
+            }
+
+            if (CollectionUtils.isNotEmpty(hdlist)){
+                DBExcelhdData(wb,hdlist);
+            }
+
+            if (CollectionUtils.isNotEmpty(zdlist)){
+                DBExcelzdData(wb,zdlist);
+            }
+
+            if (CollectionUtils.isNotEmpty(ljhzlist)){
+                DBExcelljhzData(wb,ljhzlist);
+            }
+            if (CollectionUtils.isNotEmpty(lmysdlist)){
+                DBExcellmysdData(wb,lmysdlist);
+            }
+
+            if (CollectionUtils.isNotEmpty(lmwclist)){
+                DBExcellmwcdData(wb,lmwclist);
+            }
+            if (CollectionUtils.isNotEmpty(lmwclallist)){
+                DBExcellmwcalldData(wb,lmwclallist);
+            }
+            if (CollectionUtils.isNotEmpty(lmwclcflist)){
+                DBExcellmwclcfdData(wb,lmwclcflist);
+            }
+            if (CollectionUtils.isNotEmpty(lmczlist)){
+                DBExcellmczData(wb,lmczlist);
+            }
+            if (CollectionUtils.isNotEmpty(lmssxslist)){
+                DBExcellmssxsData(wb,lmssxslist);
+            }
+            if (CollectionUtils.isNotEmpty(lmhntqdlist)){
+                DBExcellmhntqdData(wb,lmhntqdlist);
+            }
+            if (CollectionUtils.isNotEmpty(lmhntxlbgclist)){
+                DBExcellmhntxlbgcData(wb,lmhntxlbgclist);
+            }
+            if (CollectionUtils.isNotEmpty(lmpzdlist)){
+                DBExcellmpzdData(wb,lmpzdlist);
+            }
+            if (CollectionUtils.isNotEmpty(khlist)){
+                DBExcelkhData(wb,khlist);
+            }
+            if (CollectionUtils.isNotEmpty(zxfhdlist)){
+                DBExcelzxfhdData(wb,zxfhdlist);
+            }
+            if (CollectionUtils.isNotEmpty(ldhdlist)){
+                DBExcelldhdData(wb,ldhdlist);
+            }
+            if (CollectionUtils.isNotEmpty(lmhdlist)){
+                DBExcellmhdData(wb,lmhdlist);
+            }
+            if (CollectionUtils.isNotEmpty(lmhplist)){
+                DBExcellmhpData(wb,lmhplist);
+            }
+            if (CollectionUtils.isNotEmpty(lmhzlist)){
+                DBExcellmhzData(wb,lmhzlist);
+            }
+            if (CollectionUtils.isNotEmpty(qmpzdlist)){
+                DBExcelqmpzdData(wb,qmpzdlist);
+            }
+            if (CollectionUtils.isNotEmpty(qmhphplist)){
+                DBExcelqmhpdData(wb,qmhphplist);
+            }
+            if (CollectionUtils.isNotEmpty(qmkhlist)){
+                DBExcelqmkhData(wb,qmkhlist);
+            }
+            if (CollectionUtils.isNotEmpty(qmxhzlist)){
+                DBExcelqmxhzData(wb,qmxhzlist);
+            }
+            if (CollectionUtils.isNotEmpty(sdysdlist)){
+                DBExcelsdysdData(wb,sdysdlist);
+            }
+            if (CollectionUtils.isNotEmpty(sdczlist)){
+                DBExcelsdczData(wb,sdczlist);
+            }
+            if (CollectionUtils.isNotEmpty(sdssxslist)){
+                DBExcelsdssxsData(wb,sdssxslist);
+            }
+            if (CollectionUtils.isNotEmpty(sdhntqdlist)){
+                DBExcelsdhntqdData(wb,sdhntqdlist);
+            }
+            if (CollectionUtils.isNotEmpty(sdhntxlbgclist)){
+                DBExcelsdhntxlbgcData(wb,sdhntxlbgclist);
+            }
+            if (CollectionUtils.isNotEmpty(sdpzdlist)){
+                DBExcelsdpzdData(wb,sdpzdlist);
+            }
+            if (CollectionUtils.isNotEmpty(sdkhlist)){
+                DBExcelsdkhData(wb,sdkhlist);
+            }
+            if (CollectionUtils.isNotEmpty(sdzxfhdlist)){
+                DBExcelsdzxfhdData(wb,sdzxfhdlist);
+            }
+            if (CollectionUtils.isNotEmpty(sdldhdlist)){
+                DBExcelsdldhdData(wb,sdldhdlist);
+            }
+            if (CollectionUtils.isNotEmpty(sdhdlist)){
+                DBExcelsdhdData(wb,sdhdlist);
+            }
+            if (CollectionUtils.isNotEmpty(sdhplist)){
+                DBExcelsdhpData(wb,sdhplist);
+            }
+            if (CollectionUtils.isNotEmpty(sdlmhzblist)){
+                DBExcelsdlmhzData(wb,sdlmhzblist);
+            }
+            if (CollectionUtils.isNotEmpty(xmcclist)){
+                DBExcelxmccData(wb,xmcclist);
+            }
+            if (CollectionUtils.isNotEmpty(qlxblist)){
+                DBExcelqlxbData(wb,qlxblist);
+            }
+            if (CollectionUtils.isNotEmpty(qlsblist)){
+                DBExcelqlsbData(wb,qlsblist);
+            }
+            if (CollectionUtils.isNotEmpty(qmxlist)){
+                DBExcelqmxData(wb,qmxlist);
+            }
+            if (CollectionUtils.isNotEmpty(qlgclist)){
+                DBExcelqlpdData(wb,qlgclist);
+            }
+            if (CollectionUtils.isNotEmpty(cqlist)){
+                DBExcelsdcqData(wb,cqlist);
+            }
+            if (CollectionUtils.isNotEmpty(ztlist)){
+                DBExcelsdztData(wb,ztlist);
+            }
+            if (CollectionUtils.isNotEmpty(sdlmlist)){
+                DBExcelsdlmData(wb,sdlmlist);
+            }
+            if (CollectionUtils.isNotEmpty(sdgclist)){
+                DBExcelsdgcData(wb,sdgclist);
+            }
+            if (CollectionUtils.isNotEmpty(bzlist)){
+                DBExceljabzData(wb,bzlist);
+            }
+            if (CollectionUtils.isNotEmpty(bxlist)){
+                DBExceljabxData(wb,bxlist);
+            }
+            if (CollectionUtils.isNotEmpty(jafhllist)){
+                DBExceljafhlData(wb,jafhllist);
+            }
+            if (CollectionUtils.isNotEmpty(qdcclist)){
+                DBExcelqdccData(wb,qdcclist);
+            }
+            if (CollectionUtils.isNotEmpty(jabzlist)){
+                DBExceljabzhzData(wb,jabzlist);
+            }
+            if (CollectionUtils.isNotEmpty(ysdfxblist)){
+                DBExcelysdfxData(wb,ysdfxblist);
+            }
+            if (CollectionUtils.isNotEmpty(qlszdfxblist)){
+                DBExcelqlszdfxbData(wb,qlszdfxblist);
+            }
+            if (CollectionUtils.isNotEmpty(sdcqfxblist)){
+                DBExcelsdcqfxData(wb,sdcqfxblist);
+            }
+
+            //删除空的工作簿
+            JjgFbgcCommonUtils.deleteSheets(wb);
+
+            FileOutputStream fileOut = new FileOutputStream(f);
+            wb.write(fileOut);
+            fileOut.flush();
+            fileOut.close();
+            out.close();
+            wb.close();
+        }catch (Exception e) {
+            if(f.exists()){
+                f.delete();
+            }
+            throw new JjgysException(20001, "生成报告中表格错误，请检查数据的正确性");
         }
 
-        if (CollectionUtils.isNotEmpty(xqlist)){
-            DBExcelxqData(wb,xqlist);
-        }
-
-        if (CollectionUtils.isNotEmpty(hdlist)){
-            DBExcelhdData(wb,hdlist);
-        }
-
-        if (CollectionUtils.isNotEmpty(zdlist)){
-            DBExcelzdData(wb,zdlist);
-        }
-
-        if (CollectionUtils.isNotEmpty(ljhzlist)){
-            DBExcelljhzData(wb,ljhzlist);
-        }
-        if (CollectionUtils.isNotEmpty(lmysdlist)){
-            DBExcellmysdData(wb,lmysdlist);
-        }
-
-        if (CollectionUtils.isNotEmpty(lmwclist)){
-            DBExcellmwcdData(wb,lmwclist);
-        }
-        if (CollectionUtils.isNotEmpty(lmwclallist)){
-            DBExcellmwcalldData(wb,lmwclallist);
-        }
-        if (CollectionUtils.isNotEmpty(lmwclcflist)){
-            DBExcellmwclcfdData(wb,lmwclcflist);
-        }
-        if (CollectionUtils.isNotEmpty(lmczlist)){
-            DBExcellmczData(wb,lmczlist);
-        }
-        if (CollectionUtils.isNotEmpty(lmssxslist)){
-            DBExcellmssxsData(wb,lmssxslist);
-        }
-        if (CollectionUtils.isNotEmpty(lmhntqdlist)){
-            DBExcellmhntqdData(wb,lmhntqdlist);
-        }
-        if (CollectionUtils.isNotEmpty(lmhntxlbgclist)){
-            DBExcellmhntxlbgcData(wb,lmhntxlbgclist);
-        }
-        if (CollectionUtils.isNotEmpty(lmpzdlist)){
-            DBExcellmpzdData(wb,lmpzdlist);
-        }
-        if (CollectionUtils.isNotEmpty(khlist)){
-            DBExcelkhData(wb,khlist);
-        }
-        if (CollectionUtils.isNotEmpty(zxfhdlist)){
-            DBExcelzxfhdData(wb,zxfhdlist);
-        }
-        if (CollectionUtils.isNotEmpty(ldhdlist)){
-            DBExcelldhdData(wb,ldhdlist);
-        }
-        if (CollectionUtils.isNotEmpty(lmhdlist)){
-            DBExcellmhdData(wb,lmhdlist);
-        }
-        if (CollectionUtils.isNotEmpty(lmhplist)){
-            DBExcellmhpData(wb,lmhplist);
-        }
-        if (CollectionUtils.isNotEmpty(lmhzlist)){
-            DBExcellmhzData(wb,lmhzlist);
-        }
-        if (CollectionUtils.isNotEmpty(qmpzdlist)){
-            DBExcelqmpzdData(wb,qmpzdlist);
-        }
-        if (CollectionUtils.isNotEmpty(qmhphplist)){
-            DBExcelqmhpdData(wb,qmhphplist);
-        }
-        if (CollectionUtils.isNotEmpty(qmkhlist)){
-            DBExcelqmkhData(wb,qmkhlist);
-        }
-        if (CollectionUtils.isNotEmpty(qmxhzlist)){
-            DBExcelqmxhzData(wb,qmxhzlist);
-        }
-        if (CollectionUtils.isNotEmpty(sdysdlist)){
-            DBExcelsdysdData(wb,sdysdlist);
-        }
-        if (CollectionUtils.isNotEmpty(sdczlist)){
-            DBExcelsdczData(wb,sdczlist);
-        }
-        if (CollectionUtils.isNotEmpty(sdssxslist)){
-            DBExcelsdssxsData(wb,sdssxslist);
-        }
-        if (CollectionUtils.isNotEmpty(sdhntqdlist)){
-            DBExcelsdhntqdData(wb,sdhntqdlist);
-        }
-        if (CollectionUtils.isNotEmpty(sdhntxlbgclist)){
-            DBExcelsdhntxlbgcData(wb,sdhntxlbgclist);
-        }
-        if (CollectionUtils.isNotEmpty(sdpzdlist)){
-            DBExcelsdpzdData(wb,sdpzdlist);
-        }
-        if (CollectionUtils.isNotEmpty(sdkhlist)){
-            DBExcelsdkhData(wb,sdkhlist);
-        }
-        if (CollectionUtils.isNotEmpty(sdzxfhdlist)){
-            DBExcelsdzxfhdData(wb,sdzxfhdlist);
-        }
-        if (CollectionUtils.isNotEmpty(sdldhdlist)){
-            DBExcelsdldhdData(wb,sdldhdlist);
-        }
-        if (CollectionUtils.isNotEmpty(sdhdlist)){
-            DBExcelsdhdData(wb,sdhdlist);
-        }
-        if (CollectionUtils.isNotEmpty(sdhplist)){
-            DBExcelsdhpData(wb,sdhplist);
-        }
-        if (CollectionUtils.isNotEmpty(sdlmhzblist)){
-            DBExcelsdlmhzData(wb,sdlmhzblist);
-        }
-        if (CollectionUtils.isNotEmpty(xmcclist)){
-            DBExcelxmccData(wb,xmcclist);
-        }
-        if (CollectionUtils.isNotEmpty(qlxblist)){
-            DBExcelqlxbData(wb,qlxblist);
-        }
-        if (CollectionUtils.isNotEmpty(qlsblist)){
-            DBExcelqlsbData(wb,qlsblist);
-        }
-        if (CollectionUtils.isNotEmpty(qmxlist)){
-            DBExcelqmxData(wb,qmxlist);
-        }
-        if (CollectionUtils.isNotEmpty(qlgclist)){
-            DBExcelqlpdData(wb,qlgclist);
-        }
-        if (CollectionUtils.isNotEmpty(cqlist)){
-            DBExcelsdcqData(wb,cqlist);
-        }
-        if (CollectionUtils.isNotEmpty(ztlist)){
-            DBExcelsdztData(wb,ztlist);
-        }
-        if (CollectionUtils.isNotEmpty(sdlmlist)){
-            DBExcelsdlmData(wb,sdlmlist);
-        }
-        if (CollectionUtils.isNotEmpty(sdgclist)){
-            DBExcelsdgcData(wb,sdgclist);
-        }
-        if (CollectionUtils.isNotEmpty(bzlist)){
-            DBExceljabzData(wb,bzlist);
-        }
-        if (CollectionUtils.isNotEmpty(bxlist)){
-            DBExceljabxData(wb,bxlist);
-        }
-        if (CollectionUtils.isNotEmpty(jafhllist)){
-            DBExceljafhlData(wb,jafhllist);
-        }
-        if (CollectionUtils.isNotEmpty(qdcclist)){
-            DBExcelqdccData(wb,qdcclist);
-        }
-        if (CollectionUtils.isNotEmpty(jabzlist)){
-            DBExceljabzhzData(wb,jabzlist);
-        }
-        if (CollectionUtils.isNotEmpty(ysdfxblist)){
-            DBExcelysdfxData(wb,ysdfxblist);
-        }
-        if (CollectionUtils.isNotEmpty(qlszdfxblist)){
-            DBExcelqlszdfxbData(wb,qlszdfxblist);
-        }
-        if (CollectionUtils.isNotEmpty(sdcqfxblist)){
-            DBExcelsdcqfxData(wb,sdcqfxblist);
-        }
-
-        //删除空的工作簿
-        JjgFbgcCommonUtils.deleteSheets(wb);
-
-        FileOutputStream fileOut = new FileOutputStream(f);
-        wb.write(fileOut);
-        fileOut.flush();
-        fileOut.close();
-        out.close();
-        wb.close();
 
     }
 

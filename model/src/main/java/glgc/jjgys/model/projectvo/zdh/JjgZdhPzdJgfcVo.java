@@ -40,32 +40,26 @@ public class JjgZdhPzdJgfcVo extends BaseRowModel {
      * 左IRI
      */
     @ColumnWidth(23)
-    @ExcelProperty(value = "左IRI" ,index = 2)
+    @ExcelProperty(value = "IRI" ,index = 2)
     private String ziri;
 
-    /**
-     * 右IRI
-     */
-    @ColumnWidth(23)
-    @ExcelProperty(value = "右IRI" ,index = 3)
-    private String yiri;
 
     /**
      * 类型标识
      */
     @ColumnWidth(23)
-    @ExcelProperty(value = "路线类型" ,index = 4)
+    @ExcelProperty(value = "路线类型" ,index = 3)
     private String lxbs;
 
     /**
      * 匝道标识
      */
     @ColumnWidth(23)
-    @ExcelProperty(value = "匝道标识" ,index = 5)
+    @ExcelProperty(value = "匝道标识" ,index = 4)
     private String zdbs;
 
     @ColumnWidth(23)
-    @ExcelProperty(value = "合同段" ,index = 6)
+    @ExcelProperty(value = "合同段" ,index = 5)
     private String htd;
 
 

@@ -5,19 +5,16 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import glgc.jjgys.common.excel.ExcelUtil;
 import glgc.jjgys.model.project.JjgFbgcQlgcZdhpzd;
 import glgc.jjgys.model.project.JjgLqsQl;
-import glgc.jjgys.model.project.JjgLqsSd;
-import glgc.jjgys.model.project.JjgZdhPzd;
 import glgc.jjgys.model.projectvo.ljgc.CommonInfoVo;
 import glgc.jjgys.model.projectvo.qlgc.JjgFbgcQlgcZdhpzdVo;
-import glgc.jjgys.model.projectvo.zdh.JjgZdhPzdVo;
 import glgc.jjgys.system.easyexcel.ExcelHandler;
 import glgc.jjgys.system.exception.JjgysException;
 import glgc.jjgys.system.mapper.JjgFbgcQlgcZdhpzdMapper;
 import glgc.jjgys.system.service.JjgFbgcQlgcZdhpzdService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import glgc.jjgys.system.service.JjgLqsQlService;
-import glgc.jjgys.system.service.JjgLqsSdService;
 import glgc.jjgys.system.utils.RowCopy;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
@@ -130,11 +127,34 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
     public List<Map<String, Object>> lookJdbjg(CommonInfoVo commonInfoVo) throws IOException {
         String proname = commonInfoVo.getProname();
         String htd = commonInfoVo.getHtd();
+        List<Map<String, Object>> mapList = new ArrayList<>();
+
+        List<Map<String,Object>> lxlist = jjgFbgcQlgcZdhpzdMapper.selectlx(proname,htd);
+        if (lxlist.size()>0){
+            for (Map<String, Object> map : lxlist) {
+                String zx = map.get("lxbs").toString();
+                int num = jjgFbgcQlgcZdhpzdMapper.selectcdnum(proname,htd,zx);
+                List<Map<String, Object>> looksdjdb = lookdata(proname, htd, zx,num);
+                mapList.addAll(looksdjdb);
+            }
+            return mapList;
+        }else {
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * @param proname
+     * @param htd
+     * @param zx
+     * @param cds
+     * @return
+     * @throws IOException
+     */
+    private List<Map<String, Object>> lookdata(String proname, String htd, String zx, int cds) throws IOException {
         DecimalFormat df = new DecimalFormat("0.00");
         DecimalFormat decf = new DecimalFormat("0.##");
-        int cds = getcds(proname,htd);
-        File f = new File(filepath + File.separator + proname + File.separator + htd + File.separator + "33桥面平整度.xlsx");
-
+        File f = new File(filepath + File.separator + proname + File.separator + htd + File.separator + "33桥面平整度-"+zx+".xlsx");
         if (!f.exists()) {
             return new ArrayList<>();
         } else {
@@ -173,6 +193,7 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
             }
             return jgmap;
         }
+
     }
 
     /**
@@ -202,7 +223,18 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
         String proname = commonInfoVo.getProname();
         String htd = commonInfoVo.getHtd();
         List<Map<String,Object>> lxlist = jjgFbgcQlgcZdhpzdMapper.selectlx(proname,htd);
-        int cds = 0;
+        for (Map<String, Object> map : lxlist) {
+            String zx = map.get("lxbs").toString();
+            int num = jjgFbgcQlgcZdhpzdMapper.selectcdnum(proname,htd,zx);
+            int cds = 0;
+            if (num == 1){
+                cds = 2;
+            }else {
+                cds=num;
+            }
+            handlezxData(proname,htd,zx,cds,commonInfoVo.getSjz());
+        }
+        /*int cds = 0;
         int maxNum = 2;
         for (Map<String, Object> map : lxlist) {
             String zx = map.get("lxbs").toString();
@@ -212,19 +244,19 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
             }
         }
         cds = maxNum;
-        handlezxData(proname,htd,cds,commonInfoVo.getSjz());
+        handlezxData(proname,htd,cds,commonInfoVo.getSjz());*/
 
 
     }
 
     /**
-     *
-     * @param proname
+     *  @param proname
      * @param htd
+     * @param zx
      * @param cdsl
      * @param sjz
      */
-    private void handlezxData(String proname, String htd, int cdsl, String sjz) throws IOException, ParseException {
+    private void handlezxData(String proname, String htd, String zx, int cdsl, String sjz) throws IOException, ParseException {
         String[] arr = null;
         if (cdsl == 2) {
             arr = new String[] {"左幅一车道", "左幅二车道", "右幅一车道", "右幅二车道"};
@@ -241,8 +273,8 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
         }
         String result = sb.substring(0, sb.length() - 1); // 去掉最后一个逗号
 
-        List<Map<String,Object>> datazf = jjgFbgcQlgcZdhpzdMapper.selectzfList(proname,htd,result);
-        List<Map<String,Object>> datayf = jjgFbgcQlgcZdhpzdMapper.selectyfList(proname,htd,result);
+        List<Map<String,Object>> datazf = jjgFbgcQlgcZdhpzdMapper.selectzfList(proname,htd,zx,result);
+        List<Map<String,Object>> datayf = jjgFbgcQlgcZdhpzdMapper.selectyfList(proname,htd,zx,result);
 
         List<Map<String, Object>> lmzfList = montageIRI(datazf);
         Collections.sort(lmzfList, new Comparator<Map<String, Object>>() {
@@ -290,7 +322,7 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
                 return qdzh1.compareTo(qdzh2);
             }
         });
-        writeExcelData(proname,htd,lmzf,lmyf,cdsl,sjz);
+        writeExcelData(proname,htd,lmzf,lmyf,cdsl,sjz,zx);
     }
 
     @Autowired
@@ -304,74 +336,83 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
      * @param lmyfList
      * @param cdsl
      * @param sjz
+     * @param zx
      * @throws IOException
      */
-    private void writeExcelData(String proname, String htd, List<Map<String, Object>> lmzfList, List<Map<String, Object>> lmyfList, int cdsl, String sjz) throws IOException, ParseException {
+    private void writeExcelData(String proname, String htd, List<Map<String, Object>> lmzfList, List<Map<String, Object>> lmyfList, int cdsl, String sjz, String zx) throws IOException, ParseException {
         XSSFWorkbook wb = null;
-        String fname="33桥面平整度.xlsx";
+        String fname="33桥面平整度-"+zx+".xlsx";
         File f = new File(filepath+File.separator+proname+File.separator+htd+File.separator+fname);
         File fdir = new File(filepath + File.separator + proname + File.separator + htd);
         if (!fdir.exists()) {
             //创建文件根目录
             fdir.mkdirs();
         }
-        File directory = new File("service-system/src/main/resources/static");
-        String reportPath = directory.getCanonicalPath();
-        String filename = "";
+        try {
+            File directory = new File("service-system/src/main/resources/static");
+            String reportPath = directory.getCanonicalPath();
+            String filename = "";
 
-        if (cdsl == 5){
-            filename = "平整度-5车道.xlsx";
-        }else if (cdsl == 4){
-            filename = "平整度-4车道.xlsx";
-        }else if (cdsl == 3){
-            filename = "平整度-3车道.xlsx";
-        }else if (cdsl == 2){
-            filename = "平整度-2车道.xlsx";
-        }
-
-        String path = reportPath + File.separator + filename;
-        Files.copy(Paths.get(path), new FileOutputStream(f));
-        FileInputStream out = new FileInputStream(f);
-        wb = new XSSFWorkbook(out);
-
-        lmzfList.addAll(lmyfList);
-        if (lmzfList.size()>0 && !lmzfList.isEmpty()){
-            List<Map<String,Object>> addList = addMissingData(lmzfList,cdsl);
-            List<Map<String, Object>> mapslist = mergedList(addList,cdsl);
-
-
-            String lxbs = mapslist.get(0).get("lxbs").toString();
-            QueryWrapper<JjgLqsQl> wrapper = new QueryWrapper<>();
-            wrapper.eq("name",lxbs);
-            List<JjgLqsQl> list = jjgLqsQlService.list(wrapper);
-            String sheetmame = "";
-            if (list.get(0).getPzlx().contains("水泥")){
-                sheetmame = "混凝土桥";
-            }else {
-                sheetmame = "沥青桥";
+            if (cdsl == 5){
+                filename = "平整度-5车道.xlsx";
+            }else if (cdsl == 4){
+                filename = "平整度-4车道.xlsx";
+            }else if (cdsl == 3){
+                filename = "平整度-3车道.xlsx";
+            }else if (cdsl == 2){
+                filename = "平整度-2车道.xlsx";
             }
 
-            DBtoExcel(proname,htd,addList,wb,sheetmame,cdsl,sjz);
-        }
+            String path = reportPath + File.separator + filename;
+            Files.copy(Paths.get(path), new FileOutputStream(f));
+            FileInputStream out = new FileInputStream(f);
+            wb = new XSSFWorkbook(out);
 
-        String[] arr = {"混凝土收费站","混凝土匝道隧道","沥青匝道隧道","混凝土匝道桥","沥青匝道桥","沥青匝道","混凝土匝道","混凝土隧道","沥青隧道","混凝土桥","沥青桥","混凝土路面","沥青路面"};
-        //String[] arr = {"混凝土隧道","沥青隧道","混凝土桥","沥青桥","混凝土路面","沥青路面"};
-        for (int i = 0; i < arr.length; i++) {
-            if (shouldBeCalculate(wb.getSheet(arr[i]))) {
-                calculateAsphaltPavementSheet(wb,wb.getSheet(arr[i]),cdsl);
-            }else {
-                wb.setSheetHidden(wb.getSheetIndex(arr[i]),true);
-                //wb.removeSheetAt(wb.getSheetIndex(arr[i]));
+            lmzfList.addAll(lmyfList);
+            if (lmzfList.size()>0 && !lmzfList.isEmpty()){
+                List<Map<String,Object>> addList = addMissingData(lmzfList,cdsl);
+                List<Map<String, Object>> mapslist = mergedList(addList,cdsl);
+
+
+                String lxbs = mapslist.get(0).get("lxbs").toString();
+                QueryWrapper<JjgLqsQl> wrapper = new QueryWrapper<>();
+                wrapper.eq("name",lxbs);
+                List<JjgLqsQl> list = jjgLqsQlService.list(wrapper);
+                String sheetmame = "";
+                if (list.get(0).getPzlx().contains("水泥")){
+                    sheetmame = "混凝土桥";
+                }else {
+                    sheetmame = "沥青桥";
+                }
+
+                DBtoExcel(proname,htd,addList,wb,sheetmame,cdsl,sjz,zx);
             }
+
+            String[] arr = {"混凝土收费站","混凝土匝道隧道","沥青匝道隧道","混凝土匝道桥","沥青匝道桥","沥青匝道","混凝土匝道","混凝土隧道","沥青隧道","混凝土桥","沥青桥","混凝土路面","沥青路面"};
+            //String[] arr = {"混凝土隧道","沥青隧道","混凝土桥","沥青桥","混凝土路面","沥青路面"};
+            for (int i = 0; i < arr.length; i++) {
+                if (shouldBeCalculate(wb.getSheet(arr[i]))) {
+                    calculateAsphaltPavementSheet(wb,wb.getSheet(arr[i]),cdsl);
+                }else {
+                    wb.setSheetHidden(wb.getSheetIndex(arr[i]),true);
+                    //wb.removeSheetAt(wb.getSheetIndex(arr[i]));
+                }
+            }
+
+
+            FileOutputStream fileOut = new FileOutputStream(f);
+            wb.write(fileOut);
+            fileOut.flush();
+            fileOut.close();
+            out.close();
+            wb.close();
+        }catch (Exception e) {
+            if(f.exists()){
+                f.delete();
+            }
+            throw new JjgysException(20001, "生成鉴定表错误，请检查数据的正确性");
         }
 
-
-        FileOutputStream fileOut = new FileOutputStream(f);
-        wb.write(fileOut);
-        fileOut.flush();
-        fileOut.close();
-        out.close();
-        wb.close();
 
     }
 
@@ -383,11 +424,11 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
      */
     private List<Map<String, Object>> mergedList(List<Map<String, Object>> dataLists,int cds) {
         //处理拼接的iri
-        int cdsl = cds * 2;
+        //int cdsl = cds * 2;
         String iris = "-";
         StringBuilder iriBuilder = new StringBuilder();
-        for (int i = 0; i < cdsl; i++) {
-            if (i == cdsl - 1) {
+        for (int i = 0; i < cds; i++) {
+            if (i == cds - 1) {
                 iriBuilder.append("-");
             } else {
                 iriBuilder.append("-,");
@@ -398,7 +439,7 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
         Map<String, List<Map<String, Object>>> groupedData =
                 dataLists.stream()
                         .collect(Collectors.groupingBy(
-                                item -> item.get("lxbs") + "-" + item.get("qdzh") + "-" + item.get("zdzh")
+                                item -> item.get("name") + "-" + item.get("qdzh") + "-" + item.get("zdzh")
                         ));
         List<Map<String, Object>> toBeRemoved = new ArrayList<>();
         for (Map.Entry<String, List<Map<String, Object>>> entry : groupedData.entrySet()) {
@@ -673,92 +714,215 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
      * @param hasdata
      */
     private void fillTotalData(XSSFSheet sheet, int rownum, XSSFRow rowstart, XSSFRow rowend, int left_right, int fillcolum, boolean hasdata,FormulaEvaluator e,int cdsl) {
-        if (hasdata) {
-            sheet.getRow(rownum)
-                    .getCell(fillcolum)
-                    .setCellFormula("IFERROR("+
-                            "COUNT("
-                            + rowstart.getCell(5 + left_right * 4)
-                            .getReference()
-                            + ":"
-                            + rowend.getCell(8 + left_right * 4)
-                            .getReference() + ")"+",\"-\")");// 总点数P=COUNT(F8:I17)
-
-            sheet.getRow(rownum + 1)
-                    .getCell(fillcolum)
-                    .setCellFormula("IFERROR("+
-                            sheet.getRow(rownum).getCell(fillcolum)
-                                    .getReference()
-                            + "-COUNTIF("
-                            + rowstart.getCell(5 + left_right * 4)
-                            .getReference()
-                            + ":"
-                            + rowend.getCell(8 + left_right * 4)
-                            .getReference() + ",\">\"&$F$4)"+",\"-\")");// 合格数P=P11-COUNTIF(F8:I17,">"&$F$4)
-
-            sheet.getRow(rownum + 2)
-                    .getCell(fillcolum)
-                    .setCellFormula("IFERROR("+
-                            "AVERAGE("
-                            + rowstart.getCell(5 + left_right * 4)
-                            .getReference()
-                            + ":"
-                            + rowend.getCell(8 + left_right * 4)
-                            .getReference() + ")"+",\"-\")");// 平均值P=AVERAGE(F8:I17)
-            sheet.getRow(rownum + 3)
-                    .getCell(fillcolum)
-                    .setCellFormula("IFERROR("+
-                            "STDEV("
-                            + rowstart.getCell(5 + left_right * 4)
-                            .getReference()
-                            + ":"
-                            + rowend.getCell(8 + left_right * 4)
-                            .getReference() + ")"+",\"-\")");// 均方差P=STDEV(F8:I17)
-
-            sheet.getRow(rownum + 4)
-                    .getCell(fillcolum)
-                    .setCellFormula("IF("+sheet.getRow(rownum)
-                            .getCell(fillcolum).getReference()+"=0,\"-\","+
-                            "MIN("
-                            + rowstart.getCell(5 + left_right * 4)
-                            .getReference()
-                            + ":"
-                            + rowend.getCell(8 + left_right * 4)
-                            .getReference() + ")"+")");// 最小值P=MIN(F8:I17)=IF(MIN(P92,Q92)=0,"",MIN(P92,Q92))
-
-            sheet.getRow(rownum + 5)
-                    .getCell(fillcolum)
-                    .setCellFormula("IF("+sheet.getRow(rownum)
-                            .getCell(fillcolum).getReference()+"=0,\"-\","+
-                            "MAX("
-                            + rowstart.getCell(5 + left_right * 4)
-                            .getReference()
-                            + ":"
-                            + rowend.getCell(8 + left_right * 4)
-                            .getReference() + ")"+")");// 最大值P=MAX(F8:I17)
-
-            sheet.getRow(rownum + 6)
-                    .getCell(fillcolum)
-                    .setCellFormula("IFERROR("+
-                            sheet.getRow(rownum + 1).getCell(fillcolum)
-                                    .getReference()
-                            + "*100/"
-                            + sheet.getRow(rownum)
-                            .getCell(fillcolum).getReference()+",\"-\")");// 合格率P=P12*100/P11
-            if(left_right == 1){
-                fillExtraTotalData(sheet, rownum - 1, hasdata,e,cdsl);
+        /**
+         * 5c z:5-14 y:15-24
+         * 4c z:5-12 y:13-20
+         * 3c z:5-10 y:11-16
+         * 2c z:5-8  y:9-12
+         */
+        if (left_right == 0){
+            int a = 5, b =0;
+            if (cdsl == 5){
+                b = 14;
+            }else if (cdsl == 4){
+                b = 12;
+            }else if (cdsl == 3){
+                b = 10;
+            }else if (cdsl == 2){
+                b = 8;
             }
+            if (hasdata) {
+                sheet.getRow(rownum)
+                        .getCell(fillcolum)
+                        .setCellFormula("IFERROR("+
+                                "COUNT("
+                                + rowstart.getCell(a + left_right * a * 2)
+                                .getReference()
+                                + ":"
+                                + rowend.getCell(b + left_right * a * 2)
+                                .getReference() + ")"+",\"-\")");// 总点数P=COUNT(F8:I17)
 
-        } else {
-            sheet.getRow(rownum).getCell(fillcolum).setCellValue("-");
-            sheet.getRow(rownum + 1).getCell(fillcolum).setCellValue("-");
-            sheet.getRow(rownum + 2).getCell(fillcolum).setCellValue("-");
-            sheet.getRow(rownum + 3).getCell(fillcolum).setCellValue("-");
-            sheet.getRow(rownum + 4).getCell(fillcolum).setCellValue("-");
-            sheet.getRow(rownum + 5).getCell(fillcolum).setCellValue("-");
-            sheet.getRow(rownum + 6).getCell(fillcolum).setCellValue("-");
-            if(left_right == 1){
-                fillExtraTotalData(sheet, rownum - 1, true,e,cdsl);
+                sheet.getRow(rownum + 1)
+                        .getCell(fillcolum)
+                        .setCellFormula("IFERROR("+
+                                sheet.getRow(rownum).getCell(fillcolum)
+                                        .getReference()
+                                + "-COUNTIF("
+                                + rowstart.getCell(a + left_right * a * 2)
+                                .getReference()
+                                + ":"
+                                + rowend.getCell(b + left_right * a * 2)
+                                .getReference() + ",\">\"&$F$4)"+",\"-\")");// 合格数P=P11-COUNTIF(F8:I17,">"&$F$4)
+
+                sheet.getRow(rownum + 2)
+                        .getCell(fillcolum)
+                        .setCellFormula("IFERROR("+
+                                "AVERAGE("
+                                + rowstart.getCell(a + left_right * a * 2)
+                                .getReference()
+                                + ":"
+                                + rowend.getCell(b + left_right * a * 2)
+                                .getReference() + ")"+",\"-\")");// 平均值P=AVERAGE(F8:I17)
+                sheet.getRow(rownum + 3)
+                        .getCell(fillcolum)
+                        .setCellFormula("IFERROR("+
+                                "STDEV("
+                                + rowstart.getCell(a + left_right * a * 2)
+                                .getReference()
+                                + ":"
+                                + rowend.getCell(b + left_right * a * 2)
+                                .getReference() + ")"+",\"-\")");// 均方差P=STDEV(F8:I17)
+
+                sheet.getRow(rownum + 4)
+                        .getCell(fillcolum)
+                        .setCellFormula("IF("+sheet.getRow(rownum)
+                                .getCell(fillcolum).getReference()+"=0,\"-\","+
+                                "MIN("
+                                + rowstart.getCell(a + left_right * a * 2)
+                                .getReference()
+                                + ":"
+                                + rowend.getCell(b + left_right * a * 2)
+                                .getReference() + ")"+")");// 最小值P=MIN(F8:I17)=IF(MIN(P92,Q92)=0,"",MIN(P92,Q92))
+
+                sheet.getRow(rownum + 5)
+                        .getCell(fillcolum)
+                        .setCellFormula("IF("+sheet.getRow(rownum)
+                                .getCell(fillcolum).getReference()+"=0,\"-\","+
+                                "MAX("
+                                + rowstart.getCell(a + left_right * a * 2)
+                                .getReference()
+                                + ":"
+                                + rowend.getCell(b + left_right * a * 2)
+                                .getReference() + ")"+")");// 最大值P=MAX(F8:I17)
+
+                sheet.getRow(rownum + 6)
+                        .getCell(fillcolum)
+                        .setCellFormula("IFERROR("+
+                                sheet.getRow(rownum + 1).getCell(fillcolum)
+                                        .getReference()
+                                + "*100/"
+                                + sheet.getRow(rownum)
+                                .getCell(fillcolum).getReference()+",\"-\")");// 合格率P=P12*100/P11
+                if(left_right == 1){
+                    fillExtraTotalData(sheet, rownum - 1, hasdata,e,cdsl);
+                }
+
+            } else {
+                sheet.getRow(rownum).getCell(fillcolum).setCellValue("-");
+                sheet.getRow(rownum + 1).getCell(fillcolum).setCellValue("-");
+                sheet.getRow(rownum + 2).getCell(fillcolum).setCellValue("-");
+                sheet.getRow(rownum + 3).getCell(fillcolum).setCellValue("-");
+                sheet.getRow(rownum + 4).getCell(fillcolum).setCellValue("-");
+                sheet.getRow(rownum + 5).getCell(fillcolum).setCellValue("-");
+                sheet.getRow(rownum + 6).getCell(fillcolum).setCellValue("-");
+                if(left_right == 1){
+                    fillExtraTotalData(sheet, rownum - 1, true,e,cdsl);
+                }
+            }
+        }else if (left_right == 1){
+            /**
+             * 5c z:5-14 y:15-24
+             * 4c z:5-12 y:13-20
+             * 3c z:5-10 y:11-16
+             * 2c z:5-8  y:9-12
+             */
+            int a = 5, b =0;
+            if (cdsl == 5){
+                b = 14;
+            }else if (cdsl == 4){
+                b = 12;
+            }else if (cdsl == 3){
+                b = 10;
+            }else if (cdsl == 2){
+                b = 8;
+            }
+            if (hasdata) {
+                sheet.getRow(rownum)
+                        .getCell(fillcolum)
+                        .setCellFormula("IFERROR("+
+                                "COUNT("
+                                + rowstart.getCell(cdsl * 2+5)
+                                .getReference()
+                                + ":"
+                                + rowend.getCell(4*cdsl+4)
+                                .getReference() + ")"+",\"-\")");// 总点数P=COUNT(F8:I17)
+
+                sheet.getRow(rownum + 1)
+                        .getCell(fillcolum)
+                        .setCellFormula("IFERROR("+
+                                sheet.getRow(rownum).getCell(fillcolum)
+                                        .getReference()
+                                + "-COUNTIF("
+                                + rowstart.getCell(cdsl * 2+5)
+                                .getReference()
+                                + ":"
+                                + rowend.getCell(4*cdsl+4)
+                                .getReference() + ",\">\"&$F$4)"+",\"-\")");// 合格数P=P11-COUNTIF(F8:I17,">"&$F$4)
+
+                sheet.getRow(rownum + 2)
+                        .getCell(fillcolum)
+                        .setCellFormula("IFERROR("+
+                                "AVERAGE("
+                                + rowstart.getCell(cdsl * 2+5)
+                                .getReference()
+                                + ":"
+                                + rowend.getCell(4*cdsl+4)
+                                .getReference() + ")"+",\"-\")");// 平均值P=AVERAGE(F8:I17)
+                sheet.getRow(rownum + 3)
+                        .getCell(fillcolum)
+                        .setCellFormula("IFERROR("+
+                                "STDEV("
+                                + rowstart.getCell(cdsl * 2+5)
+                                .getReference()
+                                + ":"
+                                + rowend.getCell(4*cdsl+4)
+                                .getReference() + ")"+",\"-\")");// 均方差P=STDEV(F8:I17)
+
+                sheet.getRow(rownum + 4)
+                        .getCell(fillcolum)
+                        .setCellFormula("IF("+sheet.getRow(rownum)
+                                .getCell(fillcolum).getReference()+"=0,\"-\","+
+                                "MIN("
+                                + rowstart.getCell(cdsl * 2+5)
+                                .getReference()
+                                + ":"
+                                + rowend.getCell(4*cdsl+4)
+                                .getReference() + ")"+")");// 最小值P=MIN(F8:I17)=IF(MIN(P92,Q92)=0,"",MIN(P92,Q92))
+
+                sheet.getRow(rownum + 5)
+                        .getCell(fillcolum)
+                        .setCellFormula("IF("+sheet.getRow(rownum)
+                                .getCell(fillcolum).getReference()+"=0,\"-\","+
+                                "MAX("
+                                + rowstart.getCell(cdsl * 2+5)
+                                .getReference()
+                                + ":"
+                                + rowend.getCell(4*cdsl+4)
+                                .getReference() + ")"+")");// 最大值P=MAX(F8:I17)
+
+                sheet.getRow(rownum + 6)
+                        .getCell(fillcolum)
+                        .setCellFormula("IFERROR("+
+                                sheet.getRow(rownum + 1).getCell(fillcolum)
+                                        .getReference()
+                                + "*100/"
+                                + sheet.getRow(rownum)
+                                .getCell(fillcolum).getReference()+",\"-\")");// 合格率P=P12*100/P11
+                if(left_right == 1){
+                    fillExtraTotalData(sheet, rownum - 1, hasdata,e,cdsl);
+                }
+
+            } else {
+                sheet.getRow(rownum).getCell(fillcolum).setCellValue("-");
+                sheet.getRow(rownum + 1).getCell(fillcolum).setCellValue("-");
+                sheet.getRow(rownum + 2).getCell(fillcolum).setCellValue("-");
+                sheet.getRow(rownum + 3).getCell(fillcolum).setCellValue("-");
+                sheet.getRow(rownum + 4).getCell(fillcolum).setCellValue("-");
+                sheet.getRow(rownum + 5).getCell(fillcolum).setCellValue("-");
+                sheet.getRow(rownum + 6).getCell(fillcolum).setCellValue("-");
+                if(left_right == 1){
+                    fillExtraTotalData(sheet, rownum - 1, true,e,cdsl);
+                }
             }
         }
 
@@ -902,9 +1066,10 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
      * @param sheetname
      * @param cdsl
      * @param sjz
+     * @param zx
      * @throws ParseException
      */
-    private void DBtoExcel(String proname, String htd, List<Map<String, Object>> data, XSSFWorkbook wb, String sheetname, int cdsl, String sjz) throws ParseException {
+    private void DBtoExcel(String proname, String htd, List<Map<String, Object>> data, XSSFWorkbook wb, String sheetname, int cdsl, String sjz, String zx) throws ParseException {
         int b = 0;
         if (cdsl == 2){
             b=40;
@@ -916,7 +1081,7 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
         if (data!=null && !data.isEmpty()){
             //List<Map<String, Object>> maps = mergedList(data,cdsl);
             createTable(getNum(data,cdsl),wb,sheetname,cdsl);
-            writesdqlzyf(wb,data,proname, htd,sheetname,cdsl,sjz,b);
+            writesdqlzyf(wb,data,proname, htd,sheetname,cdsl,sjz,b,zx);
 
         }
     }
@@ -931,9 +1096,10 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
      * @param cdsl
      * @param sjz
      * @param b
+     * @param zx
      * @throws ParseException
      */
-    private void writesdqlzyf(XSSFWorkbook wb, List<Map<String, Object>> data, String proname, String htd, String sheetname, int cdsl, String sjz,int b) throws ParseException {
+    private void writesdqlzyf(XSSFWorkbook wb, List<Map<String, Object>> data, String proname, String htd, String sheetname, int cdsl, String sjz, int b, String zx) throws ParseException {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         SimpleDateFormat outputDateFormat  = new SimpleDateFormat("yyyy.MM.dd");
         XSSFSheet sheet = wb.getSheet(sheetname);
@@ -1002,9 +1168,9 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
         if (!sfc[0].isEmpty()) {
             for (int i = 0 ; i < sfc.length ; i++) {
                 if (!sfc[i].equals("-")){
-                    sheet.getRow(tableNum * a + 7 + index % b).getCell(cdsl*i+5).setCellValue(Double.parseDouble(sfc[i]));
+                    sheet.getRow(tableNum * a + 7 + index % b).getCell(5+(i*2)).setCellValue(Double.parseDouble(sfc[i]));
                 }else {
-                    sheet.getRow(tableNum * a + 7 + index % b).getCell(cdsl*i+5).setCellValue(sfc[i]);
+                    sheet.getRow(tableNum * a + 7 + index % b).getCell(5+(i*2)).setCellValue(sfc[i]);
                 }
 
             }
@@ -1057,15 +1223,15 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
                 for (int i = 0 ; i < sfc.length ; i++) {
                     if (lm.get("cd").equals("左幅")){
                         if (!sfc[i].equals("-")) {
-                            sheet.getRow(tableNum * a + 7 + index % b).getCell(5 + i).setCellValue(Double.parseDouble(sfc[i]));
+                            sheet.getRow(tableNum * a + 7 + index % b).getCell(5+(i*2)).setCellValue(Double.parseDouble(sfc[i]));
                         }else {
-                            sheet.getRow(tableNum * a + 7 + index % b).getCell(5 + i).setCellValue(sfc[i]);
+                            sheet.getRow(tableNum * a + 7 + index % b).getCell(5+(i*2)).setCellValue(sfc[i]);
                         }
                     }else {
                         if (!sfc[i].equals("-")){
-                            sheet.getRow(tableNum * a + 7 + index % b).getCell((2*cdsl+5)+i).setCellValue(Double.parseDouble(sfc[i]));
+                            sheet.getRow(tableNum * a + 7 + index % b).getCell(2*cdsl+5+(i*2)).setCellValue(Double.parseDouble(sfc[i]));
                         }else {
-                            sheet.getRow(tableNum * a + 7 + index % b).getCell((2*cdsl+5)+i).setCellValue(sfc[i]);
+                            sheet.getRow(tableNum * a + 7 + index % b).getCell(2*cdsl+5+(i*2)).setCellValue(sfc[i]);
                         }
 
                     }
@@ -1241,15 +1407,16 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
      * @return
      */
     private List<Map<String, Object>> decrementNumberByStep(double zdzh,double finzdzh, List<Map<String, Object>> mapList,int cds) {
-        int cdsl = cds * 2;
+        //int cdsl = cds * 2;
         String iri = "-";
         StringBuilder iriBuilder = new StringBuilder();
-        for (int i = 0; i < cdsl; i++) {
-            if (i == cdsl - 1) {
+        for (int i = 0; i < cds; i++) {
+            if (i == cds - 1) {
                 iriBuilder.append("-");
             } else {
                 iriBuilder.append("-,");
             }
+
         }
         iri = iriBuilder.toString();
 
@@ -1319,24 +1486,24 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
                 //String ziri = map.get("ziri").toString();
                 //String yiri = map.get("yiri").toString();
                 String ziri = "";
-                String yiri = "";
+                //String yiri = "";
                 if (map.get("ziri") == null){
                     ziri = "-";
                 }else {
                     ziri = map.get("ziri").toString();
                 }
-                if (map.get("yiri") == null){
+                /*if (map.get("yiri") == null){
                     yiri = "-";
                 }else {
                     yiri = map.get("yiri").toString();
-                }
+                }*/
                 if (resultMapz.containsKey(qdzh)) {
                     resultMapz.get(qdzh).add(ziri);
-                    resultMapz.get(qdzh).add(yiri);
+                    //resultMapz.get(qdzh).add(yiri);
                 } else {
                     List<String> sfcList = new ArrayList<>();
                     sfcList.add(ziri);
-                    sfcList.add(yiri);
+                    //sfcList.add(yiri);
                     resultMapz.put(qdzh, sfcList);
                 }
             }
@@ -1346,13 +1513,12 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
                 Map<String, Object> map = new TreeMap<>();
                 map.put("qdzh", entry.getKey());
                 map.put("iri", String.join(",", entry.getValue()));
-
                 for (Map<String, Object> item : list) {
                     if (item.get("qdzh").toString().equals(entry.getKey())) {
                         map.put("qdzh", item.get("qdzh"));
                         map.put("zdzh", item.get("zdzh"));
-                       /* map.put("pzlx", item.get("pzlx"));
-                        map.put("name", item.get("name"));*/
+                        map.put("pzlx", item.get("pzlx"));
+                        map.put("name", item.get("name"));
                         map.put("cd", item.get("cd").toString().substring(0,2));
                         map.put("createTime", item.get("createTime"));
                         break;
@@ -1369,5 +1535,58 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
     public List<Map<String, Object>> selectlx(String proname, String htd) {
         List<Map<String,Object>> lxlist = jjgFbgcQlgcZdhpzdMapper.selectlx(proname,htd);
         return lxlist;
+    }
+
+    @Override
+    public List<Map<String, Object>> lookJdb(CommonInfoVo commonInfoVo, String value) throws IOException {
+        DecimalFormat df = new DecimalFormat("0.00");
+        DecimalFormat decf = new DecimalFormat("0.##");
+        String proname = commonInfoVo.getProname();
+        String htd = commonInfoVo.getHtd();
+        //List<Map<String, Object>> selectqlmc = selectqlmc2(proname, htd);
+
+        List<Map<String, Object>> mapList = new ArrayList<>();
+        String qlmc = StringUtils.substringBetween(value, "-", ".");
+        int cds = jjgFbgcQlgcZdhpzdMapper.selectcdnum(proname,htd,qlmc);
+        File f = new File(filepath + File.separator + proname + File.separator + htd + File.separator + value);
+        if (!f.exists()) {
+            return new ArrayList<>();
+        } else {
+            XSSFWorkbook wb = new XSSFWorkbook(new FileInputStream(f));
+            List<Map<String, Object>> jgmap = new ArrayList<>();
+            for (int j = 0; j < wb.getNumberOfSheets(); j++) {
+                if (!wb.isSheetHidden(wb.getSheetIndex(wb.getSheetAt(j)))) {
+                    XSSFSheet slSheet = wb.getSheetAt(j);
+
+                    XSSFCell xmname = slSheet.getRow(1).getCell(5);//项目名
+                    XSSFCell htdname = slSheet.getRow(1).getCell(cds*4+4);//合同段名
+
+
+                    if (proname.equals(xmname.toString()) && htd.equals(htdname.toString())) {
+                        slSheet.getRow(5).getCell(cds*4+9).setCellType(CellType.STRING);//总点数
+                        slSheet.getRow(5).getCell(cds*4+10).setCellType(CellType.STRING);//合格点数
+
+                        slSheet.getRow(5).getCell(cds*4+11).setCellType(CellType.STRING);
+                        slSheet.getRow(5).getCell(cds*4+12).setCellType(CellType.STRING);
+                        slSheet.getRow(3).getCell(5).setCellType(CellType.STRING);
+                        double zds = Double.valueOf(slSheet.getRow(5).getCell(cds*4+9).getStringCellValue());
+                        double hgds = Double.valueOf(slSheet.getRow(5).getCell(cds*4+10).getStringCellValue());
+                        String zdsz1 = decf.format(zds);
+                        String hgdsz1 = decf.format(hgds);
+                        Map map = new HashMap();
+                        map.put("检测项目", qlmc);
+                        map.put("路面类型", wb.getSheetName(j));
+                        map.put("总点数", zdsz1);
+                        map.put("设计值", slSheet.getRow(3).getCell(5).getStringCellValue());
+                        map.put("合格点数", hgdsz1);
+                        map.put("合格率", zds!=0 ? df.format(hgds/zds*100) : 0);
+                        map.put("Max",slSheet.getRow(5).getCell(cds*4+11).getStringCellValue());
+                        map.put("Min",slSheet.getRow(5).getCell(cds*4+12).getStringCellValue());
+                        jgmap.add(map);
+                    }
+                }
+            }
+            return jgmap;
+        }
     }
 }

@@ -41,4 +41,6 @@ public interface JjgZdhCzJgfcMapper extends BaseMapper<JjgZdhCzJgfc> {
 
     Collection<? extends Map<String, Object>> selectqlcz(String proname, String bz, String lf, String qlzhq, String qlzhz, String zx, String zhq1, String zhz1);
 
+    List<Map<String, Object>> selecthtd(String proname);
+
 }

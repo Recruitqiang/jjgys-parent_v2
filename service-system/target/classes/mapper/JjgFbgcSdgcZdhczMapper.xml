@@ -13,11 +13,11 @@
     </select>
 
     <select id="selectzfList" resultType="java.util.Map" parameterType="java.lang.String">
-        SELECT * from jjg_fbgc_sdgc_zdhcz where proname = #{proname} and htd = #{htd} and cd LIKE '左幅%' ORDER BY zdbs,qdzh,val
+        SELECT *, concat(#{zx}, '左幅') as name  from jjg_fbgc_sdgc_zdhcz where proname = #{proname} and htd = #{htd} and cd LIKE '左幅%' and lxbs = #{zx}  ORDER BY zdbs,qdzh,val
     </select>
 
     <select id="selectyfList" resultType="java.util.Map" parameterType="java.lang.String">
-        SELECT * from jjg_fbgc_sdgc_zdhcz where proname = #{proname} and htd = #{htd} and cd LIKE '右幅%' ORDER BY zdbs,qdzh,val
+        SELECT *,concat(#{zx}, '右幅') as name  from jjg_fbgc_sdgc_zdhcz where proname = #{proname} and htd = #{htd} and cd LIKE '右幅%' and lxbs = #{zx}  ORDER BY zdbs,qdzh,val
     </select>
 
 

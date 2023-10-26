@@ -44,20 +44,34 @@ public class JjgZdhPzdJgfcController {
     @Value(value = "${jjgys.path.jgfilepath}")
     private String jgfilepath;
 
+    @ApiOperation("查看平均值")
+    @GetMapping("lookpjz")
+    public Result lookpjz(@RequestParam String proname) throws IOException {
+        List<Map<String,Object>> list = jjgZdhPzdJgfcService.lookpjz(proname);
+        return Result.ok(list);
+    }
+
     @RequestMapping(value = "/download", method = RequestMethod.GET)
-    public void downloadExport(HttpServletResponse response, String proname, String htd) throws IOException {
-        List<Map<String,Object>> lxlist = jjgZdhPzdJgfcService.selectlx(proname,htd);
+    public void downloadExport(HttpServletResponse response, String proname) throws IOException {
+
+        List<Map<String,Object>> htdList = jjgZdhPzdJgfcService.selecthtd(proname);
         List<String> fileName = new ArrayList<>();
-        for (Map<String, Object> map : lxlist) {
-            String lxbs = map.get("lxbs").toString();
-            if (lxbs.equals("主线")){
-                fileName.add("18路面平整度");;
-            }else {
-                fileName.add("61互通平整度-"+lxbs);
+        if (htdList!=null){
+            for (Map<String, Object> map1 : htdList) {
+                String htd = map1.get("htd").toString();
+                List<Map<String,Object>> lxlist = jjgZdhPzdJgfcService.selectlx(proname,htd);
+                for (Map<String, Object> map : lxlist) {
+                    String lxbs = map.get("lxbs").toString();
+                    if (lxbs.equals("主线")){
+                        fileName.add(htd+File.separator+"18路面平整度");
+                    }else {
+                        fileName.add(htd+File.separator+"61互通平整度-"+lxbs);
+                    }
+                }
             }
         }
-        String zipname = "平整度鉴定表";
-        JjgFbgcCommonUtils.batchDowndFile(response,zipname,fileName,jgfilepath+ File.separator+proname+File.separator+htd);
+        String zipname = "车辙鉴定表";
+        JjgFbgcCommonUtils.batchDowndFile(response,zipname,fileName,jgfilepath+ File.separator+proname);
     }
 
     @ApiOperation("生成平整度鉴定表")
@@ -90,8 +104,6 @@ public class JjgZdhPzdJgfcController {
         if (jjgZdhpzd != null) {
             QueryWrapper<JjgZdhPzdJgfc> wrapper = new QueryWrapper<>();
             wrapper.like("proname", jjgZdhpzd.getProname());
-            wrapper.like("htd", jjgZdhpzd.getHtd());
-
             //调用方法分页查询
             IPage<JjgZdhPzdJgfc> pageModel = jjgZdhPzdJgfcService.page(pageParam, wrapper);
             //返回

@@ -31,4 +31,7 @@ public interface JjgFbgcQlgcZdhmcxsService extends IService<JjgFbgcQlgcZdhmcxs> 
     void importmcxs(MultipartFile file, CommonInfoVo commonInfoVo) throws IOException;
 
 
+    List<Map<String, Object>> selectlx(String proname, String htd);
+
+    List<Map<String, Object>> lookJdb(CommonInfoVo commonInfoVo, String value) throws IOException;
 }

@@ -97,45 +97,53 @@ public class JjgFbgcLjgcLjtsfysdHtServiceImpl extends ServiceImpl<JjgFbgcLjgcLjt
                 //创建文件根目录
                 fdir.mkdirs();
             }
-            File directory = new File("service-system/src/main/resources/static");
-            String reportPath = directory.getCanonicalPath();
-            String ss = "路基压实度.xlsx";
-            String path =reportPath+File.separator+ss;
-            Files.copy(Paths.get(path), new FileOutputStream(f));
-            FileInputStream out = new FileInputStream(f);
-            xwb = new XSSFWorkbook(out);
-            //xwb.setSheetHidden(xwb.getSheetIndex("保证率系数"), true);
-            //沙砾
-            LinkedHashMap<String, ArrayList<String>> EvalSLdata = jjgFbgcLjgcLjtsfysdSlService.writeAndGetData(xwb,proname,htd,fbgc);
-            //灰土
-            List<String> numsList = jjgFbgcLjgcLjtsfysdHtMapper.selectNums(proname,htd,fbgc);
-            createTable(gettableNum(numsList));
-            DBtoExcel(htdata,proname,htd);
+            try {
+                File directory = new File("service-system/src/main/resources/static");
+                String reportPath = directory.getCanonicalPath();
+                String ss = "路基压实度.xlsx";
+                String path =reportPath+File.separator+ss;
+                Files.copy(Paths.get(path), new FileOutputStream(f));
+                FileInputStream out = new FileInputStream(f);
+                xwb = new XSSFWorkbook(out);
+                //xwb.setSheetHidden(xwb.getSheetIndex("保证率系数"), true);
+                //沙砾
+                LinkedHashMap<String, ArrayList<String>> EvalSLdata = jjgFbgcLjgcLjtsfysdSlService.writeAndGetData(xwb,proname,htd,fbgc);
+                //灰土
+                List<String> numsList = jjgFbgcLjgcLjtsfysdHtMapper.selectNums(proname,htd,fbgc);
+                createTable(gettableNum(numsList));
+                DBtoExcel(htdata,proname,htd);
 
-            LinkedHashMap<String, ArrayList<String>> EvalHTdata = evaluateDataht;
-            //根据鉴定表的数据生成评定单元
-            if(dataToExcel(xwb,EvalSLdata,EvalHTdata,proname,htd)){
-                //删除空的sheet
-                //JjgFbgcCommonUtils.deleteEmptySheets(xwb);
-                if(xwb.getSheet("压实度单点(灰土)") == null || xwb.getSheet("压实度单点(灰土)").getRow(1) == null
-                        || xwb.getSheet("压实度单点(灰土)").getRow(1).getCell(1) == null || "".equals(xwb.getSheet("压实度单点(灰土)").getRow(1).getCell(1).toString())){
+                LinkedHashMap<String, ArrayList<String>> EvalHTdata = evaluateDataht;
+                //根据鉴定表的数据生成评定单元
+                if(dataToExcel(xwb,EvalSLdata,EvalHTdata,proname,htd)){
+                    //删除空的sheet
+                    //JjgFbgcCommonUtils.deleteEmptySheets(xwb);
+                    if(xwb.getSheet("压实度单点(灰土)") == null || xwb.getSheet("压实度单点(灰土)").getRow(1) == null
+                            || xwb.getSheet("压实度单点(灰土)").getRow(1).getCell(1) == null || "".equals(xwb.getSheet("压实度单点(灰土)").getRow(1).getCell(1).toString())){
 
-                    xwb.setSheetHidden(xwb.getSheetIndex("评定单元(2)"), true);//把sheet工作表都给隐藏掉,0=显示 1=隐藏 2=非常隐秘(在excel里就看不见了，等于删除)
-                    xwb.setSheetHidden(xwb.getSheetIndex("压实度单点(灰土)"), true);
+                        xwb.setSheetHidden(xwb.getSheetIndex("评定单元(2)"), true);//把sheet工作表都给隐藏掉,0=显示 1=隐藏 2=非常隐秘(在excel里就看不见了，等于删除)
+                        xwb.setSheetHidden(xwb.getSheetIndex("压实度单点(灰土)"), true);
+                    }
+                    if(xwb.getSheet("压实度单点(砂砾)") == null || xwb.getSheet("压实度单点(砂砾)").getRow(1) == null
+                            || xwb.getSheet("压实度单点(砂砾)").getRow(1).getCell(2) == null || "".equals(xwb.getSheet("压实度单点(砂砾)").getRow(1).getCell(2).toString())){
+
+                        xwb.setSheetHidden(xwb.getSheetIndex("评定单元"),true);
+                        xwb.setSheetHidden(xwb.getSheetIndex("压实度单点(砂砾)"), true);
+                    }
+                    FileOutputStream fileOut = new FileOutputStream(f);
+                    xwb.write(fileOut);
+                    fileOut.flush();
+                    fileOut.close();
                 }
-                if(xwb.getSheet("压实度单点(砂砾)") == null || xwb.getSheet("压实度单点(砂砾)").getRow(1) == null
-                        || xwb.getSheet("压实度单点(砂砾)").getRow(1).getCell(2) == null || "".equals(xwb.getSheet("压实度单点(砂砾)").getRow(1).getCell(2).toString())){
-
-                    xwb.setSheetHidden(xwb.getSheetIndex("评定单元"),true);
-                    xwb.setSheetHidden(xwb.getSheetIndex("压实度单点(砂砾)"), true);
+                out.close();
+                xwb.close();
+            }catch (Exception e) {
+                if(f.exists()){
+                    f.delete();
                 }
-                FileOutputStream fileOut = new FileOutputStream(f);
-                xwb.write(fileOut);
-                fileOut.flush();
-                fileOut.close();
+                throw new JjgysException(20001, "生成鉴定表错误，请检查数据的正确性");
             }
-            out.close();
-            xwb.close();
+
 
         }
     }

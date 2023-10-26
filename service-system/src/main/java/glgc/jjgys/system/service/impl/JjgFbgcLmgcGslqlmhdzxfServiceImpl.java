@@ -14,6 +14,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import glgc.jjgys.system.service.ProjectService;
 import glgc.jjgys.system.utils.JjgFbgcCommonUtils;
 import glgc.jjgys.system.utils.RowCopy;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -450,54 +451,62 @@ public class JjgFbgcLmgcGslqlmhdzxfServiceImpl extends ServiceImpl<JjgFbgcLmgcGs
                 //创建文件根目录
                 fdir.mkdirs();
             }
-            File directory = new File("service-system/src/main/resources/static");
-            String reportPath = directory.getCanonicalPath();
-            String path = reportPath + File.separator + "沥青路面厚度-钻芯法.xlsx";
-            Files.copy(Paths.get(path), new FileOutputStream(f));
-            FileInputStream out = new FileInputStream(f);
-            wb = new XSSFWorkbook(out);
-            //路面左幅
-            lmhdzxf(wb, zxzfdata, "路面左幅");
-            //主线右幅
-            lmhdzxf(wb, zxyfdata, "路面右幅");
-            //隧道左幅
-            lmhdzxf(wb, sdzfdata, "隧道左幅");
-            //隧道右幅
-            lmhdzxf(wb, sdyfdata, "隧道右幅");
-            //桥面左幅
-            lmhdzxf(wb, qlzfdata, "桥面左幅");
-            //桥面右幅
-            lmhdzxf(wb, qlyfdata, "桥面右幅");
-            //路面匝道
-            lmhdzxf(wb, zddata, "路面匝道");
-            //连接线
-            //lmhdzxf(wb, ljxdata, "连接线");
+            try {
+                File directory = new File("service-system/src/main/resources/static");
+                String reportPath = directory.getCanonicalPath();
+                String path = reportPath + File.separator + "沥青路面厚度-钻芯法.xlsx";
+                Files.copy(Paths.get(path), new FileOutputStream(f));
+                FileInputStream out = new FileInputStream(f);
+                wb = new XSSFWorkbook(out);
+                //路面左幅
+                lmhdzxf(wb, zxzfdata, "路面左幅");
+                //主线右幅
+                lmhdzxf(wb, zxyfdata, "路面右幅");
+                //隧道左幅
+                lmhdzxf(wb, sdzfdata, "隧道左幅");
+                //隧道右幅
+                lmhdzxf(wb, sdyfdata, "隧道右幅");
+                //桥面左幅
+                lmhdzxf(wb, qlzfdata, "桥面左幅");
+                //桥面右幅
+                lmhdzxf(wb, qlyfdata, "桥面右幅");
+                //路面匝道
+                lmhdzxf(wb, zddata, "路面匝道");
+                //连接线
+                //lmhdzxf(wb, ljxdata, "连接线");
 
             /*if (ljxdata.size()>0){
                 f = new File(filepath+File.separator+proname+File.separator+htd+File.separator+"22沥青路面厚度-连接线-钻芯法.xlsx");
             }*/
 
-            for (int j = 0; j < wb.getNumberOfSheets(); j++) {
-                if (shouldBeCalculate(wb.getSheetAt(j))) {
-                    calculateCompactionSheet(wb.getSheetAt(j), wb.getSheetName(j));
+                for (int j = 0; j < wb.getNumberOfSheets(); j++) {
+                    if (shouldBeCalculate(wb.getSheetAt(j))) {
+                        calculateCompactionSheet(wb.getSheetAt(j), wb.getSheetName(j));
+                    }
                 }
-            }
-            getTunnelTotal(wb.getSheet("隧道左幅"));
-            getTunnelTotal(wb.getSheet("隧道右幅"));
+                getTunnelTotal(wb.getSheet("隧道左幅"));
+                getTunnelTotal(wb.getSheet("隧道右幅"));
 
-            for (int j = 0; j < wb.getNumberOfSheets(); j++) {   //表内公式  计算 显示结果
-                if(!wb.getSheetAt(j).getSheetName().equals("source"))
-                {
-                    JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
+                for (int j = 0; j < wb.getNumberOfSheets(); j++) {   //表内公式  计算 显示结果
+                    if(!wb.getSheetAt(j).getSheetName().equals("source"))
+                    {
+                        JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
+                    }
                 }
+                JjgFbgcCommonUtils.deleteEmptySheets(wb);
+                FileOutputStream fileOut = new FileOutputStream(f);
+                wb.write(fileOut);
+                fileOut.flush();
+                fileOut.close();
+                out.close();
+                wb.close();
+            }catch (Exception e) {
+                if(f.exists()){
+                    f.delete();
+                }
+                throw new JjgysException(20001, "生成鉴定表错误，请检查数据的正确性");
             }
-            JjgFbgcCommonUtils.deleteEmptySheets(wb);
-            FileOutputStream fileOut = new FileOutputStream(f);
-            wb.write(fileOut);
-            fileOut.flush();
-            fileOut.close();
-            out.close();
-            wb.close();
+
         }
 
     }
@@ -1004,8 +1013,46 @@ public class JjgFbgcLmgcGslqlmhdzxfServiceImpl extends ServiceImpl<JjgFbgcLmgcGs
                             new ExcelHandler<JjgFbgcLmgcGslqlmhdzxfVo>(JjgFbgcLmgcGslqlmhdzxfVo.class) {
                                 @Override
                                 public void handle(List<JjgFbgcLmgcGslqlmhdzxfVo> dataList) {
+                                    int rowNumber=2;
                                     for(JjgFbgcLmgcGslqlmhdzxfVo gslqlmhdzxfVo: dataList)
                                     {
+                                        if (StringUtils.isEmpty(gslqlmhdzxfVo.getZh())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，桩号为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(gslqlmhdzxfVo.getLx())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，路桥隧匝道为空，请修改后重新上传");
+                                        }
+
+                                        if (!StringUtils.isNumeric(gslqlmhdzxfVo.getSmccz1()) || StringUtils.isEmpty(gslqlmhdzxfVo.getSmccz1())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，上面层测值1有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(gslqlmhdzxfVo.getSmccz2()) || StringUtils.isEmpty(gslqlmhdzxfVo.getSmccz2())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，上面层测值2有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(gslqlmhdzxfVo.getSmccz3()) || StringUtils.isEmpty(gslqlmhdzxfVo.getSmccz3())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，上面层测值3有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(gslqlmhdzxfVo.getSmccz4()) || StringUtils.isEmpty(gslqlmhdzxfVo.getSmccz4())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，上面层测值4有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(gslqlmhdzxfVo.getSmcsjz()) || StringUtils.isEmpty(gslqlmhdzxfVo.getSmcsjz())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，上面层设计值有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(gslqlmhdzxfVo.getZhdcz1()) || StringUtils.isEmpty(gslqlmhdzxfVo.getZhdcz1())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，总厚度测值1有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(gslqlmhdzxfVo.getZhdcz2()) || StringUtils.isEmpty(gslqlmhdzxfVo.getZhdcz2())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，总厚度测值2有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(gslqlmhdzxfVo.getZhdcz3()) || StringUtils.isEmpty(gslqlmhdzxfVo.getZhdcz3())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，总厚度测值3有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(gslqlmhdzxfVo.getZhdcz4()) || StringUtils.isEmpty(gslqlmhdzxfVo.getZhdcz4())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，总厚度测值4有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(gslqlmhdzxfVo.getZhdsjz()) || StringUtils.isEmpty(gslqlmhdzxfVo.getZhdsjz())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，总厚度设计值有误，请修改后重新上传");
+                                        }
                                         JjgFbgcLmgcGslqlmhdzxf gslqlmhdzxf = new JjgFbgcLmgcGslqlmhdzxf();
                                         BeanUtils.copyProperties(gslqlmhdzxfVo,gslqlmhdzxf);
                                         gslqlmhdzxf.setCreatetime(new Date());
@@ -1013,6 +1060,7 @@ public class JjgFbgcLmgcGslqlmhdzxfServiceImpl extends ServiceImpl<JjgFbgcLmgcGs
                                         gslqlmhdzxf.setHtd(commonInfoVo.getHtd());
                                         gslqlmhdzxf.setFbgc(commonInfoVo.getFbgc());
                                         jjgFbgcLmgcGslqlmhdzxfMapper.insert(gslqlmhdzxf);
+                                        rowNumber++;
                                     }
                                 }
                             }

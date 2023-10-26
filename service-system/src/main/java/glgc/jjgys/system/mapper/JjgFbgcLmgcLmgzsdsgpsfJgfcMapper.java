@@ -5,6 +5,7 @@ import glgc.jjgys.model.project.JjgFbgcLmgcLmgzsdsgpsfJgfc;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -19,4 +20,5 @@ public interface JjgFbgcLmgcLmgzsdsgpsfJgfcMapper extends BaseMapper<JjgFbgcLmgc
 
     List<String> gethtd(String proname);
 
+    List<Map<String, Object>> selecthtd(String proname);
 }

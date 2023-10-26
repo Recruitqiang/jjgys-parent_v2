@@ -114,35 +114,36 @@ public class JjgFbgcSdgcGssdlqlmhdzxfServiceImpl extends ServiceImpl<JjgFbgcSdgc
                 //创建文件根目录
                 fdir.mkdirs();
             }
-            File directory = new File("service-system/src/main/resources/static");
-            String reportPath = directory.getCanonicalPath();
-            String path;
-            path = reportPath + File.separator + "沥青路面厚度-钻芯法.xlsx";
+            try {
+                File directory = new File("service-system/src/main/resources/static");
+                String reportPath = directory.getCanonicalPath();
+                String path;
+                path = reportPath + File.separator + "沥青路面厚度-钻芯法.xlsx";
             /*if (level ==0){
                 path = reportPath + File.separator + "沥青路面厚度-钻芯法.xlsx";
 
             }else {
                 path = reportPath + File.separator + "普通公路沥青路面厚度-钻芯法.xlsx";
             }*/
-            Files.copy(Paths.get(path), new FileOutputStream(f));
-            FileInputStream out = new FileInputStream(f);
-            wb = new XSSFWorkbook(out);
-            //路面左幅
-            lqlmysd(wb, zxzfdata, "路面左幅");
-            //主线右幅
-            lqlmysd(wb, zxyfdata, "路面右幅");
-            //隧道左幅
-            lqlmysd(wb, sdzfdata, "隧道左幅");
-            //隧道右幅
-            lqlmysd(wb, sdyfdata, "隧道右幅");
-            //桥面左幅
-            lqlmysd(wb, qlzfdata, "桥面左幅");
-            //桥面右幅
-            lqlmysd(wb, qlyfdata, "桥面右幅");
-            //路面匝道
-            lqlmysd(wb, zddata, "路面匝道");
+                Files.copy(Paths.get(path), new FileOutputStream(f));
+                FileInputStream out = new FileInputStream(f);
+                wb = new XSSFWorkbook(out);
+                //路面左幅
+                lqlmysd(wb, zxzfdata, "路面左幅");
+                //主线右幅
+                lqlmysd(wb, zxyfdata, "路面右幅");
+                //隧道左幅
+                lqlmysd(wb, sdzfdata, "隧道左幅");
+                //隧道右幅
+                lqlmysd(wb, sdyfdata, "隧道右幅");
+                //桥面左幅
+                lqlmysd(wb, qlzfdata, "桥面左幅");
+                //桥面右幅
+                lqlmysd(wb, qlyfdata, "桥面右幅");
+                //路面匝道
+                lqlmysd(wb, zddata, "路面匝道");
 
-            //if (level == 0){
+                //if (level == 0){
                 for (int j = 0; j < wb.getNumberOfSheets(); j++) {
                     if (shouldBeCalculate(wb.getSheetAt(j))) {
                         calculateCompactionSheet(wb.getSheetAt(j), wb.getSheetName(j));
@@ -160,7 +161,7 @@ public class JjgFbgcSdgcGssdlqlmhdzxfServiceImpl extends ServiceImpl<JjgFbgcSdgc
                 }
                 JjgFbgcCommonUtils.deleteEmptySheets(wb);
 
-            //}
+                //}
             /*else {
                 for (int j = 0; j < wb.getNumberOfSheets(); j++) {
                     if (shouldBeCalculate(wb.getSheetAt(j))) {
@@ -175,12 +176,19 @@ public class JjgFbgcSdgcGssdlqlmhdzxfServiceImpl extends ServiceImpl<JjgFbgcSdgc
             }*/
 
 
-            FileOutputStream fileOut = new FileOutputStream(f);
-            wb.write(fileOut);
-            fileOut.flush();
-            fileOut.close();
-            out.close();
-            wb.close();
+                FileOutputStream fileOut = new FileOutputStream(f);
+                wb.write(fileOut);
+                fileOut.flush();
+                fileOut.close();
+                out.close();
+                wb.close();
+            }catch (Exception e) {
+                if(f.exists()){
+                    f.delete();
+                }
+                throw new JjgysException(20001, "生成鉴定表错误，请检查数据的正确性");
+            }
+
         }
 
     }
@@ -909,8 +917,48 @@ public class JjgFbgcSdgcGssdlqlmhdzxfServiceImpl extends ServiceImpl<JjgFbgcSdgc
                             new ExcelHandler<JjgFbgcSdgcGssdlqlmhdzxfVo>(JjgFbgcSdgcGssdlqlmhdzxfVo.class) {
                                 @Override
                                 public void handle(List<JjgFbgcSdgcGssdlqlmhdzxfVo> dataList) {
+                                    int rowNumber=2;
                                     for(JjgFbgcSdgcGssdlqlmhdzxfVo zxfvo: dataList)
                                     {
+                                        if (StringUtils.isEmpty(zxfvo.getZh())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，桩号为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(zxfvo.getLqszd())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，路桥隧匝道为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(zxfvo.getSdmc())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，隧道名称为空，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(zxfvo.getSmcz1()) || StringUtils.isEmpty(zxfvo.getSmcz1())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，上面层测值1有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(zxfvo.getSmcz2()) || StringUtils.isEmpty(zxfvo.getSmcz2())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，上面层测值2有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(zxfvo.getSmcz3()) || StringUtils.isEmpty(zxfvo.getSmcz3())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，上面层测值3有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(zxfvo.getSmcz4()) || StringUtils.isEmpty(zxfvo.getSmcz4())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，上面层测值4有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(zxfvo.getSmcsjz()) || StringUtils.isEmpty(zxfvo.getSmcsjz())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，上面层设计值有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(zxfvo.getZhdz1()) || StringUtils.isEmpty(zxfvo.getZhdz1())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，总厚度测值1有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(zxfvo.getZhdz2()) || StringUtils.isEmpty(zxfvo.getZhdz2())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，总厚度测值2有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(zxfvo.getZhdz3()) || StringUtils.isEmpty(zxfvo.getZhdz3())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，总厚度测值3有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(zxfvo.getZhdz4()) || StringUtils.isEmpty(zxfvo.getZhdz4())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，总厚度测值4有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(zxfvo.getZhdsjz()) || StringUtils.isEmpty(zxfvo.getZhdsjz())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，总厚度设计值有误，请修改后重新上传");
+                                        }
                                         JjgFbgcSdgcGssdlqlmhdzxf sdlmzxf = new JjgFbgcSdgcGssdlqlmhdzxf();
                                         BeanUtils.copyProperties(zxfvo,sdlmzxf);
                                         sdlmzxf.setCreatetime(new Date());
@@ -918,6 +966,7 @@ public class JjgFbgcSdgcGssdlqlmhdzxfServiceImpl extends ServiceImpl<JjgFbgcSdgc
                                         sdlmzxf.setHtd(commonInfoVo.getHtd());
                                         sdlmzxf.setFbgc(commonInfoVo.getFbgc());
                                         jjgFbgcSdgcGssdlqlmhdzxfMapper.insert(sdlmzxf);
+                                        rowNumber++;
                                     }
                                 }
                             }

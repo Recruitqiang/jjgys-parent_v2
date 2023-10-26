@@ -14,6 +14,7 @@ import glgc.jjgys.system.mapper.JjgFbgcLmgcTlmxlbgcMapper;
 import glgc.jjgys.system.service.JjgFbgcLmgcTlmxlbgcService;
 import glgc.jjgys.system.utils.JjgFbgcCommonUtils;
 import glgc.jjgys.system.utils.RowCopy;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -75,33 +76,41 @@ public class JjgFbgcLmgcTlmxlbgcServiceImpl extends ServiceImpl<JjgFbgcLmgcTlmxl
                 //创建文件根目录
                 fdir.mkdirs();
             }
-            File directory = new File("service-system/src/main/resources/static");
-            String reportPath = directory.getCanonicalPath();
-            String path =reportPath +File.separator+ "混凝土路面相邻板高差.xlsx";
-            Files.copy(Paths.get(path), new FileOutputStream(f));
-            FileInputStream out = new FileInputStream(f);
-            wb = new XSSFWorkbook(out);
-            createTable(gettableNum(data.size()),wb);
-            if(DBtoExcel(data,wb)){
-                for (int j = 0; j < wb.getNumberOfSheets(); j++) {
-                    if (shouldBeCalculate(wb.getSheetAt(j))) {
-                        calculateHeightDifferenceSheet(wb.getSheetAt(j));
-                        getTunnelTotal(wb.getSheetAt(j));
+            try {
+                File directory = new File("service-system/src/main/resources/static");
+                String reportPath = directory.getCanonicalPath();
+                String path =reportPath +File.separator+ "混凝土路面相邻板高差.xlsx";
+                Files.copy(Paths.get(path), new FileOutputStream(f));
+                FileInputStream out = new FileInputStream(f);
+                wb = new XSSFWorkbook(out);
+                createTable(gettableNum(data.size()),wb);
+                if(DBtoExcel(data,wb)){
+                    for (int j = 0; j < wb.getNumberOfSheets(); j++) {
+                        if (shouldBeCalculate(wb.getSheetAt(j))) {
+                            calculateHeightDifferenceSheet(wb.getSheetAt(j));
+                            getTunnelTotal(wb.getSheetAt(j));
+                        }
                     }
+
+                    for (int j = 0; j < wb.getNumberOfSheets(); j++) {
+                        JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
+                    }
+
+                    FileOutputStream fileOut = new FileOutputStream(f);
+                    wb.write(fileOut);
+                    fileOut.flush();
+                    fileOut.close();
+
                 }
-
-                for (int j = 0; j < wb.getNumberOfSheets(); j++) {
-                    JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
+                out.close();
+                wb.close();
+            }catch (Exception e) {
+                if(f.exists()){
+                    f.delete();
                 }
-
-                FileOutputStream fileOut = new FileOutputStream(f);
-                wb.write(fileOut);
-                fileOut.flush();
-                fileOut.close();
-
+                throw new JjgysException(20001, "生成鉴定表错误，请检查数据的正确性");
             }
-            out.close();
-            wb.close();
+
         }
 
     }
@@ -390,8 +399,31 @@ public class JjgFbgcLmgcTlmxlbgcServiceImpl extends ServiceImpl<JjgFbgcLmgcTlmxl
                             new ExcelHandler<JjgFbgcLmgcTlmxlbgcVo>(JjgFbgcLmgcTlmxlbgcVo.class) {
                                 @Override
                                 public void handle(List<JjgFbgcLmgcTlmxlbgcVo> dataList) {
+                                    int rowNumber=2;
                                     for(JjgFbgcLmgcTlmxlbgcVo tlmxlbgcVo: dataList)
                                     {
+                                        if (StringUtils.isEmpty(tlmxlbgcVo.getZh())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，桩号为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(tlmxlbgcVo.getQywzmc())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，取样位置名称为空，请修改后重新上传");
+                                        }
+
+                                        if (!StringUtils.isNumeric(tlmxlbgcVo.getScz1()) || StringUtils.isEmpty(tlmxlbgcVo.getScz1())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，实测值1有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(tlmxlbgcVo.getScz2()) || StringUtils.isEmpty(tlmxlbgcVo.getScz2())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，实测值2有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(tlmxlbgcVo.getScz3()) || StringUtils.isEmpty(tlmxlbgcVo.getScz3())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，实测值3有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(tlmxlbgcVo.getScz4()) || StringUtils.isEmpty(tlmxlbgcVo.getScz4())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，实测值4有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(tlmxlbgcVo.getBgcgdz()) || StringUtils.isEmpty(tlmxlbgcVo.getBgcgdz())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，板高差规定值有误，请修改后重新上传");
+                                        }
                                         JjgFbgcLmgcTlmxlbgc tlmxlbgc = new JjgFbgcLmgcTlmxlbgc();
                                         BeanUtils.copyProperties(tlmxlbgcVo,tlmxlbgc);
                                         tlmxlbgc.setCreatetime(new Date());
@@ -399,6 +431,7 @@ public class JjgFbgcLmgcTlmxlbgcServiceImpl extends ServiceImpl<JjgFbgcLmgcTlmxl
                                         tlmxlbgc.setHtd(commonInfoVo.getHtd());
                                         tlmxlbgc.setFbgc(commonInfoVo.getFbgc());
                                         jjgFbgcLmgcTlmxlbgcMapper.insert(tlmxlbgc);
+                                        rowNumber++;
                                     }
                                 }
                             }

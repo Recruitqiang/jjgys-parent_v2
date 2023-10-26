@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -55,12 +56,22 @@ public class JjgFbgcSdgcZdhmcxsController {
 
     @RequestMapping(value = "/download", method = RequestMethod.GET)
     public void downloadExport(HttpServletRequest request, HttpServletResponse response, String proname, String htd) throws IOException {
-        String fileName = "50隧道摩擦系数.xlsx";
+        /*String fileName = "50隧道摩擦系数.xlsx";
         String p = filespath+ File.separator+proname+File.separator+htd+File.separator+fileName;
         File file = new File(p);
         if (file.exists()){
             JjgFbgcCommonUtils.download(response,p,fileName);
+        }*/
+        List<Map<String,Object>> lxlist = jjgFbgcSdgcZdhmcxsService.selectlx(proname,htd);
+        List<String> fileName = new ArrayList<>();
+        for (Map<String, Object> map : lxlist) {
+            String lxbs = map.get("lxbs").toString();
+
+            fileName.add("50隧道摩擦系数-"+lxbs);
+
         }
+        String zipname = "隧道摩擦系数鉴定表";
+        JjgFbgcCommonUtils.batchDowndFile(response,zipname,fileName,filespath+File.separator+proname+File.separator+htd);
     }
 
     @ApiOperation("生成隧道摩擦系数鉴定表")

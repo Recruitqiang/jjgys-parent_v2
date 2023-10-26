@@ -28,4 +28,6 @@ public interface JjgZdhLdhdService extends IService<JjgZdhLdhd> {
     void exportldhd(HttpServletResponse response, String cdsl) throws IOException;
 
     void importldhd(MultipartFile file, CommonInfoVo commonInfoVo) throws IOException;
+
+    List<Map<String, Object>> selectlx(String proname, String htd);
 }

@@ -50,11 +50,6 @@ public class JjgZdhPzdJgfc implements Serializable {
     @TableField("ziri")
     private String ziri;
 
-    /**
-     * 右IRI
-     */
-    @TableField("yiri")
-    private String yiri;
 
     @TableField("cd")
     private String cd;

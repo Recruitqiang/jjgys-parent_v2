@@ -10,4 +10,12 @@
         SELECT * FROM jjg_lqs_jg_sd where proname = #{proname} and zhq >=#{zhq} and zhz &lt;= #{zhz} and zdbz=#{bz} and wz=#{wz} and lf=#{zdlf} ORDER BY zhq
     </select>
 
+    <select id="selectsdzf" resultMap="sdMap" parameterType="java.lang.String">
+        SELECT * FROM jjg_lqs_jg_sd where proname = #{proname} and zhq >=#{htdzhq} and zhz &lt;= #{htdzhz} and lf = #{lf} and wz='主线' ORDER BY zhq
+    </select>
+
+    <select id="selectsdyf" resultMap="sdMap" parameterType="java.lang.String">
+        SELECT * FROM jjg_lqs_jg_sd where proname = #{proname} and zhq >=#{htdzhq} and zhz &lt;= #{htdzhz} and lf = #{lf} and wz='主线' ORDER BY zhq
+    </select>
+
 </mapper>

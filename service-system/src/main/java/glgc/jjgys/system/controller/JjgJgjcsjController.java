@@ -73,11 +73,11 @@ public class JjgJgjcsjController {
         jjgJgjcsjService.importjgsj(file,projectname);
     }
 
-    /*@ApiOperation("生成新规范评定表")
+    @ApiOperation("生成新规范评定表")
     @PostMapping("generatepdbNew")
     public void generatepdbNew(@RequestParam String proname) {
         jjgJgjcsjService.generatepdb(proname);
-    }*/
+    }
 
     @ApiOperation("生成旧规范评定表")
     @PostMapping("generatepdb")

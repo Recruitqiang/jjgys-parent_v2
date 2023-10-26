@@ -28,4 +28,9 @@ public interface JjgZdhPzdJgfcService extends IService<JjgZdhPzdJgfc> {
     void importpzd(MultipartFile file, String proname) throws IOException;
 
     List<Map<String, Object>> selectlx(String proname, String htd);
+
+    List<Map<String, Object>> selecthtd(String proname);
+
+    List<Map<String, Object>> lookpjz(String proname);
+
 }

@@ -16,6 +16,7 @@ import glgc.jjgys.model.system.SysOperLog;
 import glgc.jjgys.model.system.SysUser;
 import glgc.jjgys.system.annotation.Log;
 import glgc.jjgys.system.enums.BusinessType;
+import glgc.jjgys.system.exception.JjgysException;
 import glgc.jjgys.system.service.JjgFbgcLjgcHdgqdService;
 import glgc.jjgys.system.service.LoginLogService;
 import glgc.jjgys.system.service.OperLogService;

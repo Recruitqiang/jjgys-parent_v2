@@ -20,8 +20,10 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -42,18 +44,23 @@ public class JjgFbgcLmgcTlmxlbgcJgfcController {
     private String jgfilepath;
 
     @RequestMapping(value = "/download", method = RequestMethod.GET)
-    public void downloadExport(HttpServletResponse response, String proname, String htd) throws IOException {
-        String fileName = "17混凝土路面相邻板高差.xlsx";
-        String p = jgfilepath+ File.separator+proname+File.separator+htd+File.separator+fileName;
-        File file = new File(p);
-        if (file.exists()){
-            JjgFbgcCommonUtils.download(response,p,fileName);
+    public void downloadExport(HttpServletResponse response, String proname) throws IOException {
+        List<Map<String,Object>> htdList = jjgFbgcLmgcTlmxlbgcJgfcService.selecthtd(proname);
+        List<String> fileName = new ArrayList<>();
+        if (htdList!=null){
+            for (Map<String, Object> map1 : htdList) {
+                String htd = map1.get("htd").toString();
+                fileName.add(htd+File.separator+"17混凝土路面相邻板高差");
+            }
         }
+        String zipname = "混凝土路面相邻板高差";
+        JjgFbgcCommonUtils.batchDowndFile(response,zipname,fileName,jgfilepath+ File.separator+proname);
     }
 
     @ApiOperation("生成相邻板高差鉴定表")
     @PostMapping("generateJdb")
-    public void generateJdb(String proname) throws Exception {
+    public void generateJdb(@RequestBody CommonInfoVo commonInfoVo) throws Exception {
+        String proname = commonInfoVo.getProname();
         jjgFbgcLmgcTlmxlbgcJgfcService.generateJdb(proname);
 
     }
@@ -81,8 +88,7 @@ public class JjgFbgcLmgcTlmxlbgcJgfcController {
         if (jjgFbgcLmgcTlmxlbgc != null){
             QueryWrapper<JjgFbgcLmgcTlmxlbgcJgfc> wrapper=new QueryWrapper<>();
             wrapper.like("proname",jjgFbgcLmgcTlmxlbgc.getProname());
-            wrapper.like("htd",jjgFbgcLmgcTlmxlbgc.getHtd());
-            wrapper.like("fbgc",jjgFbgcLmgcTlmxlbgc.getFbgc());
+
             Date jcsj = jjgFbgcLmgcTlmxlbgc.getJcsj();
             if (!StringUtils.isEmpty(jcsj)){
                 wrapper.like("jcsj",jcsj);

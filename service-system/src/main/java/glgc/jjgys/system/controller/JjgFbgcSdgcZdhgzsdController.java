@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -56,12 +57,20 @@ public class JjgFbgcSdgcZdhgzsdController {
     @RequestMapping(value = "/download", method = RequestMethod.GET)
     public void downloadExport(HttpServletResponse response, String proname, String htd) throws IOException {
 
-        String fileName = "51隧道构造深度.xlsx";
+        /*String fileName = "51隧道构造深度.xlsx";
         String p = filespath+ File.separator+proname+File.separator+htd+File.separator+fileName;
         File file = new File(p);
         if (file.exists()){
             JjgFbgcCommonUtils.download(response,p,fileName);
+        }*/
+        List<Map<String,Object>> lxlist = jjgFbgcSdgcZdhgzsdService.selectlx(proname,htd);
+        List<String> fileName = new ArrayList<>();
+        for (Map<String, Object> map : lxlist) {
+            String lxbs = map.get("lxbs").toString();
+            fileName.add("51隧道构造深度-"+lxbs);
         }
+        String zipname = "隧道构造深度鉴定表";
+        JjgFbgcCommonUtils.batchDowndFile(response,zipname,fileName,filespath+ File.separator+proname+File.separator+htd);
     }
 
     @ApiOperation("生成隧道构造深度鉴定表")

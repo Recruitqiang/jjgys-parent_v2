@@ -14,6 +14,7 @@ import glgc.jjgys.system.service.JjgFbgcQlgcXbTqdService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import glgc.jjgys.system.utils.JjgFbgcCommonUtils;
 import glgc.jjgys.system.utils.RowCopy;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.*;
 import org.springframework.beans.BeanUtils;
@@ -82,26 +83,34 @@ public class JjgFbgcQlgcXbTqdServiceImpl extends ServiceImpl<JjgFbgcQlgcXbTqdMap
                 //创建文件根目录
                 fdir.mkdirs();
             }
-            File directory = new File("service-system/src/main/resources/static");
-            String reportPath = directory.getCanonicalPath();
-            String name = "涵洞砼强度.xlsx";
-            String path = reportPath + File.separator + name;
-            Files.copy(Paths.get(path), new FileOutputStream(f));
-            FileInputStream out = new FileInputStream(f);
-            wb = new XSSFWorkbook(out);
-            createTable(gettableNum(data.size()),wb);
-            if(DBtoExcel(data,wb)){
-                calculateSheet(wb);
-                for (int j = 0; j < wb.getNumberOfSheets(); j++) {
-                    JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
+            try {
+                File directory = new File("service-system/src/main/resources/static");
+                String reportPath = directory.getCanonicalPath();
+                String name = "涵洞砼强度.xlsx";
+                String path = reportPath + File.separator + name;
+                Files.copy(Paths.get(path), new FileOutputStream(f));
+                FileInputStream out = new FileInputStream(f);
+                wb = new XSSFWorkbook(out);
+                createTable(gettableNum(data.size()),wb);
+                if(DBtoExcel(data,wb)){
+                    calculateSheet(wb);
+                    for (int j = 0; j < wb.getNumberOfSheets(); j++) {
+                        JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
+                    }
+                    FileOutputStream fileOut = new FileOutputStream(f);
+                    wb.write(fileOut);
+                    fileOut.flush();
+                    fileOut.close();
                 }
-                FileOutputStream fileOut = new FileOutputStream(f);
-                wb.write(fileOut);
-                fileOut.flush();
-                fileOut.close();
+                out.close();
+                wb.close();
+            }catch (Exception e) {
+                if(f.exists()){
+                    f.delete();
+                }
+                throw new JjgysException(20001, "生成鉴定表错误，请检查数据的正确性");
             }
-            out.close();
-            wb.close();
+
         }
 
 
@@ -466,8 +475,81 @@ public class JjgFbgcQlgcXbTqdServiceImpl extends ServiceImpl<JjgFbgcQlgcXbTqdMap
                             new ExcelHandler<JjgFbgcQlgcXbTqdVo>(JjgFbgcQlgcXbTqdVo.class) {
                                 @Override
                                 public void handle(List<JjgFbgcQlgcXbTqdVo> dataList) {
+                                    int rowNumber=2;
                                     for(JjgFbgcQlgcXbTqdVo xbTqdVo: dataList)
                                     {
+                                        if (StringUtils.isEmpty(xbTqdVo.getQlmc())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，桥梁名称为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(xbTqdVo.getBw1())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，部位1值为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(xbTqdVo.getBw2())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，部位2值为空，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(xbTqdVo.getCdz1()) || StringUtils.isEmpty(xbTqdVo.getCdz1())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，测定值1值有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(xbTqdVo.getZ2()) || StringUtils.isEmpty(xbTqdVo.getZ2())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，值2有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(xbTqdVo.getZ3()) || StringUtils.isEmpty(xbTqdVo.getZ3())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，值3有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(xbTqdVo.getZ4()) || StringUtils.isEmpty(xbTqdVo.getZ4())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，值4有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(xbTqdVo.getZ5()) || StringUtils.isEmpty(xbTqdVo.getZ5())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，值5有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(xbTqdVo.getZ6())|| StringUtils.isEmpty(xbTqdVo.getZ6())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，值6有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(xbTqdVo.getZ7())|| StringUtils.isEmpty(xbTqdVo.getZ7())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，值7有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(xbTqdVo.getZ8())|| StringUtils.isEmpty(xbTqdVo.getZ8())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，值8有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(xbTqdVo.getZ9())|| StringUtils.isEmpty(xbTqdVo.getZ9())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，值9有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(xbTqdVo.getZ10()) || StringUtils.isEmpty(xbTqdVo.getZ10())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，值10有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(xbTqdVo.getZ11()) || StringUtils.isEmpty(xbTqdVo.getZ11())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，值11有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(xbTqdVo.getZ12()) || StringUtils.isEmpty(xbTqdVo.getZ12())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，值12有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(xbTqdVo.getZ13())|| StringUtils.isEmpty(xbTqdVo.getZ13())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，值13有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(xbTqdVo.getZ14()) || StringUtils.isEmpty(xbTqdVo.getZ14())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，值14有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(xbTqdVo.getZ15())|| StringUtils.isEmpty(xbTqdVo.getZ15())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，值15有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(xbTqdVo.getZ16())|| StringUtils.isEmpty(xbTqdVo.getZ16())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，值16有误，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(xbTqdVo.getHtjd())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，回弹角度值是空的，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(xbTqdVo.getJzm())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，浇筑面值是空的，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(xbTqdVo.getThsd())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，碳化深度值是空的，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(xbTqdVo.getSfbs())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，是否泵送值是空的，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(xbTqdVo.getSjqd())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，设计强度值是空的，请修改后重新上传");
+                                        }
                                         JjgFbgcQlgcXbTqd fbgcQlgcXbTqd = new JjgFbgcQlgcXbTqd();
                                         BeanUtils.copyProperties(xbTqdVo,fbgcQlgcXbTqd);
                                         fbgcQlgcXbTqd.setCreatetime(new Date());
@@ -475,6 +557,7 @@ public class JjgFbgcQlgcXbTqdServiceImpl extends ServiceImpl<JjgFbgcQlgcXbTqdMap
                                         fbgcQlgcXbTqd.setHtd(commonInfoVo.getHtd());
                                         fbgcQlgcXbTqd.setFbgc(commonInfoVo.getFbgc());
                                         jjgFbgcQlgcXbTqdMapper.insert(fbgcQlgcXbTqd);
+                                        rowNumber++;
                                     }
                                 }
                             }

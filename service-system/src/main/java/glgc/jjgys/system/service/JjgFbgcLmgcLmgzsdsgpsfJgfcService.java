@@ -6,6 +6,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -22,5 +24,7 @@ public interface JjgFbgcLmgcLmgzsdsgpsfJgfcService extends IService<JjgFbgcLmgcL
     void exportlmgzsdsgpsf(HttpServletResponse response);
 
     void importlmgzsdsgpsf(MultipartFile file, String proname);
+
+    List<Map<String, Object>> selecthtd(String proname);
 
 }

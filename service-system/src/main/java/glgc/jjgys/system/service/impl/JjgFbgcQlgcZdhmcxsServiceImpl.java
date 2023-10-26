@@ -1,12 +1,10 @@
 package glgc.jjgys.system.service.impl;
 
 import com.alibaba.excel.EasyExcel;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import glgc.jjgys.common.excel.ExcelUtil;
 import glgc.jjgys.model.project.*;
 import glgc.jjgys.model.projectvo.ljgc.CommonInfoVo;
 import glgc.jjgys.model.projectvo.qlgc.JjgFbgcQlgcZdhmcxsVo;
-import glgc.jjgys.model.projectvo.zdh.JjgZdhMcxsVo;
 import glgc.jjgys.system.easyexcel.ExcelHandler;
 import glgc.jjgys.system.exception.JjgysException;
 import glgc.jjgys.system.mapper.JjgFbgcQlgcZdhmcxsMapper;
@@ -14,6 +12,7 @@ import glgc.jjgys.system.service.JjgFbgcQlgcZdhmcxsService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import glgc.jjgys.system.utils.JjgFbgcCommonUtils;
 import glgc.jjgys.system.utils.RowCopy;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.xssf.usermodel.*;
@@ -55,7 +54,18 @@ public class JjgFbgcQlgcZdhmcxsServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhmcx
         String htd = commonInfoVo.getHtd();
 
         List<Map<String,Object>> lxlist = jjgFbgcQlgcZdhmcxsMapper.selectlx(proname,htd);
-        int cds = 0;
+        for (Map<String, Object> map : lxlist) {
+            String zx = map.get("lxbs").toString();
+            int num = jjgFbgcQlgcZdhmcxsMapper.selectcdnum(proname,htd,zx);
+            int cds = 0;
+            if (num == 1){
+                cds = 2;
+            }else {
+                cds=num;
+            }
+            handlezxData(proname,htd,zx,cds,commonInfoVo.getSjz());
+        }
+        /*int cds = 0;
         int maxNum = 2; // 添加一个变量用来保存最大值
         for (Map<String, Object> map : lxlist) {
             String zx = map.get("lxbs").toString();
@@ -65,7 +75,7 @@ public class JjgFbgcQlgcZdhmcxsServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhmcx
             }
         }
         cds = maxNum;
-        handlezxData(proname,htd,cds,commonInfoVo.getSjz());
+        handlezxData(proname,htd,cds,commonInfoVo.getSjz());*/
     }
 
 
@@ -73,22 +83,24 @@ public class JjgFbgcQlgcZdhmcxsServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhmcx
      *
      * @param proname
      * @param htd
+     * @param zx
      * @param cdsl
      * @param sjz
      * @throws IOException
      * @throws ParseException
      */
-    private void handlezxData(String proname, String htd, int cdsl, String sjz) throws IOException, ParseException {
+    private void handlezxData(String proname, String htd, String zx, int cdsl, String sjz) throws IOException, ParseException {
 
-        List<Map<String, Object>> datazf = jjgFbgcQlgcZdhmcxsMapper.selectzfList(proname, htd);
-        List<Map<String, Object>> datayf = jjgFbgcQlgcZdhmcxsMapper.selectyfList(proname, htd);
+        List<Map<String, Object>> datazf = jjgFbgcQlgcZdhmcxsMapper.selectzfList(proname, htd,zx);
+        List<Map<String, Object>> datayf = jjgFbgcQlgcZdhmcxsMapper.selectyfList(proname, htd,zx);
 
         //处理数据
 
         List<Map<String, Object>> lmzfList = groupByZh(datazf);
         List<Map<String, Object>> lmyfList = groupByZh(datayf);
 
-        writeExcelData(proname, htd, lmzfList, lmyfList, cdsl, sjz);
+        writeExcelData(proname, htd, lmzfList, lmyfList, cdsl, sjz,zx);
+
 
 
     }
@@ -101,12 +113,13 @@ public class JjgFbgcQlgcZdhmcxsServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhmcx
      * @param qlyxList
      * @param cdsl
      * @param sjz
+     * @param zx
      * @throws IOException
      * @throws ParseException
      */
-    private void writeExcelData(String proname, String htd, List<Map<String, Object>> qlzxList, List<Map<String, Object>> qlyxList, int cdsl,String sjz) throws IOException, ParseException {
+    private void writeExcelData(String proname, String htd, List<Map<String, Object>> qlzxList, List<Map<String, Object>> qlyxList, int cdsl, String sjz, String zx) throws IOException, ParseException {
         XSSFWorkbook wb = null;
-        String fname="36桥面摩擦系数.xlsx";
+        String fname="36桥面摩擦系数-"+zx+".xlsx";
 
         File f = new File(filepath+File.separator+proname+File.separator+htd+File.separator+fname);
         File fdir = new File(filepath + File.separator + proname + File.separator + htd);
@@ -114,52 +127,60 @@ public class JjgFbgcQlgcZdhmcxsServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhmcx
             //创建文件根目录
             fdir.mkdirs();
         }
-        File directory = new File("service-system/src/main/resources/static");
-        String reportPath = directory.getCanonicalPath();
-        String filename = "";
-        String sheetqname = "桥";
-        if (cdsl == 5){
-            filename = "摩擦系数-5车道.xlsx";
-        }else if (cdsl == 4){
-            filename = "摩擦系数-4车道.xlsx";
-        }else if (cdsl == 3){
-            filename = "摩擦系数-3车道.xlsx";
-        }else if (cdsl == 2){
-            filename = "摩擦系数-2车道.xlsx";
-        }
-
-        String path = reportPath + File.separator + filename;
-        Files.copy(Paths.get(path), new FileOutputStream(f));
-
-        FileInputStream out = new FileInputStream(f);
-        wb = new XSSFWorkbook(out);
-
-        if (qlzxList.size() >0 && !qlzxList.isEmpty()){
-            DBtoExcel(proname,htd,qlzxList,wb,"左幅-"+sheetqname,cdsl,sjz);
-        }
-        if (qlyxList.size() >0 && !qlyxList.isEmpty()){
-            DBtoExcel(proname,htd,qlyxList,wb,"右幅-"+sheetqname,cdsl,sjz);
-        }
-
-
-        String[] arr = new String[]{"左幅-路面","右幅-路面","左幅-桥","右幅-桥","左幅-隧道","右幅-隧道"};
-
-        for (int i = 0;i<arr.length;i++){
-            if (shouldBeCalculate(wb.getSheet(arr[i]))){
-                calculateSheet(wb,wb.getSheet(arr[i]),cdsl);
-                JjgFbgcCommonUtils.updateFormula(wb, wb.getSheet(arr[i]));
-            }else {
-                wb.removeSheetAt(wb.getSheetIndex(arr[i]));
+        try {
+            File directory = new File("service-system/src/main/resources/static");
+            String reportPath = directory.getCanonicalPath();
+            String filename = "";
+            String sheetqname = "桥";
+            if (cdsl == 5){
+                filename = "摩擦系数-5车道.xlsx";
+            }else if (cdsl == 4){
+                filename = "摩擦系数-4车道.xlsx";
+            }else if (cdsl == 3){
+                filename = "摩擦系数-3车道.xlsx";
+            }else if (cdsl == 2){
+                filename = "摩擦系数-2车道.xlsx";
             }
+
+            String path = reportPath + File.separator + filename;
+            Files.copy(Paths.get(path), new FileOutputStream(f));
+
+            FileInputStream out = new FileInputStream(f);
+            wb = new XSSFWorkbook(out);
+
+            if (qlzxList.size() >0 && !qlzxList.isEmpty()){
+                DBtoExcel(proname,htd,qlzxList,wb,"左幅-"+sheetqname,cdsl,sjz);
+            }
+            if (qlyxList.size() >0 && !qlyxList.isEmpty()){
+                DBtoExcel(proname,htd,qlyxList,wb,"右幅-"+sheetqname,cdsl,sjz);
+            }
+
+
+            String[] arr = new String[]{"左幅-路面","右幅-路面","左幅-桥","右幅-桥","左幅-隧道","右幅-隧道"};
+
+            for (int i = 0;i<arr.length;i++){
+                if (shouldBeCalculate(wb.getSheet(arr[i]))){
+                    calculateSheet(wb,wb.getSheet(arr[i]),cdsl);
+                    JjgFbgcCommonUtils.updateFormula(wb, wb.getSheet(arr[i]));
+                }else {
+                    wb.removeSheetAt(wb.getSheetIndex(arr[i]));
+                }
+            }
+            wb.removeSheetAt(wb.getSheetIndex("保证率系数"));
+            System.out.println("成功生成鉴定表");
+            FileOutputStream fileOut = new FileOutputStream(f);
+            wb.write(fileOut);
+            fileOut.flush();
+            fileOut.close();
+            out.close();
+            wb.close();
+        }catch (Exception e) {
+            if(f.exists()){
+                f.delete();
+            }
+            throw new JjgysException(20001, "生成鉴定表错误，请检查数据的正确性");
         }
-        wb.removeSheetAt(wb.getSheetIndex("保证率系数"));
-        System.out.println("成功生成鉴定表");
-        FileOutputStream fileOut = new FileOutputStream(f);
-        wb.write(fileOut);
-        fileOut.flush();
-        fileOut.close();
-        out.close();
-        wb.close();
+
     }
 
     /**
@@ -913,12 +934,39 @@ public class JjgFbgcQlgcZdhmcxsServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhmcx
 
     @Override
     public List<Map<String, Object>> lookJdbjg(CommonInfoVo commonInfoVo) throws IOException {
+
         String proname = commonInfoVo.getProname();
         String htd = commonInfoVo.getHtd();
+        List<Map<String, Object>> mapList = new ArrayList<>();
+
+        List<Map<String,Object>> lxlist = jjgFbgcQlgcZdhmcxsMapper.selectlx(proname,htd);
+        if (lxlist.size()>0){
+            for (Map<String, Object> map : lxlist) {
+                String zx = map.get("lxbs").toString();
+                int num = jjgFbgcQlgcZdhmcxsMapper.selectcdnum(proname,htd,zx);
+                List<Map<String, Object>> looksdjdb = lookdata(proname, htd, zx,num);
+                mapList.addAll(looksdjdb);
+            }
+            return mapList;
+        }else {
+            return new ArrayList<>();
+        }
+
+    }
+
+    /**
+     *
+     * @param proname
+     * @param htd
+     * @param zx
+     * @param cds
+     * @return
+     * @throws IOException
+     */
+    private List<Map<String, Object>> lookdata(String proname, String htd, String zx, int cds) throws IOException {
         DecimalFormat df = new DecimalFormat("0.00");
         DecimalFormat decf = new DecimalFormat("0.##");
-        int cds = getcds(proname,htd);
-        File f = new File(filepath + File.separator + proname + File.separator + htd + File.separator + "36桥面摩擦系数.xlsx");
+        File f = new File(filepath + File.separator + proname + File.separator + htd + File.separator + "36桥面摩擦系数-"+zx+".xlsx");
         int pronamecl = 0;
         int htdcl = 0;
         if (cds == 2){
@@ -1061,5 +1109,77 @@ public class JjgFbgcQlgcZdhmcxsServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhmcx
         inputStream.close();
 
 
+    }
+
+    @Override
+    public List<Map<String, Object>> selectlx(String proname, String htd) {
+        List<Map<String, Object>> selectlx = jjgFbgcQlgcZdhmcxsMapper.selectlx(proname, htd);
+        return selectlx;
+    }
+
+    @Override
+    public List<Map<String, Object>> lookJdb(CommonInfoVo commonInfoVo, String value) throws IOException {
+        DecimalFormat df = new DecimalFormat("0.00");
+        DecimalFormat decf = new DecimalFormat("0.##");
+        String proname = commonInfoVo.getProname();
+        String htd = commonInfoVo.getHtd();
+        //List<Map<String, Object>> selectqlmc = selectqlmc2(proname, htd);
+
+        List<Map<String, Object>> mapList = new ArrayList<>();
+        String qlmc = StringUtils.substringBetween(value, "-", ".");
+        int cds = jjgFbgcQlgcZdhmcxsMapper.selectcdnum(proname,htd,qlmc);
+        File f = new File(filepath + File.separator + proname + File.separator + htd + File.separator + value);
+        int pronamecl = 0;
+        int htdcl = 0;
+        if (cds == 2){
+            pronamecl = 1;
+            htdcl = 7;
+        }else {
+            pronamecl = 2;
+            if (cds == 5){
+                htdcl = 14;
+            }else {
+                htdcl =  cds*3;
+            }
+        }
+        if (!f.exists()) {
+            return new ArrayList<>();
+        } else {
+            XSSFWorkbook wb = new XSSFWorkbook(new FileInputStream(f));
+            List<Map<String, Object>> jgmap = new ArrayList<>();
+            for (int j = 0; j < wb.getNumberOfSheets(); j++) {
+                if (!wb.isSheetHidden(wb.getSheetIndex(wb.getSheetAt(j)))) {
+                    XSSFSheet slSheet = wb.getSheetAt(j);
+
+                    XSSFCell xmname = slSheet.getRow(1).getCell(pronamecl);//项目名
+                    XSSFCell htdname = slSheet.getRow(1).getCell(htdcl);//合同段名
+
+
+                    if (proname.equals(xmname.toString()) && htd.equals(htdname.toString())) {
+                        slSheet.getRow(1).getCell(3*cds+3).setCellType(CellType.STRING);//总点数
+                        slSheet.getRow(1).getCell(3*cds+4).setCellType(CellType.STRING);//合格点数
+
+                        slSheet.getRow(1).getCell(3*cds+6).setCellType(CellType.STRING);//合格点数
+                        slSheet.getRow(1).getCell(3*cds+7).setCellType(CellType.STRING);//合格点数
+                        slSheet.getRow(37).getCell(cds*2+3).setCellType(CellType.STRING);
+                        double zds = Double.valueOf(slSheet.getRow(1).getCell(3*cds+3).getStringCellValue());
+                        double hgds = Double.valueOf(slSheet.getRow(1).getCell(3*cds+4).getStringCellValue());
+                        String zdsz1 = decf.format(zds);
+                        String hgdsz1 = decf.format(hgds);
+                        Map map = new HashMap();
+                        map.put("检测项目", qlmc);
+                        map.put("路面类型", wb.getSheetName(j));
+                        map.put("总点数", zdsz1);
+                        map.put("设计值", slSheet.getRow(37).getCell(cds*2+3).getStringCellValue());
+                        map.put("合格点数", hgdsz1);
+                        map.put("Min", slSheet.getRow(1).getCell(3*cds+7).getStringCellValue());
+                        map.put("Max", slSheet.getRow(1).getCell(3*cds+6).getStringCellValue());
+                        jgmap.add(map);
+                    }
+                }
+            }
+            return jgmap;
+
+        }
     }
 }

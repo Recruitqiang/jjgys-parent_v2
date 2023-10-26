@@ -3,7 +3,11 @@
 <mapper namespace="glgc.jjgys.system.mapper.JjgFbgcLmgcTlmxlbgcJgfcMapper">
 
     <select id="gethtd" resultType="java.lang.String" parameterType="java.lang.String">
-        SELECT DISTINCT htd from jjg_fbgc_lmgc_lmgzsdsgpsf_jgfc  where proname = #{proname}
+        SELECT DISTINCT htd from jjg_fbgc_lmgc_tlmxlbgc_jgfc  where proname = #{proname}
+    </select>
+
+    <select id="selecthtd" resultType="java.util.Map" parameterType="java.lang.String">
+        SELECT DISTINCT htd,lxbs from jjg_fbgc_lmgc_tlmxlbgc_jgfc  where proname = #{proname}
     </select>
 
 </mapper>

@@ -2,6 +2,10 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="glgc.jjgys.system.mapper.JjgZdhMcxsJgfcMapper">
 
+    <select id="selecthtd" resultType="java.util.Map" parameterType="java.lang.String">
+        SELECT DISTINCT htd,lxbs from jjg_zdh_mcxs_jgfc  where proname = #{proname}
+    </select>
+
     <select id="gethtd" resultType="java.lang.String" parameterType="java.lang.String">
         SELECT DISTINCT htd from jjg_zdh_mcxs_jgfc  where proname = #{proname}
     </select>

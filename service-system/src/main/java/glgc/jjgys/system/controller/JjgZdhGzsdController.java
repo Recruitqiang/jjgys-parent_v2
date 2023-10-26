@@ -63,7 +63,7 @@ public class JjgZdhGzsdController {
         for (Map<String, Object> map : lxlist) {
             String lxbs = map.get("lxbs").toString();
             if (lxbs.equals("主线")){
-                fileName.add("20路面构造深度");;
+                fileName.add("20路面构造深度");
             }else {
                 fileName.add("63互通构造深度-"+lxbs);
             }

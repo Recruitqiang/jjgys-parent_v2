@@ -111,43 +111,51 @@ public class JjgFbgcSdgcSdlqlmysdServiceImpl extends ServiceImpl<JjgFbgcSdgcSdlq
                 //创建文件根目录
                 fdir.mkdirs();
             }
-            File directory = new File("service-system/src/main/resources/static");
-            String reportPath = directory.getCanonicalPath();
-            String path = reportPath + File.separator + "沥青路面压实度.xlsx";
-            Files.copy(Paths.get(path), new FileOutputStream(f));
-            FileInputStream out = new FileInputStream(f);
-            wb = new XSSFWorkbook(out);
+            try {
+                File directory = new File("service-system/src/main/resources/static");
+                String reportPath = directory.getCanonicalPath();
+                String path = reportPath + File.separator + "沥青路面压实度.xlsx";
+                Files.copy(Paths.get(path), new FileOutputStream(f));
+                FileInputStream out = new FileInputStream(f);
+                wb = new XSSFWorkbook(out);
 
 
-            //沥青路面压实度主线左幅
-            lqlmysdzx(wb, zxzfdata, "沥青路面压实度左幅", "路面面层（主线左幅）");
-            //沥青路面压实度主线右幅
-            lqlmysdzx(wb, zxyfdata, "沥青路面压实度右幅", "路面面层（主线右幅）");
-            //沥青路面压实度隧道左幅
-            lqlmysdOther(wb, sdzfdata, "隧道左幅", "隧道路面");
-            //沥青路面压实度隧道右幅
-            lqlmysdOther(wb, sdyfdata, "隧道右幅", "隧道路面");
-            //沥青路面压实度匝道
-            lqlmysdOther(wb, zddata, "沥青路面压实度匝道", "匝道路面");
-            //沥青路面压实度连接线
-            lqlmysdOther(wb, ljxdata, "连接线", "连接线");
-            //沥青路面压实度连接线隧道
-            lqlmysdOther(wb, ljxsddata, "连接线隧道", "连接线隧道");
-            for (int j = 0; j < wb.getNumberOfSheets(); j++) {
-                if (shouldBeCalculate(wb.getSheetAt(j))) {
-                    calculateOneSheet(wb.getSheetAt(j));
+                //沥青路面压实度主线左幅
+                lqlmysdzx(wb, zxzfdata, "沥青路面压实度左幅", "路面面层（主线左幅）");
+                //沥青路面压实度主线右幅
+                lqlmysdzx(wb, zxyfdata, "沥青路面压实度右幅", "路面面层（主线右幅）");
+                //沥青路面压实度隧道左幅
+                lqlmysdOther(wb, sdzfdata, "隧道左幅", "隧道路面");
+                //沥青路面压实度隧道右幅
+                lqlmysdOther(wb, sdyfdata, "隧道右幅", "隧道路面");
+                //沥青路面压实度匝道
+                lqlmysdOther(wb, zddata, "沥青路面压实度匝道", "匝道路面");
+                //沥青路面压实度连接线
+                lqlmysdOther(wb, ljxdata, "连接线", "连接线");
+                //沥青路面压实度连接线隧道
+                lqlmysdOther(wb, ljxsddata, "连接线隧道", "连接线隧道");
+                for (int j = 0; j < wb.getNumberOfSheets(); j++) {
+                    if (shouldBeCalculate(wb.getSheetAt(j))) {
+                        calculateOneSheet(wb.getSheetAt(j));
+                        JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
+                    }
+                }
+                for (int j = 0; j < wb.getNumberOfSheets(); j++) {   //表内公式  计算 显示结果
                     JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
                 }
+                JjgFbgcCommonUtils.deleteEmptySheets(wb);
+                FileOutputStream fileOut = new FileOutputStream(f);
+                wb.write(fileOut);
+                fileOut.flush();
+                fileOut.close();
+                out.close();
+            }catch (Exception e) {
+                if(f.exists()){
+                    f.delete();
+                }
+                throw new JjgysException(20001, "生成鉴定表错误，请检查数据的正确性");
             }
-            for (int j = 0; j < wb.getNumberOfSheets(); j++) {   //表内公式  计算 显示结果
-                JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
-            }
-            JjgFbgcCommonUtils.deleteEmptySheets(wb);
-            FileOutputStream fileOut = new FileOutputStream(f);
-            wb.write(fileOut);
-            fileOut.flush();
-            fileOut.close();
-            out.close();
+
         }
         wb.close();
     }
@@ -748,8 +756,25 @@ public class JjgFbgcSdgcSdlqlmysdServiceImpl extends ServiceImpl<JjgFbgcSdgcSdlq
                             new ExcelHandler<JjgFbgcSdgcSdlqlmysdVo>(JjgFbgcSdgcSdlqlmysdVo.class) {
                                 @Override
                                 public void handle(List<JjgFbgcSdgcSdlqlmysdVo> dataList) {
+                                    int rowNumber=2;
                                     for(JjgFbgcSdgcSdlqlmysdVo sdlqlmysdVo: dataList)
                                     {
+                                        if (StringUtils.isEmpty(sdlqlmysdVo.getLmlx())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，路面类型为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(sdlqlmysdVo.getLqs())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，路桥隧为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(sdlqlmysdVo.getSdmc())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，隧道名称为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(sdlqlmysdVo.getZh())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，桩号为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(sdlqlmysdVo.getQywz())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，取样位置为空，请修改后重新上传");
+                                        }
+
                                         JjgFbgcSdgcSdlqlmysd fbgcLmgcLqlmysd = new JjgFbgcSdgcSdlqlmysd();
                                         BeanUtils.copyProperties(sdlqlmysdVo,fbgcLmgcLqlmysd);
                                         fbgcLmgcLqlmysd.setCreatetime(new Date());
@@ -757,6 +782,7 @@ public class JjgFbgcSdgcSdlqlmysdServiceImpl extends ServiceImpl<JjgFbgcSdgcSdlq
                                         fbgcLmgcLqlmysd.setHtd(commonInfoVo.getHtd());
                                         fbgcLmgcLqlmysd.setFbgc(commonInfoVo.getFbgc());
                                         jjgFbgcSdgcSdlqlmysdMapper.insert(fbgcLmgcLqlmysd);
+                                        rowNumber++;
                                     }
                                 }
                             }

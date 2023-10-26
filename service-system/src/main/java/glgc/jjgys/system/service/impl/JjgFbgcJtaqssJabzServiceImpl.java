@@ -13,6 +13,7 @@ import glgc.jjgys.system.service.JjgFbgcJtaqssJabzService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import glgc.jjgys.system.utils.JjgFbgcCommonUtils;
 import glgc.jjgys.system.utils.RowCopy;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
@@ -65,8 +66,25 @@ public class JjgFbgcJtaqssJabzServiceImpl extends ServiceImpl<JjgFbgcJtaqssJabzM
                             new ExcelHandler<JjgFbgcJtaqssJabzVo>(JjgFbgcJtaqssJabzVo.class) {
                                 @Override
                                 public void handle(List<JjgFbgcJtaqssJabzVo> dataList) {
+                                    int rowNumber=2;
                                     for(JjgFbgcJtaqssJabzVo jabzVo: dataList)
                                     {
+                                        if (StringUtils.isEmpty(jabzVo.getWz())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，位置为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(jabzVo.getLzlx())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，立柱类型为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(jabzVo.getSzdyxps())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，竖直度允许偏差为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(jabzVo.getHdyxps())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，厚度允许偏差为空，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(jabzVo.getJkgdz()) || StringUtils.isEmpty(jabzVo.getJkgdz())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，净空规定值有误，请修改后重新上传");
+                                        }
+
                                         JjgFbgcJtaqssJabz fbgcJtaqssJabz = new JjgFbgcJtaqssJabz();
                                         BeanUtils.copyProperties(jabzVo,fbgcJtaqssJabz);
                                         fbgcJtaqssJabz.setCreatetime(new Date());
@@ -74,6 +92,7 @@ public class JjgFbgcJtaqssJabzServiceImpl extends ServiceImpl<JjgFbgcJtaqssJabzM
                                         fbgcJtaqssJabz.setHtd(commonInfoVo.getHtd());
                                         fbgcJtaqssJabz.setFbgc(commonInfoVo.getFbgc());
                                         jjgFbgcJtaqssJabzMapper.insert(fbgcJtaqssJabz);
+                                        rowNumber++;
                                     }
                                 }
                             }
@@ -117,31 +136,39 @@ public class JjgFbgcJtaqssJabzServiceImpl extends ServiceImpl<JjgFbgcJtaqssJabzM
                 //创建文件根目录
                 fdir.mkdirs();
             }
-            File directory = new File("service-system/src/main/resources/static");
-            String reportPath = directory.getCanonicalPath();
-            String name = "标志.xlsx";
-            String path = reportPath + File.separator + name;
-            Files.copy(Paths.get(path), new FileOutputStream(f));
-            FileInputStream out = new FileInputStream(f);
-            wb = new XSSFWorkbook(out);
-            createTable(gettableNum(data.size()),wb);
-            if(DBtoExcel(data,wb)){
-                for (int j = 0; j < wb.getNumberOfSheets(); j++) {
-                    calculateOneSheet(wb.getSheetAt(j),wb);
-                }
+            try {
+                File directory = new File("service-system/src/main/resources/static");
+                String reportPath = directory.getCanonicalPath();
+                String name = "标志.xlsx";
+                String path = reportPath + File.separator + name;
+                Files.copy(Paths.get(path), new FileOutputStream(f));
+                FileInputStream out = new FileInputStream(f);
+                wb = new XSSFWorkbook(out);
+                createTable(gettableNum(data.size()),wb);
+                if(DBtoExcel(data,wb)){
+                    for (int j = 0; j < wb.getNumberOfSheets(); j++) {
+                        calculateOneSheet(wb.getSheetAt(j),wb);
+                    }
 
-                for (int j = 0; j < wb.getNumberOfSheets(); j++) {   //表内公式  计算 显示结果
-                    JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
-                }
+                    for (int j = 0; j < wb.getNumberOfSheets(); j++) {   //表内公式  计算 显示结果
+                        JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
+                    }
 
-                FileOutputStream fileOut = new FileOutputStream(f);
-                wb.write(fileOut);
-                fileOut.flush();
-                fileOut.close();
-                
+                    FileOutputStream fileOut = new FileOutputStream(f);
+                    wb.write(fileOut);
+                    fileOut.flush();
+                    fileOut.close();
+
+                }
+                out.close();
+                wb.close();
+            }catch (Exception e) {
+                if(f.exists()){
+                    f.delete();
+                }
+                throw new JjgysException(20001, "生成鉴定表错误，请检查数据的正确性");
             }
-            out.close();
-            wb.close();
+
         }
 
     }

@@ -10,6 +10,7 @@ import com.spire.doc.documents.VerticalAlignment;
 import com.spire.presentation.Cell;
 import com.spire.xls.WorksheetVisibility;
 import com.spire.xls.collections.WorksheetsCollection;
+import glgc.jjgys.system.exception.JjgysException;
 import glgc.jjgys.system.mapper.JjgFbgcGenerateWordMapper;
 import glgc.jjgys.system.service.JjgFbgcGenerateWordService;
 import glgc.jjgys.system.utils.JjgFbgcCommonUtils;
@@ -46,61 +47,69 @@ public class JjgFbgcGenerateWordImpl extends ServiceImpl<JjgFbgcGenerateWordMapp
             fdir.mkdirs();
         }
         Document xw = null;
-        File directory = new File("service-system/src/main/resources/static");
-        String reportPath = directory.getCanonicalPath();
-        String name = "报告.docx";
-        String path = reportPath + File.separator + name;
-        Files.copy(Paths.get(path), new FileOutputStream(f));
-        FileInputStream out = new FileInputStream(f);
-        xw = new Document(out);
         try {
-            //读取Excel文件
-            Workbook workbook = new Workbook();
-            workbook.loadFromFile(excelFilePath);
-            WorksheetsCollection sheetnum = workbook.getWorksheets();
+            File directory = new File("service-system/src/main/resources/static");
+            String reportPath = directory.getCanonicalPath();
+            String name = "报告.docx";
+            String path = reportPath + File.separator + name;
+            Files.copy(Paths.get(path), new FileOutputStream(f));
+            FileInputStream out = new FileInputStream(f);
+            xw = new Document(out);
+            try {
+                //读取Excel文件
+                Workbook workbook = new Workbook();
+                workbook.loadFromFile(excelFilePath);
+                WorksheetsCollection sheetnum = workbook.getWorksheets();
 
-            //xw.replace("项目全称", proname, true, true);
-            int cnt=sheetnum.getCount()-1;
+                //xw.replace("项目全称", proname, true, true);
+                int cnt=sheetnum.getCount()-1;
 
-            //xw.saveToFile(f.getPath(), FileFormat.Docx);
-            //for (int j = 0; j < sheetnum.getCount()-1; j++) {
-            for (int j = 0; j < 2; j++) {
-                String sheetname = sheetnum.get(j).getName();
-                Worksheet sheet = workbook.getWorksheets().get(j);
-                boolean ishidden = JjgFbgcCommonUtils.ishidden(excelFilePath, sheetname);
-                if (!ishidden) {
-                    CellRange allocatedRange = sheet.getAllocatedRange();
-                    // text= allocatedRange.getDisplayedText();
-                    String s=allocatedRange.get(1,1).getDisplayedText();
-                    //String[] s1=s.split("\\s+");
-                    //log.info("总共复制{}个表，目前第{}个",cnt,j+1);
-                    log.info("表名：{}",s);
-                    TextSelection[] selection = xw.findAllString(s, true, true);
-                    if(selection==null){
-                        System.out.println("不存在的表格:"+s);
-                        continue;
-                    }
-                    for(int k=0;k<selection.length;k++){
-                        TextRange range=selection[k].getAsOneRange();
+                //xw.saveToFile(f.getPath(), FileFormat.Docx);
+                //for (int j = 0; j < sheetnum.getCount()-1; j++) {
+                for (int j = 0; j < 2; j++) {
+                    String sheetname = sheetnum.get(j).getName();
+                    Worksheet sheet = workbook.getWorksheets().get(j);
+                    boolean ishidden = JjgFbgcCommonUtils.ishidden(excelFilePath, sheetname);
+                    if (!ishidden) {
+                        CellRange allocatedRange = sheet.getAllocatedRange();
+                        // text= allocatedRange.getDisplayedText();
+                        String s=allocatedRange.get(1,1).getDisplayedText();
+                        //String[] s1=s.split("\\s+");
+                        //log.info("总共复制{}个表，目前第{}个",cnt,j+1);
+                        log.info("表名：{}",s);
+                        TextSelection[] selection = xw.findAllString(s, true, true);
+                        System.out.println(selection);
+                        if(selection==null){
+                            System.out.println("不存在的表格:"+s);
+                            continue;
+                        }
+                        for(int k=0;k<selection.length;k++){
+                            TextRange range=selection[k].getAsOneRange();
 
-                        //删除没用数据的行
-                        CellRange dataRange = RemoveEmptyRows(sheet,allocatedRange);
-                        //复制到Word文档
-                        log.info("开始复制{}中的数据到word中",sheetname);
-                        log.info("此处共{}处匹配，目前第{}处",selection.length,k+1);
-                        copyToWord(dataRange, xw,f.getPath(),range);
+                            //删除没用数据的行
+                            CellRange dataRange = RemoveEmptyRows(sheet,allocatedRange);
+                            //复制到Word文档
+                            log.info("开始复制{}中的数据到word中",sheetname);
+                            log.info("此处共{}处匹配，目前第{}处",selection.length,k+1);
+                            copyToWord(dataRange, xw,f.getPath(),range);
 
-                        log.info("{}中的数据复制完成",sheetname);
+                            log.info("{}中的数据复制完成",sheetname);
+                        }
                     }
                 }
-            }
 
-        } catch (Exception e) {
-            e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            out.close();
+            xw.close();
+        }catch (Exception e) {
+            if(f.exists()){
+                f.delete();
+            }
+            throw new JjgysException(20001, "生成报告错误，请检查数据的正确性");
         }
 
-        out.close();
-        xw.close();
     }
 
     /**
@@ -145,7 +154,7 @@ public class JjgFbgcGenerateWordImpl extends ServiceImpl<JjgFbgcGenerateWordMapp
         Body body=paragraph.ownerTextBody();
         int index=body.getChildObjects().indexOf(paragraph);
 
-        for (int r = 2; r <= cell.getRowCount(); r++) {
+        /*for (int r = 2; r <= cell.getRowCount(); r++) {
             for (int c = 1; c <= cell.getLastColumn(); c++) {
                 CellRange xCell = cell.get(r, c);
                 CellRange mergeArea = xCell.getMergeArea();
@@ -171,7 +180,7 @@ public class JjgFbgcGenerateWordImpl extends ServiceImpl<JjgFbgcGenerateWordMapp
                 }
             }
         }
-        body.getChildObjects().remove(paragraph);
+        body.getChildObjects().remove(paragraph);*/
         body.getChildObjects().insert(index,table);
         doc.saveToFile(path,com.spire.doc.FileFormat.Docx);
     }

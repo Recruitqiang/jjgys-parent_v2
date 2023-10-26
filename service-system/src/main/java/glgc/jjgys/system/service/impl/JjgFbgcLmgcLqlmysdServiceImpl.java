@@ -16,6 +16,7 @@ import glgc.jjgys.system.service.JjgFbgcLmgcLqlmysdService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import glgc.jjgys.system.utils.JjgFbgcCommonUtils;
 import glgc.jjgys.system.utils.RowCopy;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -84,162 +85,178 @@ public class JjgFbgcLmgcLqlmysdServiceImpl extends ServiceImpl<JjgFbgcLmgcLqlmys
                 //创建文件根目录
                 fdir.mkdirs();
             }
+
             File directory = new File("service-system/src/main/resources");
             String reportPath = directory.getCanonicalPath();
             if (sffl.equals("否")) {
-                String path = reportPath + "/static/沥青路面压实度.xlsx";
-                Files.copy(Paths.get(path), new FileOutputStream(f));
-                FileInputStream out = new FileInputStream(f);
-                wb = new XSSFWorkbook(out);
+                try {
+                    String path = reportPath + "/static/沥青路面压实度.xlsx";
+                    Files.copy(Paths.get(path), new FileOutputStream(f));
+                    FileInputStream out = new FileInputStream(f);
+                    wb = new XSSFWorkbook(out);
 
-                List<JjgFbgcLmgcLqlmysd> zxzfdata = new ArrayList<>();
-                List<JjgFbgcLmgcLqlmysd> zxyfdata = new ArrayList<>();
-                List<JjgFbgcLmgcLqlmysd> sdzfdata = new ArrayList<>();
-                List<JjgFbgcLmgcLqlmysd> sdyfdata = new ArrayList<>();
-                for(JjgFbgcLmgcLqlmysd ysd : data){
-                    //沥青路面压实度左幅  将所有左幅的数据收集，包含路，桥，隧道，不包含匝道，连接线，连接线隧道，并且也不分左右幅
-                    if (ysd.getZh().substring(0,1).equals("Z")){
-                        zxzfdata.add(ysd);
+                    List<JjgFbgcLmgcLqlmysd> zxzfdata = new ArrayList<>();
+                    List<JjgFbgcLmgcLqlmysd> zxyfdata = new ArrayList<>();
+                    List<JjgFbgcLmgcLqlmysd> sdzfdata = new ArrayList<>();
+                    List<JjgFbgcLmgcLqlmysd> sdyfdata = new ArrayList<>();
+                    for(JjgFbgcLmgcLqlmysd ysd : data){
+                        //沥青路面压实度左幅  将所有左幅的数据收集，包含路，桥，隧道，不包含匝道，连接线，连接线隧道，并且也不分左右幅
+                        if (ysd.getZh().substring(0,1).equals("Z")){
+                            zxzfdata.add(ysd);
+                        }
+                        if (ysd.getZh().substring(0,1).equals("Y")){
+                            zxyfdata.add(ysd);
+                        }
+                        //隧道和桥的数据 是放在隧道左右幅的工作簿中，分左右幅
+                        if (ysd.getLqs().contains("隧") && ysd.getZh().substring(0,1).equals("Z") || ysd.getLqs().contains("桥")){
+                            sdzfdata.add(ysd);
+                        }
+                        if (ysd.getLqs().contains("隧") && ysd.getZh().substring(0,1).equals("Y") || ysd.getLqs().contains("桥")){
+                            sdyfdata.add(ysd);
+                        }
                     }
-                    if (ysd.getZh().substring(0,1).equals("Y")){
-                        zxyfdata.add(ysd);
+                    //匝道数据，是不分左右福的，
+                    List<JjgFbgcLmgcLqlmysd> zddata = jjgFbgcLmgcLqlmysdMapper.selectzd(proname,htd,fbgc);
+                    List<JjgFbgcLmgcLqlmysd> ljxdata = jjgFbgcLmgcLqlmysdMapper.selectljx(proname,htd,fbgc);
+                    List<JjgFbgcLmgcLqlmysd> ljxsddata = jjgFbgcLmgcLqlmysdMapper.selectljxsd(proname,htd,fbgc);
+
+                    //沥青路面压实度主线左幅
+                    lqlmysdzx(wb, zxzfdata, "沥青路面压实度左幅", "路面面层（主线左幅）");
+                    //沥青路面压实度主线右幅
+                    lqlmysdzx(wb, zxyfdata, "沥青路面压实度右幅", "路面面层（主线右幅）");
+                    //沥青路面压实度隧道左幅
+                    lqlmysdOther(wb, sdzfdata, "隧道左幅", "隧道路面");
+                    //沥青路面压实度隧道右幅
+                    lqlmysdOther(wb, sdyfdata, "隧道右幅", "隧道路面");
+                    //沥青路面压实度匝道
+                    lqlmysdOther(wb, zddata, "沥青路面压实度匝道", "匝道路面");
+                    //沥青路面压实度连接线
+                    lqlmysdOther(wb, ljxdata, "连接线", "连接线");
+                    //沥青路面压实度连接线隧道
+                    lqlmysdOther(wb, ljxsddata, "连接线隧道", "连接线隧道");
+                    for (int j = 0; j < wb.getNumberOfSheets(); j++) {
+                        if (shouldBeCalculate(wb.getSheetAt(j))) {
+                            calculateSheet(wb.getSheetAt(j));
+                            JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
+                        }
                     }
-                    //隧道和桥的数据 是放在隧道左右幅的工作簿中，分左右幅
-                    if (ysd.getLqs().contains("隧") && ysd.getZh().substring(0,1).equals("Z") || ysd.getLqs().contains("桥")){
-                        sdzfdata.add(ysd);
+                    getTunnelTotal(wb.getSheet("隧道右幅"));
+                    getTunnelTotal(wb.getSheet("隧道左幅"));
+                    JjgFbgcCommonUtils.updateFormula(wb, wb.getSheet("隧道右幅"));
+                    JjgFbgcCommonUtils.updateFormula(wb, wb.getSheet("隧道左幅"));
+                    //删除空表
+                    JjgFbgcCommonUtils.deleteEmptySheets(wb);
+
+                    FileOutputStream fileOut = new FileOutputStream(f);
+                    wb.write(fileOut);
+                    fileOut.flush();
+                    fileOut.close();
+                    out.close();
+                }catch (Exception e) {
+                    if(f.exists()){
+                        f.delete();
                     }
-                    if (ysd.getLqs().contains("隧") && ysd.getZh().substring(0,1).equals("Y") || ysd.getLqs().contains("桥")){
-                        sdyfdata.add(ysd);
-                    }
+                    throw new JjgysException(20001, "生成鉴定表错误，请检查数据的正确性");
                 }
-                //匝道数据，是不分左右福的，
-                List<JjgFbgcLmgcLqlmysd> zddata = jjgFbgcLmgcLqlmysdMapper.selectzd(proname,htd,fbgc);
-                List<JjgFbgcLmgcLqlmysd> ljxdata = jjgFbgcLmgcLqlmysdMapper.selectljx(proname,htd,fbgc);
-                List<JjgFbgcLmgcLqlmysd> ljxsddata = jjgFbgcLmgcLqlmysdMapper.selectljxsd(proname,htd,fbgc);
-
-                //沥青路面压实度主线左幅
-                lqlmysdzx(wb, zxzfdata, "沥青路面压实度左幅", "路面面层（主线左幅）");
-                //沥青路面压实度主线右幅
-                lqlmysdzx(wb, zxyfdata, "沥青路面压实度右幅", "路面面层（主线右幅）");
-                //沥青路面压实度隧道左幅
-                lqlmysdOther(wb, sdzfdata, "隧道左幅", "隧道路面");
-                //沥青路面压实度隧道右幅
-                lqlmysdOther(wb, sdyfdata, "隧道右幅", "隧道路面");
-                //沥青路面压实度匝道
-                lqlmysdOther(wb, zddata, "沥青路面压实度匝道", "匝道路面");
-                //沥青路面压实度连接线
-                lqlmysdOther(wb, ljxdata, "连接线", "连接线");
-                //沥青路面压实度连接线隧道
-                lqlmysdOther(wb, ljxsddata, "连接线隧道", "连接线隧道");
-                for (int j = 0; j < wb.getNumberOfSheets(); j++) {
-                    if (shouldBeCalculate(wb.getSheetAt(j))) {
-                        calculateSheet(wb.getSheetAt(j));
-                        JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
-                    }
-                }
-                getTunnelTotal(wb.getSheet("隧道右幅"));
-                getTunnelTotal(wb.getSheet("隧道左幅"));
-                JjgFbgcCommonUtils.updateFormula(wb, wb.getSheet("隧道右幅"));
-                JjgFbgcCommonUtils.updateFormula(wb, wb.getSheet("隧道左幅"));
-                //删除空表
-                JjgFbgcCommonUtils.deleteEmptySheets(wb);
-
-                FileOutputStream fileOut = new FileOutputStream(f);
-                wb.write(fileOut);
-                fileOut.flush();
-                fileOut.close();
-                out.close();
 
             } else if (sffl.equals("是")){
-                String path = reportPath + "/static/沥青路面压实度-第二版.xlsx";
-                Files.copy(Paths.get(path), new FileOutputStream(f));
-                FileInputStream out = new FileInputStream(f);
-                wb = new XSSFWorkbook(out);
+                try {
+                    String path = reportPath + "/static/沥青路面压实度-第二版.xlsx";
+                    Files.copy(Paths.get(path), new FileOutputStream(f));
+                    FileInputStream out = new FileInputStream(f);
+                    wb = new XSSFWorkbook(out);
 
-                List<JjgFbgcLmgcLqlmysd> zxzfsmcdata = jjgFbgcLmgcLqlmysdMapper.selectzxsmc(proname,htd,fbgc,sffl,"上面层");
-                List<JjgFbgcLmgcLqlmysd> zxyfsmcdata = jjgFbgcLmgcLqlmysdMapper.selectzxyfsmc(proname,htd,fbgc,sffl,"上面层");
+                    List<JjgFbgcLmgcLqlmysd> zxzfsmcdata = jjgFbgcLmgcLqlmysdMapper.selectzxsmc(proname,htd,fbgc,sffl,"上面层");
+                    List<JjgFbgcLmgcLqlmysd> zxyfsmcdata = jjgFbgcLmgcLqlmysdMapper.selectzxyfsmc(proname,htd,fbgc,sffl,"上面层");
 
-                List<JjgFbgcLmgcLqlmysd> sdzfsmcdata = jjgFbgcLmgcLqlmysdMapper.selectsdzfsmc(proname,htd,fbgc,sffl,"上面层");
-                List<JjgFbgcLmgcLqlmysd> sdyfsmcdata = jjgFbgcLmgcLqlmysdMapper.selectsdyfsmc(proname,htd,fbgc,sffl,"上面层");
-                List<JjgFbgcLmgcLqlmysd> zxzfzxmcdata = jjgFbgcLmgcLqlmysdMapper.selectzxzxmc(proname,htd,fbgc,sffl);
-                List<JjgFbgcLmgcLqlmysd> zxyfzxmcdata = jjgFbgcLmgcLqlmysdMapper.selectzxyfzxmc(proname,htd,fbgc,sffl);
+                    List<JjgFbgcLmgcLqlmysd> sdzfsmcdata = jjgFbgcLmgcLqlmysdMapper.selectsdzfsmc(proname,htd,fbgc,sffl,"上面层");
+                    List<JjgFbgcLmgcLqlmysd> sdyfsmcdata = jjgFbgcLmgcLqlmysdMapper.selectsdyfsmc(proname,htd,fbgc,sffl,"上面层");
+                    List<JjgFbgcLmgcLqlmysd> zxzfzxmcdata = jjgFbgcLmgcLqlmysdMapper.selectzxzxmc(proname,htd,fbgc,sffl);
+                    List<JjgFbgcLmgcLqlmysd> zxyfzxmcdata = jjgFbgcLmgcLqlmysdMapper.selectzxyfzxmc(proname,htd,fbgc,sffl);
 
-                List<JjgFbgcLmgcLqlmysd> sdzfzxmcdata = jjgFbgcLmgcLqlmysdMapper.selectsdzfzxmc(proname,htd,fbgc,sffl);
-                List<JjgFbgcLmgcLqlmysd> sdyfzxmcdata = jjgFbgcLmgcLqlmysdMapper.selectsdyfzxmc(proname,htd,fbgc,sffl);
+                    List<JjgFbgcLmgcLqlmysd> sdzfzxmcdata = jjgFbgcLmgcLqlmysdMapper.selectsdzfzxmc(proname,htd,fbgc,sffl);
+                    List<JjgFbgcLmgcLqlmysd> sdyfzxmcdata = jjgFbgcLmgcLqlmysdMapper.selectsdyfzxmc(proname,htd,fbgc,sffl);
 
-                List<JjgFbgcLmgcLqlmysd> zdsmcdata = jjgFbgcLmgcLqlmysdMapper.selectzdsmc(proname,htd,fbgc);
-                List<JjgFbgcLmgcLqlmysd> zdsxmcdata = jjgFbgcLmgcLqlmysdMapper.selectzdsxmc(proname,htd,fbgc);
+                    List<JjgFbgcLmgcLqlmysd> zdsmcdata = jjgFbgcLmgcLqlmysdMapper.selectzdsmc(proname,htd,fbgc);
+                    List<JjgFbgcLmgcLqlmysd> zdsxmcdata = jjgFbgcLmgcLqlmysdMapper.selectzdsxmc(proname,htd,fbgc);
 
-                List<JjgFbgcLmgcLqlmysd> ljxsmcdata = jjgFbgcLmgcLqlmysdMapper.selectljxsmc(proname,htd,fbgc);
-                List<JjgFbgcLmgcLqlmysd> ljxzxmcdata = jjgFbgcLmgcLqlmysdMapper.selectljxzxmc(proname,htd,fbgc);
+                    List<JjgFbgcLmgcLqlmysd> ljxsmcdata = jjgFbgcLmgcLqlmysdMapper.selectljxsmc(proname,htd,fbgc);
+                    List<JjgFbgcLmgcLqlmysd> ljxzxmcdata = jjgFbgcLmgcLqlmysdMapper.selectljxzxmc(proname,htd,fbgc);
 
-                List<JjgFbgcLmgcLqlmysd> ljxsdsmcdata = jjgFbgcLmgcLqlmysdMapper.selectljxsdsmc(proname,htd,fbgc);
-                List<JjgFbgcLmgcLqlmysd> ljxsdzxmcdata = jjgFbgcLmgcLqlmysdMapper.selectljxsdzxmc(proname,htd,fbgc);
+                    List<JjgFbgcLmgcLqlmysd> ljxsdsmcdata = jjgFbgcLmgcLqlmysdMapper.selectljxsdsmc(proname,htd,fbgc);
+                    List<JjgFbgcLmgcLqlmysd> ljxsdzxmcdata = jjgFbgcLmgcLqlmysdMapper.selectljxsdzxmc(proname,htd,fbgc);
 
-                //沥青路面压实度主线左幅上面层
-                lqlmysdzxsmc(wb,zxzfsmcdata,"沥青路面压实度左幅-上面层","路面面层（主线左幅）");
+                    //沥青路面压实度主线左幅上面层
+                    lqlmysdzxsmc(wb,zxzfsmcdata,"沥青路面压实度左幅-上面层","路面面层（主线左幅）");
 
-                //沥青路面压实度主线左幅中下面层
-                lqlmysdzxzxmc(wb,zxzfzxmcdata,"沥青路面压实度左幅-中下面层","路面面层（主线左幅）");
+                    //沥青路面压实度主线左幅中下面层
+                    lqlmysdzxzxmc(wb,zxzfzxmcdata,"沥青路面压实度左幅-中下面层","路面面层（主线左幅）");
 
-                //沥青路面压实度主线右幅上面层
-                lqlmysdzxsmc(wb,zxyfsmcdata,"沥青路面压实度右幅-上面层","路面面层（主线右幅）");
+                    //沥青路面压实度主线右幅上面层
+                    lqlmysdzxsmc(wb,zxyfsmcdata,"沥青路面压实度右幅-上面层","路面面层（主线右幅）");
 
-                //沥青路面压实度主线右幅中下面层
-                lqlmysdzxzxmc(wb,zxyfzxmcdata,"沥青路面压实度右幅-中下面层","路面面层（主线右幅）");
+                    //沥青路面压实度主线右幅中下面层
+                    lqlmysdzxzxmc(wb,zxyfzxmcdata,"沥青路面压实度右幅-中下面层","路面面层（主线右幅）");
 
-                //沥青路面压实度隧道左幅上面层
-                lqlmysdsdsmc(wb,sdzfsmcdata,"隧道左幅-上面层","隧道路面");
+                    //沥青路面压实度隧道左幅上面层
+                    lqlmysdsdsmc(wb,sdzfsmcdata,"隧道左幅-上面层","隧道路面");
 
-                //沥青路面压实度隧道左幅中下面层
-                lqlmysdzxmc(wb,sdzfzxmcdata,"隧道左幅-中下面层","隧道路面");
+                    //沥青路面压实度隧道左幅中下面层
+                    lqlmysdzxmc(wb,sdzfzxmcdata,"隧道左幅-中下面层","隧道路面");
 
-                //沥青路面压实度隧道右幅上面层
-                lqlmysdsdsmc(wb,sdyfsmcdata,"隧道右幅-上面层","隧道路面");
+                    //沥青路面压实度隧道右幅上面层
+                    lqlmysdsdsmc(wb,sdyfsmcdata,"隧道右幅-上面层","隧道路面");
 
-                //沥青路面压实度隧道右幅中下面层
-                lqlmysdzxmc(wb,sdyfzxmcdata,"隧道右幅-中下面层","隧道路面");
+                    //沥青路面压实度隧道右幅中下面层
+                    lqlmysdzxmc(wb,sdyfzxmcdata,"隧道右幅-中下面层","隧道路面");
 
-                //沥青路面压实度匝道上面层
-                lqlmysdsdsmc(wb,zdsmcdata,"沥青路面压实度匝道-上面层","匝道路面");
+                    //沥青路面压实度匝道上面层
+                    lqlmysdsdsmc(wb,zdsmcdata,"沥青路面压实度匝道-上面层","匝道路面");
 
-                //沥青路面压实度匝道中下面层
-                lqlmysdzxmc(wb,zdsxmcdata,"沥青路面压实度匝道-中下面层","匝道路面");
+                    //沥青路面压实度匝道中下面层
+                    lqlmysdzxmc(wb,zdsxmcdata,"沥青路面压实度匝道-中下面层","匝道路面");
 
-                //沥青路面压实度连接线上面层
-                lqlmysdsdsmc(wb,ljxsmcdata,"连接线-上面层","连接线");
+                    //沥青路面压实度连接线上面层
+                    lqlmysdsdsmc(wb,ljxsmcdata,"连接线-上面层","连接线");
 
-                //沥青路面压实度连接线中下面层
-                lqlmysdzxmc(wb,ljxzxmcdata,"连接线-中下面层","连接线");
+                    //沥青路面压实度连接线中下面层
+                    lqlmysdzxmc(wb,ljxzxmcdata,"连接线-中下面层","连接线");
 
-                //沥青路面压实度连接线隧道上面层
-                lqlmysdsdsmc(wb,ljxsdsmcdata,"连接线隧道-上面层","连接线隧道");
+                    //沥青路面压实度连接线隧道上面层
+                    lqlmysdsdsmc(wb,ljxsdsmcdata,"连接线隧道-上面层","连接线隧道");
 
-                //沥青路面压实度连接线隧道中下面层
-                lqlmysdzxmc(wb,ljxsdzxmcdata,"连接线隧道-中下面层","连接线隧道");
+                    //沥青路面压实度连接线隧道中下面层
+                    lqlmysdzxmc(wb,ljxsdzxmcdata,"连接线隧道-中下面层","连接线隧道");
 
-                for (int j = 0; j < wb.getNumberOfSheets(); j++) {
-                    if (shouldBeCalculate(wb.getSheetAt(j))) {
-                        calculateSheet(wb.getSheetAt(j));
-                        JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
+                    for (int j = 0; j < wb.getNumberOfSheets(); j++) {
+                        if (shouldBeCalculate(wb.getSheetAt(j))) {
+                            calculateSheet(wb.getSheetAt(j));
+                            JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
+                        }
                     }
-                }
-                getTunnelTotal(wb.getSheet("隧道右幅-上面层"));
-                getTunnelTotal(wb.getSheet("隧道右幅-中下面层"));
-                getTunnelTotal(wb.getSheet("隧道左幅-上面层"));
-                getTunnelTotal(wb.getSheet("隧道左幅-中下面层"));
-                JjgFbgcCommonUtils.updateFormula(wb, wb.getSheet("隧道右幅-上面层"));
-                JjgFbgcCommonUtils.updateFormula(wb, wb.getSheet("隧道右幅-中下面层"));
-                JjgFbgcCommonUtils.updateFormula(wb, wb.getSheet("隧道左幅-上面层"));
-                JjgFbgcCommonUtils.updateFormula(wb, wb.getSheet("隧道左幅-中下面层"));
-                //删除空表
-                JjgFbgcCommonUtils.deleteEmptySheets(wb);
+                    getTunnelTotal(wb.getSheet("隧道右幅-上面层"));
+                    getTunnelTotal(wb.getSheet("隧道右幅-中下面层"));
+                    getTunnelTotal(wb.getSheet("隧道左幅-上面层"));
+                    getTunnelTotal(wb.getSheet("隧道左幅-中下面层"));
+                    JjgFbgcCommonUtils.updateFormula(wb, wb.getSheet("隧道右幅-上面层"));
+                    JjgFbgcCommonUtils.updateFormula(wb, wb.getSheet("隧道右幅-中下面层"));
+                    JjgFbgcCommonUtils.updateFormula(wb, wb.getSheet("隧道左幅-上面层"));
+                    JjgFbgcCommonUtils.updateFormula(wb, wb.getSheet("隧道左幅-中下面层"));
+                    //删除空表
+                    JjgFbgcCommonUtils.deleteEmptySheets(wb);
 
-                FileOutputStream fileOut = new FileOutputStream(f);
-                wb.write(fileOut);
-                fileOut.flush();
-                fileOut.close();
-                out.close();
+                    FileOutputStream fileOut = new FileOutputStream(f);
+                    wb.write(fileOut);
+                    fileOut.flush();
+                    fileOut.close();
+                    out.close();
+                }catch (Exception e) {
+                    if(f.exists()){
+                        f.delete();
+                    }
+                    throw new JjgysException(20001, "生成鉴定表错误，请检查数据的正确性");
+                }
+
             }
 
             wb.close();
@@ -1250,8 +1267,28 @@ public class JjgFbgcLmgcLqlmysdServiceImpl extends ServiceImpl<JjgFbgcLmgcLqlmys
                             new ExcelHandler<JjgFbgcLmgcLqlmysdVo>(JjgFbgcLmgcLqlmysdVo.class) {
                                 @Override
                                 public void handle(List<JjgFbgcLmgcLqlmysdVo> dataList) {
+                                    int rowNumber=2;
                                     for(JjgFbgcLmgcLqlmysdVo lqlmysdVo: dataList)
                                     {
+                                        if (StringUtils.isEmpty(lqlmysdVo.getZh())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，桩号为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(lqlmysdVo.getLmlx())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，路面类型为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(lqlmysdVo.getLqs())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，路桥隧为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(lqlmysdVo.getQywz())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，取样位置为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(lqlmysdVo.getCw())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，层位为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(lqlmysdVo.getSffl())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，是否分离为空，请修改后重新上传");
+                                        }
+
                                         JjgFbgcLmgcLqlmysd fbgcLmgcLqlmysd = new JjgFbgcLmgcLqlmysd();
                                         BeanUtils.copyProperties(lqlmysdVo,fbgcLmgcLqlmysd);
                                         fbgcLmgcLqlmysd.setCreatetime(new Date());
@@ -1259,6 +1296,7 @@ public class JjgFbgcLmgcLqlmysdServiceImpl extends ServiceImpl<JjgFbgcLmgcLqlmys
                                         fbgcLmgcLqlmysd.setHtd(commonInfoVo.getHtd());
                                         fbgcLmgcLqlmysd.setFbgc(commonInfoVo.getFbgc());
                                         jjgFbgcLmgcLqlmysdMapper.insert(fbgcLmgcLqlmysd);
+                                        rowNumber++;
                                     }
                                 }
                             }

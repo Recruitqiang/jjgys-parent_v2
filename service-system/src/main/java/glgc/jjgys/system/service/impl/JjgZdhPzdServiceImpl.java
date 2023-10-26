@@ -509,16 +509,16 @@ public class JjgZdhPzdServiceImpl extends ServiceImpl<JjgZdhPzdMapper, JjgZdhPzd
             for (Map<String, Object> map : list) {
                 String qdzh = map.get("qdzh").toString();
                 String ziri = map.get("ziri").toString();
-                String yiri = map.get("yiri").toString();
+                //String yiri = map.get("yiri").toString();
                 String zdbs = map.get("zdbs").toString();
                 String key = qdzh + "_" + zdbs; // 添加zdbs的唯一标识，防止重复覆盖
                 if (resultMapz.containsKey(key) ) {
                     resultMapz.get(key).add(ziri);
-                    resultMapz.get(key).add(yiri);
+                    //resultMapz.get(key).add(yiri);
                 } else {
                     List<String> sfcList = new ArrayList<>();
                     sfcList.add(ziri);
-                    sfcList.add(yiri);
+                    //sfcList.add(yiri);
                     resultMapz.put(key, sfcList);
                     //resultMapz.put(qdzh, sfcList);
                 }
@@ -613,106 +613,106 @@ public class JjgZdhPzdServiceImpl extends ServiceImpl<JjgZdhPzdMapper, JjgZdhPzd
             //创建文件根目录
             fdir.mkdirs();
         }
-        File directory = new File("service-system/src/main/resources/static");
-        String reportPath = directory.getCanonicalPath();
-        String filename = "";
+        try {
+            File directory = new File("service-system/src/main/resources/static");
+            String reportPath = directory.getCanonicalPath();
+            String filename = "";
 
-        if (cdsl == 5){
-            filename = "平整度-5车道.xlsx";
-        }else if (cdsl == 4){
-            filename = "平整度-4车道.xlsx";
-        }else if (cdsl == 3){
-            filename = "平整度-3车道.xlsx";
-        }else if (cdsl == 2){
-            filename = "平整度-2车道.xlsx";
-        }
+            if (cdsl == 5){
+                filename = "平整度-5车道.xlsx";
+            }else if (cdsl == 4){
+                filename = "平整度-4车道.xlsx";
+            }else if (cdsl == 3){
+                filename = "平整度-3车道.xlsx";
+            }else if (cdsl == 2){
+                filename = "平整度-2车道.xlsx";
+            }
 
-        String path = reportPath + File.separator + filename;
-        Files.copy(Paths.get(path), new FileOutputStream(f));
-        FileInputStream out = new FileInputStream(f);
-        wb = new XSSFWorkbook(out);
-
-
-        List<Map<String,Object>> sdqlData = new ArrayList<>();
+            String path = reportPath + File.separator + filename;
+            Files.copy(Paths.get(path), new FileOutputStream(f));
+            FileInputStream out = new FileInputStream(f);
+            wb = new XSSFWorkbook(out);
 
 
-        sdzxList.addAll(sdyxList);
-        if (sdzxList.size() >0 && !sdzxList.isEmpty()){
-            //把有隧道的数据存入到sdqlData
-            for (Map<String, Object> map : sdzxList) {
-                Map<String,Object> map1 = new HashMap<>();
-                map1.put("qdzh",map.get("qdzh").toString());
-                map1.put("zdzh",map.get("zdzh").toString());
-                map1.put("pzlx",map.get("pzlx").toString());
-                map1.put("name",map.get("name").toString());
-                map1.put("createTime",map.get("createTime").toString());
-                map1.put("cd",map.get("cd").toString());
-                if (map.get("zdbs")!=null){
-                    map1.put("zdbs",map.get("zdbs").toString());
+            List<Map<String,Object>> sdqlData = new ArrayList<>();
+
+
+            sdzxList.addAll(sdyxList);
+            if (sdzxList.size() >0 && !sdzxList.isEmpty()){
+                //把有隧道的数据存入到sdqlData
+                for (Map<String, Object> map : sdzxList) {
+                    Map<String,Object> map1 = new HashMap<>();
+                    map1.put("qdzh",map.get("qdzh").toString());
+                    map1.put("zdzh",map.get("zdzh").toString());
+                    map1.put("pzlx",map.get("pzlx").toString());
+                    map1.put("name",map.get("name").toString());
+                    map1.put("createTime",map.get("createTime").toString());
+                    map1.put("cd",map.get("cd").toString());
+                    if (map.get("zdbs")!=null){
+                        map1.put("zdbs",map.get("zdbs").toString());
+                    }
+                    sdqlData.add(map1);
                 }
-                sdqlData.add(map1);
-            }
 
-            List<Map<String,Object>> addList = addMissingData(sdzxList,cdsl);
-            List<Map<String, Object>> mapslist = mergedList(addList,cdsl);
-            //sdqlData.addAll(mapslist);
-            String sheetmame = "";
-            if (mapslist.get(0).get("pzlx").toString().contains("水泥") && zx.equals("主线")){
-                sheetmame = "混凝土隧道";
-            }else if(mapslist.get(0).get("pzlx").toString().contains("水泥")){
-                sheetmame = "混凝土匝道隧道";
-            }else if (mapslist.get(0).get("pzlx").toString().contains("沥青") && zx.equals("主线")){
-                sheetmame = "沥青隧道";
-            }else if (mapslist.get(0).get("pzlx").toString().contains("沥青")){
-                sheetmame = "沥青匝道隧道";
-            }
-            DBtoExcel(proname,htd,mapslist,wb,sheetmame,cdsl,sjz,zx);
-        }
-
-        qlzxList.addAll(qlyxList);
-        if (qlzxList.size()>0 && !qlzxList.isEmpty()){
-            //把有桥梁的数据存入到sdqlData
-            for (Map<String, Object> map : qlzxList) {
-                Map<String,Object> map1 = new HashMap<>();
-                map1.put("qdzh",map.get("qdzh").toString());
-                map1.put("zdzh",map.get("zdzh").toString());
-                map1.put("pzlx",map.get("pzlx").toString());
-                map1.put("name",map.get("name").toString());
-                map1.put("createTime",map.get("createTime").toString());
-                map1.put("cd",map.get("cd").toString());
-                if (map.get("zdbs")!=null){
-                    map1.put("zdbs",map.get("zdbs").toString());
+                List<Map<String,Object>> addList = addMissingData(sdzxList,cdsl);
+                List<Map<String, Object>> mapslist = mergedList(addList,cdsl);
+                //sdqlData.addAll(mapslist);
+                String sheetmame = "";
+                if (mapslist.get(0).get("pzlx").toString().contains("水泥") && zx.equals("主线")){
+                    sheetmame = "混凝土隧道";
+                }else if(mapslist.get(0).get("pzlx").toString().contains("水泥")){
+                    sheetmame = "混凝土匝道隧道";
+                }else if (mapslist.get(0).get("pzlx").toString().contains("沥青") && zx.equals("主线")){
+                    sheetmame = "沥青隧道";
+                }else if (mapslist.get(0).get("pzlx").toString().contains("沥青")){
+                    sheetmame = "沥青匝道隧道";
                 }
-                sdqlData.add(map1);
+                DBtoExcel(proname,htd,mapslist,wb,sheetmame,cdsl,sjz,zx);
             }
-            List<Map<String,Object>> addList = addMissingData(qlzxList,cdsl);
-            List<Map<String, Object>> mapslist = mergedList(addList,cdsl);
-            //sdqlData.addAll(mapslist);
-            String sheetmame = "";
 
-            if (mapslist.get(0).get("pzlx").toString().contains("水泥") && zx.equals("主线")){
-                sheetmame = "混凝土桥";
-            }else if(mapslist.get(0).get("pzlx").toString().contains("水泥")){
-                sheetmame = "混凝土匝道桥";
-            }else if (mapslist.get(0).get("pzlx").toString().contains("沥青") && zx.equals("主线")){
-                sheetmame = "沥青桥";
-            }else if (mapslist.get(0).get("pzlx").toString().contains("沥青")){
-                sheetmame = "沥青匝道桥";
+            qlzxList.addAll(qlyxList);
+            if (qlzxList.size()>0 && !qlzxList.isEmpty()){
+                //把有桥梁的数据存入到sdqlData
+                for (Map<String, Object> map : qlzxList) {
+                    Map<String,Object> map1 = new HashMap<>();
+                    map1.put("qdzh",map.get("qdzh").toString());
+                    map1.put("zdzh",map.get("zdzh").toString());
+                    map1.put("pzlx",map.get("pzlx").toString());
+                    map1.put("name",map.get("name").toString());
+                    map1.put("createTime",map.get("createTime").toString());
+                    map1.put("cd",map.get("cd").toString());
+                    if (map.get("zdbs")!=null){
+                        map1.put("zdbs",map.get("zdbs").toString());
+                    }
+                    sdqlData.add(map1);
+                }
+                List<Map<String,Object>> addList = addMissingData(qlzxList,cdsl);
+                List<Map<String, Object>> mapslist = mergedList(addList,cdsl);
+                //sdqlData.addAll(mapslist);
+                String sheetmame = "";
+
+                if (mapslist.get(0).get("pzlx").toString().contains("水泥") && zx.equals("主线")){
+                    sheetmame = "混凝土桥";
+                }else if(mapslist.get(0).get("pzlx").toString().contains("水泥")){
+                    sheetmame = "混凝土匝道桥";
+                }else if (mapslist.get(0).get("pzlx").toString().contains("沥青") && zx.equals("主线")){
+                    sheetmame = "沥青桥";
+                }else if (mapslist.get(0).get("pzlx").toString().contains("沥青")){
+                    sheetmame = "沥青匝道桥";
+                }
+                DBtoExcel(proname,htd,mapslist,wb,sheetmame,cdsl,sjz,zx);
             }
-            DBtoExcel(proname,htd,mapslist,wb,sheetmame,cdsl,sjz,zx);
-        }
-        lmzfList.addAll(lmyfList);
-        if (lmzfList.size()>0 && !lmzfList.isEmpty()){
-            System.out.println(lmzfList);
-            List<Map<String,Object>> addList = addMissingData(lmzfList,cdsl);
-            String sheetmame = "";
-            if (zx.equals("主线")){
-                sheetmame = "沥青路面";
-                DBtoExcelLM(proname,htd,addList,sdqlData,wb,sheetmame,cdsl,sjz,zx);
-            }else {
-                sheetmame = "沥青匝道";
-                DBtoExcelZD(proname,htd,addList,sdqlData,wb,sheetmame,cdsl,sjz,zx);
-            }
+            lmzfList.addAll(lmyfList);
+            if (lmzfList.size()>0 && !lmzfList.isEmpty()){
+                List<Map<String,Object>> addList = addMissingData(lmzfList,cdsl);
+                String sheetmame = "";
+                if (zx.equals("主线")){
+                    sheetmame = "沥青路面";
+                    DBtoExcelLM(proname,htd,addList,sdqlData,wb,sheetmame,cdsl,sjz,zx);
+                }else {
+                    sheetmame = "沥青匝道";
+                    DBtoExcelZD(proname,htd,addList,sdqlData,wb,sheetmame,cdsl,sjz,zx);
+                }
             /*if (addList.get(0).get("pzlx").toString().contains("水泥")){
                 sheetmame = "混凝土路面";
             }
@@ -720,25 +720,32 @@ public class JjgZdhPzdServiceImpl extends ServiceImpl<JjgZdhPzdMapper, JjgZdhPzd
                 sheetmame = "沥青路面";
             }*/
 
-        }
-
-        String[] arr = {"混凝土收费站","混凝土匝道隧道","沥青匝道隧道","混凝土匝道桥","沥青匝道桥","沥青匝道","混凝土匝道","混凝土隧道","沥青隧道","混凝土桥","沥青桥","混凝土路面","沥青路面"};
-        //String[] arr = {"混凝土隧道","沥青隧道","混凝土桥","沥青桥","混凝土路面","沥青路面"};
-        for (int i = 0; i < arr.length; i++) {
-            if (shouldBeCalculate(wb.getSheet(arr[i]))) {
-                calculateAsphaltPavementSheet(wb,wb.getSheet(arr[i]),cdsl);
-            }else {
-                wb.removeSheetAt(wb.getSheetIndex(arr[i]));
             }
+
+            String[] arr = {"混凝土收费站","混凝土匝道隧道","沥青匝道隧道","混凝土匝道桥","沥青匝道桥","沥青匝道","混凝土匝道","混凝土隧道","沥青隧道","混凝土桥","沥青桥","混凝土路面","沥青路面"};
+            //String[] arr = {"混凝土隧道","沥青隧道","混凝土桥","沥青桥","混凝土路面","沥青路面"};
+            for (int i = 0; i < arr.length; i++) {
+                if (shouldBeCalculate(wb.getSheet(arr[i]))) {
+                    calculateAsphaltPavementSheet(wb,wb.getSheet(arr[i]),cdsl);
+                }else {
+                    wb.removeSheetAt(wb.getSheetIndex(arr[i]));
+                }
+            }
+
+
+            FileOutputStream fileOut = new FileOutputStream(f);
+            wb.write(fileOut);
+            fileOut.flush();
+            fileOut.close();
+            out.close();
+            wb.close();
+        }catch (Exception e) {
+            if(f.exists()){
+                f.delete();
+            }
+            throw new JjgysException(20001, "生成鉴定表错误，请检查数据的正确性");
         }
 
-
-        FileOutputStream fileOut = new FileOutputStream(f);
-        wb.write(fileOut);
-        fileOut.flush();
-        fileOut.close();
-        out.close();
-        wb.close();
 
     }
 
@@ -1331,92 +1338,216 @@ public class JjgZdhPzdServiceImpl extends ServiceImpl<JjgZdhPzdMapper, JjgZdhPzd
      * @param hasdata
      */
     private void fillTotalData(XSSFSheet sheet, int rownum, XSSFRow rowstart, XSSFRow rowend, int left_right, int fillcolum, boolean hasdata,FormulaEvaluator e,int cdsl) {
-        if (hasdata) {
-            sheet.getRow(rownum)
-                    .getCell(fillcolum)
-                    .setCellFormula("IFERROR("+
-                            "COUNT("
-                            + rowstart.getCell(5 + left_right * 4)
-                            .getReference()
-                            + ":"
-                            + rowend.getCell(8 + left_right * 4)
-                            .getReference() + ")"+",\"-\")");// 总点数P=COUNT(F8:I17)
 
-            sheet.getRow(rownum + 1)
-                    .getCell(fillcolum)
-                    .setCellFormula("IFERROR("+
-                            sheet.getRow(rownum).getCell(fillcolum)
-                                    .getReference()
-                            + "-COUNTIF("
-                            + rowstart.getCell(5 + left_right * 4)
-                            .getReference()
-                            + ":"
-                            + rowend.getCell(8 + left_right * 4)
-                            .getReference() + ",\">\"&$F$4)"+",\"-\")");// 合格数P=P11-COUNTIF(F8:I17,">"&$F$4)
-
-            sheet.getRow(rownum + 2)
-                    .getCell(fillcolum)
-                    .setCellFormula("IFERROR("+
-                            "AVERAGE("
-                            + rowstart.getCell(5 + left_right * 4)
-                            .getReference()
-                            + ":"
-                            + rowend.getCell(8 + left_right * 4)
-                            .getReference() + ")"+",\"-\")");// 平均值P=AVERAGE(F8:I17)
-            sheet.getRow(rownum + 3)
-                    .getCell(fillcolum)
-                    .setCellFormula("IFERROR("+
-                            "STDEV("
-                            + rowstart.getCell(5 + left_right * 4)
-                            .getReference()
-                            + ":"
-                            + rowend.getCell(8 + left_right * 4)
-                            .getReference() + ")"+",\"-\")");// 均方差P=STDEV(F8:I17)
-
-            sheet.getRow(rownum + 4)
-                    .getCell(fillcolum)
-                    .setCellFormula("IF("+sheet.getRow(rownum)
-                            .getCell(fillcolum).getReference()+"=0,\"-\","+
-                            "MIN("
-                            + rowstart.getCell(5 + left_right * 4)
-                            .getReference()
-                            + ":"
-                            + rowend.getCell(8 + left_right * 4)
-                            .getReference() + ")"+")");// 最小值P=MIN(F8:I17)=IF(MIN(P92,Q92)=0,"",MIN(P92,Q92))
-
-            sheet.getRow(rownum + 5)
-                    .getCell(fillcolum)
-                    .setCellFormula("IF("+sheet.getRow(rownum)
-                            .getCell(fillcolum).getReference()+"=0,\"-\","+
-                            "MAX("
-                            + rowstart.getCell(5 + left_right * 4)
-                            .getReference()
-                            + ":"
-                            + rowend.getCell(8 + left_right * 4)
-                            .getReference() + ")"+")");// 最大值P=MAX(F8:I17)
-
-            sheet.getRow(rownum + 6)
-                    .getCell(fillcolum)
-                    .setCellFormula("IFERROR("+
-                            sheet.getRow(rownum + 1).getCell(fillcolum)
-                                    .getReference()
-                            + "*100/"
-                            + sheet.getRow(rownum)
-                            .getCell(fillcolum).getReference()+",\"-\")");// 合格率P=P12*100/P11
-            if(left_right == 1){
-                fillExtraTotalData(sheet, rownum - 1, hasdata,e,cdsl);
+        /**
+         * 5c z:5-14 y:15-24
+         * 4c z:5-12 y:13-20
+         * 3c z:5-10 y:11-16
+         * 2c z:5-8  y:9-12
+         */
+        if (left_right == 0){
+            int a = 5, b =0;
+            if (cdsl == 5){
+                b = 14;
+            }else if (cdsl == 4){
+                b = 12;
+            }else if (cdsl == 3){
+                b = 10;
+            }else if (cdsl == 2){
+                b = 8;
             }
+            if (hasdata) {
+                sheet.getRow(rownum)
+                        .getCell(fillcolum)
+                        .setCellFormula("IFERROR("+
+                                "COUNT("
+                                + rowstart.getCell(a + left_right * a * 2)
+                                .getReference()
+                                + ":"
+                                + rowend.getCell(b + left_right * a * 2)
+                                .getReference() + ")"+",\"-\")");// 总点数P=COUNT(F8:I17)
 
-        } else {
-            sheet.getRow(rownum).getCell(fillcolum).setCellValue("-");
-            sheet.getRow(rownum + 1).getCell(fillcolum).setCellValue("-");
-            sheet.getRow(rownum + 2).getCell(fillcolum).setCellValue("-");
-            sheet.getRow(rownum + 3).getCell(fillcolum).setCellValue("-");
-            sheet.getRow(rownum + 4).getCell(fillcolum).setCellValue("-");
-            sheet.getRow(rownum + 5).getCell(fillcolum).setCellValue("-");
-            sheet.getRow(rownum + 6).getCell(fillcolum).setCellValue("-");
-            if(left_right == 1){
-                fillExtraTotalData(sheet, rownum - 1, true,e,cdsl);
+                sheet.getRow(rownum + 1)
+                        .getCell(fillcolum)
+                        .setCellFormula("IFERROR("+
+                                sheet.getRow(rownum).getCell(fillcolum)
+                                        .getReference()
+                                + "-COUNTIF("
+                                + rowstart.getCell(a + left_right * a * 2)
+                                .getReference()
+                                + ":"
+                                + rowend.getCell(b + left_right * a * 2)
+                                .getReference() + ",\">\"&$F$4)"+",\"-\")");// 合格数P=P11-COUNTIF(F8:I17,">"&$F$4)
+
+                sheet.getRow(rownum + 2)
+                        .getCell(fillcolum)
+                        .setCellFormula("IFERROR("+
+                                "AVERAGE("
+                                + rowstart.getCell(a + left_right * a * 2)
+                                .getReference()
+                                + ":"
+                                + rowend.getCell(b + left_right * a * 2)
+                                .getReference() + ")"+",\"-\")");// 平均值P=AVERAGE(F8:I17)
+                sheet.getRow(rownum + 3)
+                        .getCell(fillcolum)
+                        .setCellFormula("IFERROR("+
+                                "STDEV("
+                                + rowstart.getCell(a + left_right * a * 2)
+                                .getReference()
+                                + ":"
+                                + rowend.getCell(b + left_right * a * 2)
+                                .getReference() + ")"+",\"-\")");// 均方差P=STDEV(F8:I17)
+
+                sheet.getRow(rownum + 4)
+                        .getCell(fillcolum)
+                        .setCellFormula("IF("+sheet.getRow(rownum)
+                                .getCell(fillcolum).getReference()+"=0,\"-\","+
+                                "MIN("
+                                + rowstart.getCell(a + left_right * a * 2)
+                                .getReference()
+                                + ":"
+                                + rowend.getCell(b + left_right * a * 2)
+                                .getReference() + ")"+")");// 最小值P=MIN(F8:I17)=IF(MIN(P92,Q92)=0,"",MIN(P92,Q92))
+
+                sheet.getRow(rownum + 5)
+                        .getCell(fillcolum)
+                        .setCellFormula("IF("+sheet.getRow(rownum)
+                                .getCell(fillcolum).getReference()+"=0,\"-\","+
+                                "MAX("
+                                + rowstart.getCell(a + left_right * a * 2)
+                                .getReference()
+                                + ":"
+                                + rowend.getCell(b + left_right * a * 2)
+                                .getReference() + ")"+")");// 最大值P=MAX(F8:I17)
+
+                sheet.getRow(rownum + 6)
+                        .getCell(fillcolum)
+                        .setCellFormula("IFERROR("+
+                                sheet.getRow(rownum + 1).getCell(fillcolum)
+                                        .getReference()
+                                + "*100/"
+                                + sheet.getRow(rownum)
+                                .getCell(fillcolum).getReference()+",\"-\")");// 合格率P=P12*100/P11
+                if(left_right == 1){
+                    fillExtraTotalData(sheet, rownum - 1, hasdata,e,cdsl);
+                }
+
+            } else {
+                sheet.getRow(rownum).getCell(fillcolum).setCellValue("-");
+                sheet.getRow(rownum + 1).getCell(fillcolum).setCellValue("-");
+                sheet.getRow(rownum + 2).getCell(fillcolum).setCellValue("-");
+                sheet.getRow(rownum + 3).getCell(fillcolum).setCellValue("-");
+                sheet.getRow(rownum + 4).getCell(fillcolum).setCellValue("-");
+                sheet.getRow(rownum + 5).getCell(fillcolum).setCellValue("-");
+                sheet.getRow(rownum + 6).getCell(fillcolum).setCellValue("-");
+                if(left_right == 1){
+                    fillExtraTotalData(sheet, rownum - 1, true,e,cdsl);
+                }
+            }
+        }else if (left_right == 1){
+            /**
+             * 5c z:5-14 y:15-24
+             * 4c z:5-12 y:13-20
+             * 3c z:5-10 y:11-16
+             * 2c z:5-8  y:9-12
+             */
+            int a = 5, b =0;
+            if (cdsl == 5){
+                b = 14;
+            }else if (cdsl == 4){
+                b = 12;
+            }else if (cdsl == 3){
+                b = 10;
+            }else if (cdsl == 2){
+                b = 8;
+            }
+            if (hasdata) {
+                sheet.getRow(rownum)
+                        .getCell(fillcolum)
+                        .setCellFormula("IFERROR("+
+                                "COUNT("
+                                + rowstart.getCell(cdsl * 2+5)
+                                .getReference()
+                                + ":"
+                                + rowend.getCell(4*cdsl+4)
+                                .getReference() + ")"+",\"-\")");// 总点数P=COUNT(F8:I17)
+
+                sheet.getRow(rownum + 1)
+                        .getCell(fillcolum)
+                        .setCellFormula("IFERROR("+
+                                sheet.getRow(rownum).getCell(fillcolum)
+                                        .getReference()
+                                + "-COUNTIF("
+                                + rowstart.getCell(cdsl * 2+5)
+                                .getReference()
+                                + ":"
+                                + rowend.getCell(4*cdsl+4)
+                                .getReference() + ",\">\"&$F$4)"+",\"-\")");// 合格数P=P11-COUNTIF(F8:I17,">"&$F$4)
+
+                sheet.getRow(rownum + 2)
+                        .getCell(fillcolum)
+                        .setCellFormula("IFERROR("+
+                                "AVERAGE("
+                                + rowstart.getCell(cdsl * 2+5)
+                                .getReference()
+                                + ":"
+                                + rowend.getCell(4*cdsl+4)
+                                .getReference() + ")"+",\"-\")");// 平均值P=AVERAGE(F8:I17)
+                sheet.getRow(rownum + 3)
+                        .getCell(fillcolum)
+                        .setCellFormula("IFERROR("+
+                                "STDEV("
+                                + rowstart.getCell(cdsl * 2+5)
+                                .getReference()
+                                + ":"
+                                + rowend.getCell(4*cdsl+4)
+                                .getReference() + ")"+",\"-\")");// 均方差P=STDEV(F8:I17)
+
+                sheet.getRow(rownum + 4)
+                        .getCell(fillcolum)
+                        .setCellFormula("IF("+sheet.getRow(rownum)
+                                .getCell(fillcolum).getReference()+"=0,\"-\","+
+                                "MIN("
+                                + rowstart.getCell(cdsl * 2+5)
+                                .getReference()
+                                + ":"
+                                + rowend.getCell(4*cdsl+4)
+                                .getReference() + ")"+")");// 最小值P=MIN(F8:I17)=IF(MIN(P92,Q92)=0,"",MIN(P92,Q92))
+
+                sheet.getRow(rownum + 5)
+                        .getCell(fillcolum)
+                        .setCellFormula("IF("+sheet.getRow(rownum)
+                                .getCell(fillcolum).getReference()+"=0,\"-\","+
+                                "MAX("
+                                + rowstart.getCell(cdsl * 2+5)
+                                .getReference()
+                                + ":"
+                                + rowend.getCell(4*cdsl+4)
+                                .getReference() + ")"+")");// 最大值P=MAX(F8:I17)
+
+                sheet.getRow(rownum + 6)
+                        .getCell(fillcolum)
+                        .setCellFormula("IFERROR("+
+                                sheet.getRow(rownum + 1).getCell(fillcolum)
+                                        .getReference()
+                                + "*100/"
+                                + sheet.getRow(rownum)
+                                .getCell(fillcolum).getReference()+",\"-\")");// 合格率P=P12*100/P11
+                if(left_right == 1){
+                    fillExtraTotalData(sheet, rownum - 1, hasdata,e,cdsl);
+                }
+
+            } else {
+                sheet.getRow(rownum).getCell(fillcolum).setCellValue("-");
+                sheet.getRow(rownum + 1).getCell(fillcolum).setCellValue("-");
+                sheet.getRow(rownum + 2).getCell(fillcolum).setCellValue("-");
+                sheet.getRow(rownum + 3).getCell(fillcolum).setCellValue("-");
+                sheet.getRow(rownum + 4).getCell(fillcolum).setCellValue("-");
+                sheet.getRow(rownum + 5).getCell(fillcolum).setCellValue("-");
+                sheet.getRow(rownum + 6).getCell(fillcolum).setCellValue("-");
+                if(left_right == 1){
+                    fillExtraTotalData(sheet, rownum - 1, true,e,cdsl);
+                }
             }
         }
 
@@ -1675,15 +1806,15 @@ public class JjgZdhPzdServiceImpl extends ServiceImpl<JjgZdhPzdMapper, JjgZdhPzd
                 for (int i = 0 ; i < sfc.length ; i++) {
                     if (lm.get("cd").equals("左幅")){
                         if (!sfc[i].equals("-")) {
-                            sheet.getRow(tableNum * a + 7 + index % b).getCell(cdsl*i+5).setCellValue(Double.parseDouble(sfc[i]));
+                            sheet.getRow(tableNum * a + 7 + index % b).getCell(5+(i*2)).setCellValue(Double.parseDouble(sfc[i]));
                         }else {
-                            sheet.getRow(tableNum * a + 7 + index % b).getCell(cdsl*i+5).setCellValue(sfc[i]);
+                            sheet.getRow(tableNum * a + 7 + index % b).getCell(5+(i*2)).setCellValue(sfc[i]);
                         }
                     }else {
                         if (!sfc[i].equals("-")){
-                            sheet.getRow(tableNum * a + 7 + index % b).getCell((2*cdsl+5)+cdsl*i).setCellValue(Double.parseDouble(sfc[i]));
+                            sheet.getRow(tableNum * a + 7 + index % b).getCell(2*cdsl+5+(i*2)).setCellValue(Double.parseDouble(sfc[i]));
                         }else {
-                            sheet.getRow(tableNum * a + 7 + index % b).getCell((2*cdsl+5)+cdsl*i).setCellValue(sfc[i]);
+                            sheet.getRow(tableNum * a + 7 + index % b).getCell(2*cdsl+5+(i*2)).setCellValue(sfc[i]);
                         }
 
                     }
@@ -1696,7 +1827,7 @@ public class JjgZdhPzdServiceImpl extends ServiceImpl<JjgZdhPzdMapper, JjgZdhPzd
                     sheet.getRow(tableNum * a + 7 + index % b).getCell(0).setCellValue(m);
                     sheet.getRow(tableNum * a + 7 + index % b).getCell(4).setCellValue(Double.valueOf(lm.get("zdzh").toString()));
                     if (lm.get("cd").equals("左幅")){
-                        sheet.getRow(tableNum * a + 7 + index % b).getCell(cdsl*i+5).setCellValue(lm.get("name").toString());
+                        sheet.getRow(tableNum * a + 7 + index % b).getCell(5+(i*2)).setCellValue(lm.get("name").toString());
 
                         startRow = tableNum * a + 7 + index % b ;
                         endRow = tableNum * a + 7 + index % b ;
@@ -1705,7 +1836,7 @@ public class JjgZdhPzdServiceImpl extends ServiceImpl<JjgZdhPzdMapper, JjgZdhPzd
                         endCol = 2*cdsl+4;
 
                     }else {
-                        sheet.getRow(tableNum * a + 7 + index % b).getCell((2*cdsl+5) + cdsl*i).setCellValue(lm.get("name").toString());
+                        sheet.getRow(tableNum * a + 7 + index % b).getCell(2*cdsl+5+(i*2)).setCellValue(lm.get("name").toString());
                         startRow = tableNum * a + 7 + index % b ;
                         endRow = tableNum * a + 7 + index % b ;
 
@@ -2295,10 +2426,10 @@ public class JjgZdhPzdServiceImpl extends ServiceImpl<JjgZdhPzdMapper, JjgZdhPzd
         if (!sfc[0].isEmpty()) {
             for (int i = 0 ; i < sfc.length ; i++) {
                 if (!sfc[i].equals("-")){
-                    sheet.getRow(tableNum * a + 7 + index % b).getCell(cdsl*i+5).setCellValue(Double.parseDouble(sfc[i]));
+                    sheet.getRow(tableNum * a + 7 + index % b).getCell(5+(i*2)).setCellValue(Double.parseDouble(sfc[i]));
                 }else {
                     //sheet.getRow(tableNum * a + 7 + index % b).getCell((2*cdsl+5)+i).setCellValue(sfc[i]);
-                    sheet.getRow(tableNum * a + 7 + index % b).getCell(cdsl*i+5).setCellValue(sfc[i]);
+                    sheet.getRow(tableNum * a + 7 + index % b).getCell(5+(i*2)).setCellValue(sfc[i]);
                 }
 
             }

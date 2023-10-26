@@ -57,12 +57,20 @@ public class JjgFbgcSdgcZdhpzdController {
     @RequestMapping(value = "/download", method = RequestMethod.GET)
     public void downloadExport(HttpServletResponse response, String proname, String htd) throws IOException {
 
-        String fileName = "49隧道路面平整度.xlsx";
+        /*String fileName = "49隧道路面平整度.xlsx";
         String p = filespath+ File.separator+proname+File.separator+htd+File.separator+fileName;
         File file = new File(p);
         if (file.exists()){
             JjgFbgcCommonUtils.download(response,p,fileName);
+        }*/
+        List<Map<String,Object>> lxlist = jjgFbgcSdgcZdhpzdService.selectlx(proname,htd);
+        List<String> fileName = new ArrayList<>();
+        for (Map<String, Object> map : lxlist) {
+            String qlname = map.get("lxbs").toString();
+            fileName.add("49隧道路面平整度-"+qlname);
         }
+        String zipname = "隧道路面平整度鉴定表";
+        JjgFbgcCommonUtils.batchDowndFile(response,zipname,fileName,filespath+ File.separator+proname+File.separator+htd);
     }
 
 

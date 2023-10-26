@@ -56,20 +56,20 @@ public class JjgFbgcQlgcZdhgzsdController {
 
     @RequestMapping(value = "/download", method = RequestMethod.GET)
     public void downloadExport(HttpServletResponse response, String proname, String htd) throws IOException {
-        /*List<Map<String,Object>> lxlist = jjgFbgcQlgcZdhgzsdService.selectlx(proname,htd);
+        List<Map<String,Object>> lxlist = jjgFbgcQlgcZdhgzsdService.selectlx(proname,htd);
         List<String> fileName = new ArrayList<>();
         for (Map<String, Object> map : lxlist) {
             String lxbs = map.get("lxbs").toString();
-            fileName.add("37桥面构造深度");
+            fileName.add("37桥面构造深度-"+lxbs);
         }
         String zipname = "桥面构造深度鉴定表";
-        JjgFbgcCommonUtils.batchDowndFile(response,zipname,fileName,filespath+ File.separator+proname+File.separator+htd);*/
-        String fileName = "37桥面构造深度.xlsx";
+        JjgFbgcCommonUtils.batchDowndFile(response,zipname,fileName,filespath+ File.separator+proname+File.separator+htd);
+        /*String fileName = "37桥面构造深度.xlsx";
         String p = filespath+File.separator+proname+File.separator+htd+File.separator+fileName;
         File file = new File(p);
         if (file.exists()){
             JjgFbgcCommonUtils.download(response,p,fileName);
-        }
+        }*/
     }
 
     @ApiOperation("生成桥梁构造深度鉴定表")

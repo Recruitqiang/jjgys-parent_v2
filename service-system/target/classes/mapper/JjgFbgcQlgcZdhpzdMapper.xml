@@ -11,11 +11,11 @@
         SELECT COUNT(DISTINCT val) from jjg_fbgc_qlgc_zdhpzd where proname = #{proname} and htd = #{htd} and qlname=#{zx}
     </select>
     <select id="selectzfList" resultType="java.util.Map" parameterType="java.lang.String">
-        SELECT * from jjg_fbgc_qlgc_zdhpzd where proname = #{proname} and htd = #{htd} and cd LIKE '左幅%'  ORDER BY val,qdzh,FIELD(cd, ${result})
+        SELECT *, #{zx} as name from jjg_fbgc_qlgc_zdhpzd where proname = #{proname} and htd = #{htd} and cd LIKE '左幅%'  and lxbs = #{zx} ORDER BY val,qdzh,FIELD(cd, ${result})
     </select>
 
     <select id="selectyfList" resultType="java.util.Map" parameterType="java.lang.String">
-        SELECT * from jjg_fbgc_qlgc_zdhpzd where proname = #{proname} and htd = #{htd} and cd LIKE '右幅%'  ORDER BY val,qdzh,FIELD(cd, ${result})
+        SELECT *, #{zx} as name from jjg_fbgc_qlgc_zdhpzd where proname = #{proname} and htd = #{htd} and cd LIKE '右幅%'  and lxbs = #{zx} ORDER BY val,qdzh,FIELD(cd, ${result})
     </select>
 
 

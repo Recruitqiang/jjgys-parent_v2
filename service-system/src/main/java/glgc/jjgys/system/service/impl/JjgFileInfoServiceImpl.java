@@ -39,7 +39,13 @@ public class JjgFileInfoServiceImpl extends ServiceImpl<JjgFileInfoMapper, JjgFi
                 JjgFileInfo jjgFileInfo = new JjgFileInfo();
                 jjgFileInfo.setPath(file.getAbsolutePath());
                 jjgFileInfo.setName(file.getName());
-                jjgFileInfo.setFileName(file.getName());
+                if (file.getName().equals("files")){
+                    jjgFileInfo.setFileName("交工文件");
+                }else if (file.getName().equals("jgfiles")){
+                    jjgFileInfo.setFileName("竣工文件");
+                }else {
+                    jjgFileInfo.setFileName(file.getName());
+                }
                 jjgFileInfo.setIsFile(file.isFile());
                 jjgFileInfo.setIsDir(file.isDirectory());
                 if (file.isDirectory()) {

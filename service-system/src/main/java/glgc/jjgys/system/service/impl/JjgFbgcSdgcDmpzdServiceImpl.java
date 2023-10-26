@@ -16,6 +16,7 @@ import glgc.jjgys.system.service.JjgFbgcSdgcDmpzdService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import glgc.jjgys.system.utils.JjgFbgcCommonUtils;
 import glgc.jjgys.system.utils.RowCopy;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
@@ -79,26 +80,34 @@ public class JjgFbgcSdgcDmpzdServiceImpl extends ServiceImpl<JjgFbgcSdgcDmpzdMap
                 //创建文件根目录
                 fdir.mkdirs();
             }
-            File directory = new File("service-system/src/main/resources/static");
-            String reportPath = directory.getCanonicalPath();
-            String name = "隧道大面平整度.xlsx";
-            String path = reportPath + File.separator + name;
-            Files.copy(Paths.get(path), new FileOutputStream(f));
-            FileInputStream out = new FileInputStream(f);
-            wb = new XSSFWorkbook(out);
-            createTable(gettableNum(data.size()),wb);
-            if(DBtoExcel(data,wb)){
-                calculatePZDSheet(wb);
-                for (int j = 0; j < wb.getNumberOfSheets(); j++) {
-                    JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
+            try {
+                File directory = new File("service-system/src/main/resources/static");
+                String reportPath = directory.getCanonicalPath();
+                String name = "隧道大面平整度.xlsx";
+                String path = reportPath + File.separator + name;
+                Files.copy(Paths.get(path), new FileOutputStream(f));
+                FileInputStream out = new FileInputStream(f);
+                wb = new XSSFWorkbook(out);
+                createTable(gettableNum(data.size()),wb);
+                if(DBtoExcel(data,wb)){
+                    calculatePZDSheet(wb);
+                    for (int j = 0; j < wb.getNumberOfSheets(); j++) {
+                        JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
+                    }
+                    FileOutputStream fileOut = new FileOutputStream(f);
+                    wb.write(fileOut);
+                    fileOut.flush();
+                    fileOut.close();
                 }
-                FileOutputStream fileOut = new FileOutputStream(f);
-                wb.write(fileOut);
-                fileOut.flush();
-                fileOut.close();
+                out.close();
+                wb.close();
+            }catch (Exception e) {
+                if(f.exists()){
+                    f.delete();
+                }
+                throw new JjgysException(20001, "生成鉴定表错误，请检查数据的正确性");
             }
-            out.close();
-            wb.close();
+
         }
 
 
@@ -449,8 +458,22 @@ public class JjgFbgcSdgcDmpzdServiceImpl extends ServiceImpl<JjgFbgcSdgcDmpzdMap
                             new ExcelHandler<JjgFbgcSdgcDmpzdVo>(JjgFbgcSdgcDmpzdVo.class) {
                                 @Override
                                 public void handle(List<JjgFbgcSdgcDmpzdVo> dataList) {
+                                    int rowNumber=2;
                                     for(JjgFbgcSdgcDmpzdVo sdgcDmpzdVo: dataList)
                                     {
+                                        if (StringUtils.isEmpty(sdgcDmpzdVo.getZh())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，桩号为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(sdgcDmpzdVo.getSdmc())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，隧道名称为空，请修改后重新上传");
+                                        }
+
+                                        if (!StringUtils.isNumeric(sdgcDmpzdVo.getYxps()) || StringUtils.isEmpty(sdgcDmpzdVo.getYxps())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，允许偏差值有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(sdgcDmpzdVo.getScz()) || StringUtils.isEmpty(sdgcDmpzdVo.getScz())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，实测值有误，请修改后重新上传");
+                                        }
                                         JjgFbgcSdgcDmpzd fbgcSdgcDmpzd = new JjgFbgcSdgcDmpzd();
                                         BeanUtils.copyProperties(sdgcDmpzdVo,fbgcSdgcDmpzd);
                                         fbgcSdgcDmpzd.setCreatetime(new Date());
@@ -458,6 +481,7 @@ public class JjgFbgcSdgcDmpzdServiceImpl extends ServiceImpl<JjgFbgcSdgcDmpzdMap
                                         fbgcSdgcDmpzd.setHtd(commonInfoVo.getHtd());
                                         fbgcSdgcDmpzd.setFbgc(commonInfoVo.getFbgc());
                                         jjgFbgcSdgcDmpzdMapper.insert(fbgcSdgcDmpzd);
+                                        rowNumber++;
                                     }
                                 }
                             }

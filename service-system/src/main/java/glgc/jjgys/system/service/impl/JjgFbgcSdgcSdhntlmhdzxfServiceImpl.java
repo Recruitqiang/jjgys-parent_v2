@@ -103,32 +103,40 @@ public class JjgFbgcSdgcSdhntlmhdzxfServiceImpl extends ServiceImpl<JjgFbgcSdgcS
                 fdir.mkdirs();
             }
 
-            File directory = new File("service-system/src/main/resources/static");
-            String reportPath = directory.getCanonicalPath();
-            String path = reportPath + File.separator + "混凝土路面厚度-钻芯法.xlsx";
-            Files.copy(Paths.get(path), new FileOutputStream(f));
-            FileInputStream out = new FileInputStream(f);
-            wb = new XSSFWorkbook(out);
-            String sheetname = "混凝土路面";
-            createTable(gettableNum(data.size()),wb,sheetname);
-            if(DBtoExcel(data,wb)){
+            try {
+                File directory = new File("service-system/src/main/resources/static");
+                String reportPath = directory.getCanonicalPath();
+                String path = reportPath + File.separator + "混凝土路面厚度-钻芯法.xlsx";
+                Files.copy(Paths.get(path), new FileOutputStream(f));
+                FileInputStream out = new FileInputStream(f);
+                wb = new XSSFWorkbook(out);
+                String sheetname = "混凝土路面";
+                createTable(gettableNum(data.size()),wb,sheetname);
+                if(DBtoExcel(data,wb)){
 
-                for (int j = 0; j < wb.getNumberOfSheets(); j++) {
-                    if (shouldBeCalculate(wb.getSheetAt(j))) {
-                        calculateThicknessSheet(wb.getSheetAt(j),level);
-                        getTunnelTotal(wb.getSheetAt(j));
+                    for (int j = 0; j < wb.getNumberOfSheets(); j++) {
+                        if (shouldBeCalculate(wb.getSheetAt(j))) {
+                            calculateThicknessSheet(wb.getSheetAt(j),level);
+                            getTunnelTotal(wb.getSheetAt(j));
+                        }
                     }
+                    for (int j = 0; j < wb.getNumberOfSheets(); j++) {
+                        JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
+                    }
+                    FileOutputStream fileOut = new FileOutputStream(f);
+                    wb.write(fileOut);
+                    fileOut.flush();
+                    fileOut.close();
                 }
-                for (int j = 0; j < wb.getNumberOfSheets(); j++) {
-                    JjgFbgcCommonUtils.updateFormula(wb, wb.getSheetAt(j));
+                out.close();
+                wb.close();
+
+            }catch (Exception e) {
+                if(f.exists()){
+                    f.delete();
                 }
-                FileOutputStream fileOut = new FileOutputStream(f);
-                wb.write(fileOut);
-                fileOut.flush();
-                fileOut.close();
+                throw new JjgysException(20001, "生成鉴定表错误，请检查数据的正确性");
             }
-            out.close();
-            wb.close();
 
         }
 
@@ -491,8 +499,40 @@ public class JjgFbgcSdgcSdhntlmhdzxfServiceImpl extends ServiceImpl<JjgFbgcSdgcS
                             new ExcelHandler<JjgFbgcSdgcSdhntlmhdzxfVo>(JjgFbgcSdgcSdhntlmhdzxfVo.class) {
                                 @Override
                                 public void handle(List<JjgFbgcSdgcSdhntlmhdzxfVo> dataList) {
+                                    int rowNumber=2;
                                     for(JjgFbgcSdgcSdhntlmhdzxfVo zxfvo: dataList)
                                     {
+                                        if (StringUtils.isEmpty(zxfvo.getZh())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，桩号为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(zxfvo.getBw())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，部位值为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(zxfvo.getLqszd())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，路桥隧匝道为空，请修改后重新上传");
+                                        }
+                                        if (StringUtils.isEmpty(zxfvo.getSdmc())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，隧道名称为空，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(zxfvo.getCz1()) || StringUtils.isEmpty(zxfvo.getCz1())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，测值1有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(zxfvo.getCz2()) || StringUtils.isEmpty(zxfvo.getCz2())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，测值2有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(zxfvo.getCz3()) || StringUtils.isEmpty(zxfvo.getCz3())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，测值3有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(zxfvo.getCz4()) || StringUtils.isEmpty(zxfvo.getCz4())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，测值4有误，请修改后重新上传");
+                                        }
+
+                                        if (!StringUtils.isNumeric(zxfvo.getSjz()) || StringUtils.isEmpty(zxfvo.getSjz())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中，设计值有误，请修改后重新上传");
+                                        }
+                                        if (!StringUtils.isNumeric(zxfvo.getYxps()) || StringUtils.isEmpty(zxfvo.getYxps())) {
+                                            throw new JjgysException(20001, "第"+rowNumber+"行的数据中允许偏差值有误，请修改后重新上传");
+                                        }
                                         JjgFbgcSdgcSdhntlmhdzxf sdlmzxf = new JjgFbgcSdgcSdhntlmhdzxf();
                                         BeanUtils.copyProperties(zxfvo,sdlmzxf);
                                         sdlmzxf.setCreatetime(new Date());
@@ -500,6 +540,7 @@ public class JjgFbgcSdgcSdhntlmhdzxfServiceImpl extends ServiceImpl<JjgFbgcSdgcS
                                         sdlmzxf.setHtd(commonInfoVo.getHtd());
                                         sdlmzxf.setFbgc(commonInfoVo.getFbgc());
                                         jjgFbgcSdgcSdhntlmhdzxfMapper.insert(sdlmzxf);
+                                        rowNumber++;
                                     }
                                 }
                             }

@@ -23,9 +23,9 @@ public interface JjgFbgcSdgcZdhldhdMapper extends BaseMapper<JjgFbgcSdgcZdhldhd>
 
     int selectcdnum(String proname, String htd, String zx);
 
-    List<Map<String, Object>> selectzfList(String proname, String htd, String result);
+    List<Map<String, Object>> selectzfList(String proname, String htd, String result, String s);
 
-    List<Map<String, Object>> selectyfList(String proname, String htd, String result);
+    List<Map<String, Object>> selectyfList(String proname, String htd, String result, String s);
 
 
     Collection<? extends Map<String, Object>> seletcfhlmzfData(String proname, String htd, String zhq, String zhz);
