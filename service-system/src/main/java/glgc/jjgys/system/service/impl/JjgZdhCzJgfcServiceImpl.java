@@ -668,11 +668,11 @@ public class JjgZdhCzJgfcServiceImpl extends ServiceImpl<JjgZdhCzJgfcMapper, Jjg
             String[] arr = {"左幅-路面","右幅-路面","左幅-隧道","右幅-隧道","左幅-桥","右幅-桥"};
             for (int i = 0; i < arr.length; i++) {
                 if (shouldBeCalculate(wb.getSheet(arr[i]))) {
-                    if (arr[i].contains("路面")) {
+                    /*if (arr[i].contains("路面")) {
                         calculatePavementSheet(wb, wb.getSheet(arr[i]), cdsl);
-                    } else {
+                    } else {*/
                         calculateTunnelAndBridgeSheet(wb, wb.getSheet(arr[i]), cdsl);
-                    }
+                    //}
                     JjgFbgcCommonUtils.updateFormula(wb, wb.getSheet(arr[i]));
                 } else {
                     wb.removeSheetAt(wb.getSheetIndex(arr[i]));
@@ -1888,6 +1888,7 @@ public class JjgZdhCzJgfcServiceImpl extends ServiceImpl<JjgZdhCzJgfcMapper, Jjg
                 }else if (cds ==5){
                     c = 18;
                 }
+
                 File f;
                 if (lxbs.equals("主线")){
                     f = new File(jgfilepath + File.separator + proname + File.separator + htd + File.separator + "14路面车辙.xlsx");
@@ -1906,7 +1907,8 @@ public class JjgZdhCzJgfcServiceImpl extends ServiceImpl<JjgZdhCzJgfcMapper, Jjg
                             XSSFCell xmname = slSheet.getRow(1).getCell(2);//项目名
                             XSSFCell htdname = slSheet.getRow(1).getCell(cds*3+4);//合同段名
                             if (proname.equals(xmname.toString()) && htd.equals(htdname.toString())) {
-                                slSheet.getRow(1).getCell(cds*4+13).setCellType(CellType.STRING);
+                                //slSheet.getRow(1).getCell(cds*4+13).setCellType(CellType.STRING);
+                                slSheet.getRow(1).getCell(c+3).setCellType(CellType.STRING);
                                 Map tempmap = new HashMap();
                                 tempmap.put("检测项目", lxbs);
                                 tempmap.put("路面类型", wb.getSheetName(j));
