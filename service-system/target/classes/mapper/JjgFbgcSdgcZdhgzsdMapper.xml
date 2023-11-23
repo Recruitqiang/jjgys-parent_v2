@@ -15,7 +15,15 @@
         SELECT * from jjg_fbgc_sdgc_zdhgzsd where proname = #{proname} and htd = #{htd} and cd LIKE '左幅%' ORDER BY zdbs,qdzh,val
     </select>
 
+    <select id="selectzfListyh" resultType="java.util.Map" parameterType="java.lang.String">
+        SELECT * from jjg_fbgc_sdgc_zdhgzsd where proname = #{proname} and htd = #{htd} and username =#{username} and cd LIKE '左幅%' ORDER BY zdbs,qdzh,val
+    </select>
+
     <select id="selectyfList" resultType="java.util.Map" parameterType="java.lang.String">
         SELECT * from jjg_fbgc_sdgc_zdhgzsd where proname = #{proname} and htd = #{htd} and cd LIKE '右幅%' ORDER BY zdbs,qdzh,val
+    </select>
+
+    <select id="selectyfListyh" resultType="java.util.Map" parameterType="java.lang.String">
+        SELECT * from jjg_fbgc_sdgc_zdhgzsd where proname = #{proname} and htd = #{htd} and username =#{username} and  cd LIKE '右幅%' ORDER BY zdbs,qdzh,val
     </select>
 </mapper>

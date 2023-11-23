@@ -8,7 +8,13 @@ import glgc.jjgys.common.result.Result;
 import glgc.jjgys.model.project.JjgFbgcLmgcLmgzsdsgpsf;
 import glgc.jjgys.model.project.JjgFbgcLmgcLmgzsdsgpsfJgfc;
 import glgc.jjgys.model.projectvo.ljgc.CommonInfoVo;
+import glgc.jjgys.model.system.SysRole;
+import glgc.jjgys.model.system.SysUser;
+import glgc.jjgys.model.system.SysUserRole;
+import glgc.jjgys.system.mapper.SysUserRoleMapper;
 import glgc.jjgys.system.service.JjgFbgcLmgcLmgzsdsgpsfJgfcService;
+import glgc.jjgys.system.service.SysRoleService;
+import glgc.jjgys.system.service.SysUserService;
 import glgc.jjgys.system.utils.JjgFbgcCommonUtils;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +46,15 @@ public class JjgFbgcLmgcLmgzsdsgpsfJgfcController {
     @Autowired
     private JjgFbgcLmgcLmgzsdsgpsfJgfcService jjgFbgcLmgcLmgzsdsgpsfJgfcService;
 
+    @Autowired
+    private SysUserService sysUserService;
+
+    @Autowired
+    private SysUserRoleMapper sysUserRoleMapper;
+
+    @Autowired
+    private SysRoleService sysRoleService;
+
     @Value(value = "${jjgys.path.jgfilepath}")
     private String jgfilepath;
 
@@ -61,7 +76,8 @@ public class JjgFbgcLmgcLmgzsdsgpsfJgfcController {
     @PostMapping("generateJdb")
     public void generateJdb(@RequestBody CommonInfoVo commonInfoVo) throws Exception {
         String proname = commonInfoVo.getProname();
-        jjgFbgcLmgcLmgzsdsgpsfJgfcService.generateJdb(proname);
+        String username = commonInfoVo.getUsername();
+        jjgFbgcLmgcLmgzsdsgpsfJgfcService.generateJdb(proname,username);
 
     }
 
@@ -74,8 +90,8 @@ public class JjgFbgcLmgcLmgzsdsgpsfJgfcController {
 
     @ApiOperation(value = "构造深度手工铺沙法数据文件导入")
     @PostMapping("importlmgzsdsgpsf")
-    public Result importlmgzsdsgpsf(@RequestParam("file") MultipartFile file, String proname) {
-        jjgFbgcLmgcLmgzsdsgpsfJgfcService.importlmgzsdsgpsf(file,proname);
+    public Result importlmgzsdsgpsf(@RequestParam("file") MultipartFile file, String proname,String username) {
+        jjgFbgcLmgcLmgzsdsgpsfJgfcService.importlmgzsdsgpsf(file,proname,username);
         return Result.ok();
     }
 
@@ -88,18 +104,76 @@ public class JjgFbgcLmgcLmgzsdsgpsfJgfcController {
         if (jjgFbgcLmgcLmgzsdsgpsf != null){
             QueryWrapper<JjgFbgcLmgcLmgzsdsgpsfJgfc> wrapper=new QueryWrapper<>();
             wrapper.like("proname",jjgFbgcLmgcLmgzsdsgpsf.getProname());
-           /* wrapper.like("htd",jjgFbgcLmgcLmgzsdsgpsf.getHtd());
-            wrapper.like("fbgc",jjgFbgcLmgcLmgzsdsgpsf.getFbgc());*/
-            Date jcsj = jjgFbgcLmgcLmgzsdsgpsf.getJcsj();
-            if (!StringUtils.isEmpty(jcsj)){
-                wrapper.like("jcsj",jcsj);
+
+            String username = jjgFbgcLmgcLmgzsdsgpsf.getUsername();
+            QueryWrapper<SysUser> sysUserQueryWrapper = new QueryWrapper<>();
+            sysUserQueryWrapper.eq("username", username);
+            SysUser one = sysUserService.getOne(sysUserQueryWrapper);
+            String userid = one.getId().toString();
+
+            QueryWrapper<SysUserRole> sysUserRoleQueryWrapper = new QueryWrapper<>();
+            sysUserRoleQueryWrapper.eq("user_id", userid);
+            SysUserRole sysUserRole = sysUserRoleMapper.selectOne(sysUserRoleQueryWrapper);
+            String roleId = sysUserRole.getRoleId();
+
+            QueryWrapper<SysRole> sysRoleQueryWrapper = new QueryWrapper<>();
+            sysRoleQueryWrapper.eq("id", roleId);
+            SysRole role = sysRoleService.getOne(sysRoleQueryWrapper);
+            String rolecode = role.getRoleCode();
+
+            if (rolecode.equals("YH")){
+                wrapper.eq("username", username);
             }
+            Date jcsj = jjgFbgcLmgcLmgzsdsgpsf.getJcsj();
+            if (!StringUtils.isEmpty(jcsj)) {
+                wrapper.like("jcsj", jcsj);
+            }
+            if (!StringUtils.isEmpty(jjgFbgcLmgcLmgzsdsgpsf.getZh())) {
+                wrapper.like("zh", jjgFbgcLmgcLmgzsdsgpsf.getZh());
+            }
+
             //调用方法分页查询
             IPage<JjgFbgcLmgcLmgzsdsgpsfJgfc> pageModel = jjgFbgcLmgcLmgzsdsgpsfJgfcService.page(pageParam, wrapper);
             //返回
             return Result.ok(pageModel);
         }
         return Result.ok().message("无数据");
+    }
+
+    @ApiOperation("全部删除")
+    @DeleteMapping("removeAll")
+    public Result removeAll(@RequestBody CommonInfoVo commonInfoVo){
+        String proname = commonInfoVo.getProname();
+        String htd = commonInfoVo.getHtd();
+        String username = commonInfoVo.getUsername();
+        QueryWrapper<JjgFbgcLmgcLmgzsdsgpsfJgfc> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("proname",proname);
+        queryWrapper.eq("htd",htd);
+        QueryWrapper<SysUser> sysUserQueryWrapper = new QueryWrapper<>();
+        sysUserQueryWrapper.eq("username", username);
+        SysUser one = sysUserService.getOne(sysUserQueryWrapper);
+        String userid = one.getId().toString();
+
+        QueryWrapper<SysUserRole> sysUserRoleQueryWrapper = new QueryWrapper<>();
+        sysUserRoleQueryWrapper.eq("user_id", userid);
+        SysUserRole sysUserRole = sysUserRoleMapper.selectOne(sysUserRoleQueryWrapper);
+        String roleId = sysUserRole.getRoleId();
+
+        QueryWrapper<SysRole> sysRoleQueryWrapper = new QueryWrapper<>();
+        sysRoleQueryWrapper.eq("id", roleId);
+        SysRole role = sysRoleService.getOne(sysRoleQueryWrapper);
+        String rolecode = role.getRoleCode();
+
+        if (rolecode.equals("YH")){
+            queryWrapper.eq("username", username);
+        }
+        boolean remove = jjgFbgcLmgcLmgzsdsgpsfJgfcService.remove(queryWrapper);
+        if(remove){
+            return Result.ok();
+        } else {
+            return Result.fail().message("删除失败！");
+        }
+
     }
 
     @ApiOperation("批量删构造深度手工铺沙法数据")

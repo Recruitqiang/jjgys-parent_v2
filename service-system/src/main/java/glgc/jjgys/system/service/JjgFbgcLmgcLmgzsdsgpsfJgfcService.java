@@ -19,11 +19,11 @@ import java.util.Map;
  */
 public interface JjgFbgcLmgcLmgzsdsgpsfJgfcService extends IService<JjgFbgcLmgcLmgzsdsgpsfJgfc> {
 
-    void generateJdb(String proname) throws IOException;
+    void generateJdb(String proname, String username) throws IOException;
 
     void exportlmgzsdsgpsf(HttpServletResponse response);
 
-    void importlmgzsdsgpsf(MultipartFile file, String proname);
+    void importlmgzsdsgpsf(MultipartFile file, String proname, String username);
 
     List<Map<String, Object>> selecthtd(String proname);
 

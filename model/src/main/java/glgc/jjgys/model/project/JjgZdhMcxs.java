@@ -78,6 +78,9 @@ public class JjgZdhMcxs implements Serializable {
     @TableField("htd")
     private String htd;
 
+    @TableField("username")
+    private String username;
+
     @TableField("createTime")
     private Date createtime;
 

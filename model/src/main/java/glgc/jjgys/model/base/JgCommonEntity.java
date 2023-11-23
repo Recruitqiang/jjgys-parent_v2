@@ -15,4 +15,5 @@ public class JgCommonEntity implements Serializable {
 
     private String proname;
     private String sjz;
+    private String username;
 }

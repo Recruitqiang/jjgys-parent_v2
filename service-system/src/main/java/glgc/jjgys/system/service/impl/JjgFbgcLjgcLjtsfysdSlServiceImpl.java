@@ -464,6 +464,7 @@ public class JjgFbgcLjgcLjtsfysdSlServiceImpl extends ServiceImpl<JjgFbgcLjgcLjt
                 jjgFbgcLjgcLjtsfysdSl.setProname(commonInfoVo.getProname());
                 jjgFbgcLjgcLjtsfysdSl.setHtd(commonInfoVo.getHtd());
                 jjgFbgcLjgcLjtsfysdSl.setFbgc(commonInfoVo.getFbgc());
+                jjgFbgcLjgcLjtsfysdSl.setUsername(commonInfoVo.getUsername());
                 jjgFbgcLjgcLjtsfysdSl.setCreatetime(new Date());
                 jjgFbgcLjgcLjtsfysdSlMapper.insert(jjgFbgcLjgcLjtsfysdSl);
             }

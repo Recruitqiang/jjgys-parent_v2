@@ -25,7 +25,7 @@ public interface JjgZdhPzdJgfcService extends IService<JjgZdhPzdJgfc> {
 
     void exportpzd(HttpServletResponse response, String cdsl) throws IOException;
 
-    void importpzd(MultipartFile file, String proname) throws IOException;
+    void importpzd(MultipartFile file, String proname, String username) throws IOException;
 
     List<Map<String, Object>> selectlx(String proname, String htd);
 

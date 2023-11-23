@@ -26,20 +26,30 @@ public interface JjgZdhGzsdJgfcMapper extends BaseMapper<JjgZdhGzsdJgfc> {
     int selectcdnum(String proname, String htd, String zx);
 
     List<Map<String, Object>> selectzfList(String proname, String htd, String zx);
+    List<Map<String, Object>> selectzfListyh(String proname, String htd, String zx, String username);
 
     List<Map<String, Object>> selectyfList(String proname, String htd, String zx);
+    List<Map<String, Object>> selectyfListyh(String proname, String htd, String zx, String username);
 
     Collection<? extends Map<String, Object>> selectSdZfData(String proname, String htd, String zx, String zhq, String zhz);
+    Collection<? extends Map<String, Object>> selectSdZfDatayh(String proname, String htd, String zx, String zhq, String zhz, String username);
 
     Collection<? extends Map<String, Object>> selectSdyfData(String proname, String htd, String zx,String zhq, String zhz);
+    Collection<? extends Map<String, Object>> selectSdyfDatayh(String proname, String htd, String zx, String zhq, String zhz, String username);
 
     Collection<? extends Map<String, Object>> selectQlZfData(String proname, String htd, String zx, String zhq, String zhz);
+    Collection<? extends Map<String, Object>> selectQlZfDatayh(String proname, String htd, String zx, String zhq, String zhz, String username);
 
     Collection<? extends Map<String, Object>> selectQlYfData(String proname, String htd, String zx, String zhq, String zhz);
+    Collection<? extends Map<String, Object>> selectQlYfDatayh(String proname, String htd, String zx, String zhq, String zhz, String username);
+
 
     Collection<? extends Map<String, Object>> selectsdgzsd(String proname,String bz,String lf, String sdzhq, String sdzhz, String zx, String zhq1, String zhz1);
+    Collection<? extends Map<String, Object>> selectsdgzsdyh(String proname, String bz, String lf, String sdzhq, String sdzhz, String zx, String zhq1, String zhz1, String username);
 
     Collection<? extends Map<String, Object>> selectqlgzsd(String proname, String bz, String lf, String qlzhq, String qlzhz, String zx, String zhq1, String zhz1);
+    Collection<? extends Map<String, Object>> selectqlgzsdyh(String proname, String bz, String lf, String qlzhq, String qlzhz, String zx, String zhq1, String zhz1, String username);
+
 
     List<Map<String, Object>> selecthtd(String proname);
 

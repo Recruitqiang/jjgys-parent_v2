@@ -6,7 +6,6 @@ import glgc.jjgys.model.project.JjgZdhGzsdJgfc;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
@@ -27,7 +26,7 @@ public interface JjgZdhGzsdJgfcService extends IService<JjgZdhGzsdJgfc> {
 
     void exportgzsd(HttpServletResponse response, String cdsl) throws IOException;
 
-    void importgzsd(MultipartFile file, String proname) throws IOException;
+    void importgzsd(MultipartFile file, String proname, String username) throws IOException;
 
     List<Map<String, Object>> selectlx(String proname, String htd);
 

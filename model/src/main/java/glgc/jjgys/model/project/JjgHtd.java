@@ -51,6 +51,12 @@ public class JjgHtd {
     @TableField("lx")
     private String lx;
 
+    @TableField("tze")
+    private String tze;
+
+    @TableField("gls")
+    private String gls;
+
     @ApiModelProperty(value = "项目名称")
     @TableField("proname")
     private String proname;

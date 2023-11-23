@@ -8,6 +8,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -45,6 +46,9 @@ public class SysUser extends BaseEntity {
 	@ApiModelProperty(value = "描述")
 	@TableField("description")
 	private String description;
+
+	@TableField("expire")
+	private LocalDateTime expire;
 
 
 	@TableField(exist = false)

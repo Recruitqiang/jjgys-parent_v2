@@ -6,17 +6,21 @@ import glgc.jjgys.common.excel.ExcelUtil;
 import glgc.jjgys.model.project.*;
 import glgc.jjgys.model.projectvo.ljgc.CommonInfoVo;
 import glgc.jjgys.model.projectvo.zdh.JjgZdhPzdVo;
+import glgc.jjgys.model.system.SysRole;
+import glgc.jjgys.model.system.SysUser;
+import glgc.jjgys.model.system.SysUserRole;
 import glgc.jjgys.system.easyexcel.ExcelHandler;
 import glgc.jjgys.system.exception.JjgysException;
 import glgc.jjgys.system.mapper.*;
 import glgc.jjgys.system.service.JjgZdhPzdService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import glgc.jjgys.system.service.SysRoleService;
+import glgc.jjgys.system.service.SysUserService;
 import glgc.jjgys.system.utils.RowCopy;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +70,15 @@ public class JjgZdhPzdServiceImpl extends ServiceImpl<JjgZdhPzdMapper, JjgZdhPzd
     @Autowired
     private JjgLqsLjxMapper jjgLqsLjxMapper;
 
+    @Autowired
+    private SysUserService sysUserService;
+
+    @Autowired
+    private SysUserRoleMapper sysUserRoleMapper;
+
+    @Autowired
+    private SysRoleService sysRoleService;
+
     @Value(value = "${jjgys.path.filepath}")
     private String filepath;
 
@@ -73,7 +86,7 @@ public class JjgZdhPzdServiceImpl extends ServiceImpl<JjgZdhPzdMapper, JjgZdhPzd
     public void generateJdb(CommonInfoVo commonInfoVo) throws IOException, ParseException {
         String proname = commonInfoVo.getProname();
         String htd = commonInfoVo.getHtd();
-
+        String username = commonInfoVo.getUsername();
         List<Map<String,Object>> lxlist = jjgZdhPzdMapper.selectlx(proname,htd);
         for (Map<String, Object> map : lxlist) {
             String zx = map.get("lxbs").toString();
@@ -84,20 +97,20 @@ public class JjgZdhPzdServiceImpl extends ServiceImpl<JjgZdhPzdMapper, JjgZdhPzd
             }else {
                 cds=num;
             }
-            handlezxData(proname,htd,zx,cds,commonInfoVo.getSjz());
+            handlezxData(proname,htd,zx,cds,commonInfoVo.getSjz(),username);
         }
 
     }
 
     /**
-     *
-     * @param proname
+     *  @param proname
      * @param htd
      * @param zx
      * @param cdsl
      * @param sjz
+     * @param username
      */
-    private void handlezxData(String proname, String htd, String zx, int cdsl, String sjz) throws IOException, ParseException {
+    private void handlezxData(String proname, String htd, String zx, int cdsl, String sjz, String username) throws IOException, ParseException {
         String[] arr = null;
         if (cdsl == 2) {
             arr = new String[] {"左幅一车道", "左幅二车道", "右幅一车道", "右幅二车道"};
@@ -113,11 +126,30 @@ public class JjgZdhPzdServiceImpl extends ServiceImpl<JjgZdhPzdMapper, JjgZdhPzd
             sb.append("\"").append(str).append("\",");
         }
         String result = sb.substring(0, sb.length() - 1); // 去掉最后一个逗号
+        QueryWrapper<SysUser> sysUserQueryWrapper = new QueryWrapper<>();
+        sysUserQueryWrapper.eq("username", username);
+        SysUser one = sysUserService.getOne(sysUserQueryWrapper);
+        String userid = one.getId().toString();
+
+        QueryWrapper<SysUserRole> sysUserRoleQueryWrapper = new QueryWrapper<>();
+        sysUserRoleQueryWrapper.eq("user_id", userid);
+        SysUserRole sysUserRole = sysUserRoleMapper.selectOne(sysUserRoleQueryWrapper);
+        String roleId = sysUserRole.getRoleId();
+
+        QueryWrapper<SysRole> sysRoleQueryWrapper = new QueryWrapper<>();
+        sysRoleQueryWrapper.eq("id", roleId);
+        SysRole role = sysRoleService.getOne(sysRoleQueryWrapper);
+        String rolecode = role.getRoleCode();
         if (zx.equals("主线")){
-
-
-            List<Map<String,Object>> datazf = jjgZdhPzdMapper.selectzfList(proname,htd,zx,result);
-            List<Map<String,Object>> datayf = jjgZdhPzdMapper.selectyfList(proname,htd,zx,result);
+            List<Map<String,Object>> datazf = new ArrayList<>();
+            List<Map<String,Object>> datayf = new ArrayList<>();
+            if (rolecode.equals("YH")){
+                datazf = jjgZdhPzdMapper.selectzfListyh(proname,htd,zx,result,username);
+                datayf = jjgZdhPzdMapper.selectyfListyh(proname,htd,zx,result,username);
+            }else {
+                datazf = jjgZdhPzdMapper.selectzfList(proname,htd,zx,result);
+                datayf = jjgZdhPzdMapper.selectyfList(proname,htd,zx,result);
+            }
 
             /**
              * 查询合同的的起止桩号
@@ -140,39 +172,69 @@ public class JjgZdhPzdServiceImpl extends ServiceImpl<JjgZdhPzdMapper, JjgZdhPzd
 
 
             List<Map<String,Object>> sdzfdata = new ArrayList<>();
-            if (jjgLqsSdzf.size()>0){
-                for (JjgLqsSd jjgLqsSd : jjgLqsSdzf) {
-                    String zhq = String.valueOf(jjgLqsSd.getZhq());
-                    String zhz = String.valueOf(jjgLqsSd.getZhz());
-                    sdzfdata.addAll(jjgZdhPzdMapper.selectSdZfData(proname,htd,zx,zhq,zhz,result));
-                }
-            }
-
-
             List<Map<String,Object>> sdyfdata = new ArrayList<>();
-            if (jjgLqsSdyf.size()>0){
-                for (JjgLqsSd jjgLqsSd : jjgLqsSdyf) {
-                    String zhq = String.valueOf(jjgLqsSd.getZhq());
-                    String zhz = String.valueOf(jjgLqsSd.getZhz());
-                    sdyfdata.addAll(jjgZdhPzdMapper.selectSdyfData(proname,htd,zx,zhq,zhz,result));
-                }
-            }
             List<Map<String,Object>> qlzfdata = new ArrayList<>();
-            if (jjgLqsQlzf.size()>0){
-                for (JjgLqsQl jjgLqsQl : jjgLqsQlzf) {
-                    String zhq = String.valueOf(jjgLqsQl.getZhq());
-                    String zhz = String.valueOf(jjgLqsQl.getZhz());
-                    qlzfdata.addAll(jjgZdhPzdMapper.selectQlZfData(proname,htd,zx,zhq,zhz,result));
-                }
-            }
             List<Map<String,Object>> qlyfdata = new ArrayList<>();
-            if (jjgLqsQlyf.size()>0){
-                for (JjgLqsQl jjgLqsQl : jjgLqsQlyf) {
-                    String zhq = String.valueOf(jjgLqsQl.getZhq());
-                    String zhz = String.valueOf(jjgLqsQl.getZhz());
-                    qlyfdata.addAll(jjgZdhPzdMapper.selectQlYfData(proname,htd,zx,zhq,zhz,result));
+            if (rolecode.equals("YH")){
+                if (jjgLqsSdzf.size()>0){
+                    for (JjgLqsSd jjgLqsSd : jjgLqsSdzf) {
+                        String zhq = String.valueOf(jjgLqsSd.getZhq());
+                        String zhz = String.valueOf(jjgLqsSd.getZhz());
+                        sdzfdata.addAll(jjgZdhPzdMapper.selectSdZfDatayh(proname,htd,zx,zhq,zhz,result,username));
+                    }
+                }
+                if (jjgLqsSdyf.size()>0){
+                    for (JjgLqsSd jjgLqsSd : jjgLqsSdyf) {
+                        String zhq = String.valueOf(jjgLqsSd.getZhq());
+                        String zhz = String.valueOf(jjgLqsSd.getZhz());
+                        sdyfdata.addAll(jjgZdhPzdMapper.selectSdyfDatayh(proname,htd,zx,zhq,zhz,result,username));
+                    }
+                }
+                if (jjgLqsQlzf.size()>0){
+                    for (JjgLqsQl jjgLqsQl : jjgLqsQlzf) {
+                        String zhq = String.valueOf(jjgLqsQl.getZhq());
+                        String zhz = String.valueOf(jjgLqsQl.getZhz());
+                        qlzfdata.addAll(jjgZdhPzdMapper.selectQlZfDatayh(proname,htd,zx,zhq,zhz,result,username));
+                    }
+                }
+                if (jjgLqsQlyf.size()>0){
+                    for (JjgLqsQl jjgLqsQl : jjgLqsQlyf) {
+                        String zhq = String.valueOf(jjgLqsQl.getZhq());
+                        String zhz = String.valueOf(jjgLqsQl.getZhz());
+                        qlyfdata.addAll(jjgZdhPzdMapper.selectQlYfDatayh(proname,htd,zx,zhq,zhz,result,username));
+                    }
+                }
+            }else {
+                if (jjgLqsSdzf.size()>0){
+                    for (JjgLqsSd jjgLqsSd : jjgLqsSdzf) {
+                        String zhq = String.valueOf(jjgLqsSd.getZhq());
+                        String zhz = String.valueOf(jjgLqsSd.getZhz());
+                        sdzfdata.addAll(jjgZdhPzdMapper.selectSdZfData(proname,htd,zx,zhq,zhz,result));
+                    }
+                }
+                if (jjgLqsSdyf.size()>0){
+                    for (JjgLqsSd jjgLqsSd : jjgLqsSdyf) {
+                        String zhq = String.valueOf(jjgLqsSd.getZhq());
+                        String zhz = String.valueOf(jjgLqsSd.getZhz());
+                        sdyfdata.addAll(jjgZdhPzdMapper.selectSdyfData(proname,htd,zx,zhq,zhz,result));
+                    }
+                }
+                if (jjgLqsQlzf.size()>0){
+                    for (JjgLqsQl jjgLqsQl : jjgLqsQlzf) {
+                        String zhq = String.valueOf(jjgLqsQl.getZhq());
+                        String zhz = String.valueOf(jjgLqsQl.getZhz());
+                        qlzfdata.addAll(jjgZdhPzdMapper.selectQlZfData(proname,htd,zx,zhq,zhz,result));
+                    }
+                }
+                if (jjgLqsQlyf.size()>0){
+                    for (JjgLqsQl jjgLqsQl : jjgLqsQlyf) {
+                        String zhq = String.valueOf(jjgLqsQl.getZhq());
+                        String zhz = String.valueOf(jjgLqsQl.getZhz());
+                        qlyfdata.addAll(jjgZdhPzdMapper.selectQlYfData(proname,htd,zx,zhq,zhz,result));
+                    }
                 }
             }
+
 
             List<Map<String, Object>> sdzxList = montageIRI(sdzfdata);
             List<Map<String, Object>> sdyxList = montageIRI(sdyfdata);
@@ -228,8 +290,16 @@ public class JjgZdhPzdServiceImpl extends ServiceImpl<JjgZdhPzdMapper, JjgZdhPzd
             writeExcelData(proname,htd,lmzf,lmyf,sdzxList,sdyxList,qlzxList,qlyxList,cdsl,sjz,zx);
         }else if (zx.contains("连接线")){
             //查询的是摩擦系数表中的连接线
-            List<Map<String,Object>> dataljxzf = jjgZdhPzdMapper.selectzfList(proname,htd,zx,result);
-            List<Map<String,Object>> dataljxyf = jjgZdhPzdMapper.selectyfList(proname,htd,zx,result);
+            List<Map<String,Object>> dataljxzf = new ArrayList<>();
+            List<Map<String,Object>> dataljxyf = new ArrayList<>();
+            if (rolecode.equals("YH")){
+                dataljxzf = jjgZdhPzdMapper.selectzfListyh(proname,htd,zx,result,username);
+                dataljxyf = jjgZdhPzdMapper.selectyfListyh(proname,htd,zx,result,username);
+            }else {
+                dataljxzf = jjgZdhPzdMapper.selectzfList(proname,htd,zx,result);
+                dataljxyf = jjgZdhPzdMapper.selectyfList(proname,htd,zx,result);
+            }
+
             //连接线
             QueryWrapper<JjgLjx> wrapperljx = new QueryWrapper<>();
             wrapperljx.like("proname",proname);
@@ -238,40 +308,76 @@ public class JjgZdhPzdServiceImpl extends ServiceImpl<JjgZdhPzdMapper, JjgZdhPzd
 
             List<Map<String,Object>> sdpzd = new ArrayList<>();
             List<Map<String,Object>> qlpzd = new ArrayList<>();
+            if (rolecode.equals("YH")){
+                for (JjgLjx jjgLjx : jjgLjxList) {
+                    String zhq = jjgLjx.getZhq();
+                    String zhz = jjgLjx.getZhz();
+                    String bz = jjgLjx.getBz();
+                    String ljxlf = jjgLjx.getLf();
+                    String wz = jjgLjx.getLjxname();
+                    List<JjgLqsSd> jjgLqssd = jjgLqsSdMapper.selectsdList(proname,zhq,zhz,bz,wz,ljxlf);
+                    for (JjgLqsSd jjgLqsSd : jjgLqssd) {
+                        String lf = jjgLqsSd.getLf();
 
-            for (JjgLjx jjgLjx : jjgLjxList) {
-                String zhq = jjgLjx.getZhq();
-                String zhz = jjgLjx.getZhz();
-                String bz = jjgLjx.getBz();
-                String ljxlf = jjgLjx.getLf();
-                String wz = jjgLjx.getLjxname();
-                List<JjgLqsSd> jjgLqssd = jjgLqsSdMapper.selectsdList(proname,zhq,zhz,bz,wz,ljxlf);
-                for (JjgLqsSd jjgLqsSd : jjgLqssd) {
-                    String lf = jjgLqsSd.getLf();
+                        Double sdq = jjgLqsSd.getZhq()+10;
+                        String sdzhq = String.valueOf(sdq);
+                        String sdzhz = jjgLqsSd.getZhz().toString();
 
-                    Double sdq = jjgLqsSd.getZhq()+10;
-                    String sdzhq = String.valueOf(sdq);
-                    String sdzhz = jjgLqsSd.getZhz().toString();
+                        String zhq1 = String.valueOf((jjgLqsSd.getZhq()));
+                        String zhz1 = String.valueOf((jjgLqsSd.getZhz()));
+                        sdpzd.addAll(jjgZdhPzdMapper.selectsdpzd1yh(proname,bz,lf,zx,zhq1,zhz1,sdzhq,sdzhz,username));
+                    }
 
-                    String zhq1 = String.valueOf((jjgLqsSd.getZhq()));
-                    String zhz1 = String.valueOf((jjgLqsSd.getZhz()));
-                    sdpzd.addAll(jjgZdhPzdMapper.selectsdpzd1(proname,bz,lf,zx,zhq1,zhz1,sdzhq,sdzhz));
+                    List<JjgLqsQl> jjgLqsql = jjgLqsQlMapper.selectqlList(proname,zhq,zhz,bz,wz,ljxlf);
+                    for (JjgLqsQl jjgLqsQl : jjgLqsql) {
+                        String lf = jjgLqsQl.getLf();
+                        Double qlq = jjgLqsQl.getZhq()+10;
+                        Double qlz = jjgLqsQl.getZhz();
+
+                        String qlzhq = String.valueOf(qlq);
+                        String qlzhz = String.valueOf(qlz);
+
+                        String zhq1 = String.valueOf(jjgLqsQl.getZhq());
+                        String zhz1 = String.valueOf(jjgLqsQl.getZhz());
+                        qlpzd.addAll(jjgZdhPzdMapper.selectqlpzd1yh(proname,bz,lf, qlzhq, qlzhz, zx, zhq1, zhz1,username));
+                    }
                 }
+            }else {
+                for (JjgLjx jjgLjx : jjgLjxList) {
+                    String zhq = jjgLjx.getZhq();
+                    String zhz = jjgLjx.getZhz();
+                    String bz = jjgLjx.getBz();
+                    String ljxlf = jjgLjx.getLf();
+                    String wz = jjgLjx.getLjxname();
+                    List<JjgLqsSd> jjgLqssd = jjgLqsSdMapper.selectsdList(proname,zhq,zhz,bz,wz,ljxlf);
+                    for (JjgLqsSd jjgLqsSd : jjgLqssd) {
+                        String lf = jjgLqsSd.getLf();
 
-                List<JjgLqsQl> jjgLqsql = jjgLqsQlMapper.selectqlList(proname,zhq,zhz,bz,wz,ljxlf);
-                for (JjgLqsQl jjgLqsQl : jjgLqsql) {
-                    String lf = jjgLqsQl.getLf();
-                    Double qlq = jjgLqsQl.getZhq()+10;
-                    Double qlz = jjgLqsQl.getZhz();
+                        Double sdq = jjgLqsSd.getZhq()+10;
+                        String sdzhq = String.valueOf(sdq);
+                        String sdzhz = jjgLqsSd.getZhz().toString();
 
-                    String qlzhq = String.valueOf(qlq);
-                    String qlzhz = String.valueOf(qlz);
+                        String zhq1 = String.valueOf((jjgLqsSd.getZhq()));
+                        String zhz1 = String.valueOf((jjgLqsSd.getZhz()));
+                        sdpzd.addAll(jjgZdhPzdMapper.selectsdpzd1(proname,bz,lf,zx,zhq1,zhz1,sdzhq,sdzhz));
+                    }
 
-                    String zhq1 = String.valueOf(jjgLqsQl.getZhq());
-                    String zhz1 = String.valueOf(jjgLqsQl.getZhz());
-                    qlpzd.addAll(jjgZdhPzdMapper.selectqlpzd1(proname,bz,lf, qlzhq, qlzhz, zx, zhq1, zhz1));
+                    List<JjgLqsQl> jjgLqsql = jjgLqsQlMapper.selectqlList(proname,zhq,zhz,bz,wz,ljxlf);
+                    for (JjgLqsQl jjgLqsQl : jjgLqsql) {
+                        String lf = jjgLqsQl.getLf();
+                        Double qlq = jjgLqsQl.getZhq()+10;
+                        Double qlz = jjgLqsQl.getZhz();
+
+                        String qlzhq = String.valueOf(qlq);
+                        String qlzhz = String.valueOf(qlz);
+
+                        String zhq1 = String.valueOf(jjgLqsQl.getZhq());
+                        String zhz1 = String.valueOf(jjgLqsQl.getZhz());
+                        qlpzd.addAll(jjgZdhPzdMapper.selectqlpzd1(proname,bz,lf, qlzhq, qlzhz, zx, zhq1, zhz1));
+                    }
                 }
             }
+
             List<Map<String,Object>> zfqlpzd = new ArrayList<>();
             List<Map<String,Object>> yfqlpzd = new ArrayList<>();
             if (qlpzd.size()>0){
@@ -340,8 +446,16 @@ public class JjgZdhPzdServiceImpl extends ServiceImpl<JjgZdhPzdMapper, JjgZdhPzd
 
         }else {
             //匝道的所有数据
-            List<Map<String,Object>> datazdzf = jjgZdhPzdMapper.selectzfList(proname,htd,zx,result);
-            List<Map<String,Object>> datazdyf = jjgZdhPzdMapper.selectyfList(proname,htd,zx,result);
+            List<Map<String,Object>> datazdzf = new ArrayList<>();
+            List<Map<String,Object>> datazdyf = new ArrayList<>();
+            if (rolecode.equals("YH")){
+                datazdzf = jjgZdhPzdMapper.selectzfListyh(proname,htd,zx,result,username);
+                datazdyf = jjgZdhPzdMapper.selectyfListyh(proname,htd,zx,result,username);
+            }else {
+                datazdzf = jjgZdhPzdMapper.selectzfList(proname,htd,zx,result);
+                datazdyf = jjgZdhPzdMapper.selectyfList(proname,htd,zx,result);
+            }
+
 
             //匝道表中的数据
             QueryWrapper<JjgLqsHntlmzd> wrapperzd = new QueryWrapper<>();
@@ -351,41 +465,80 @@ public class JjgZdhPzdServiceImpl extends ServiceImpl<JjgZdhPzdMapper, JjgZdhPzd
 
             List<Map<String,Object>> sdpzd = new ArrayList<>();//隧道的实测数据
             List<Map<String,Object>> qlpzd = new ArrayList<>();//桥梁的实测数据
-            for (JjgLqsHntlmzd jjgLqsHntlmzd : zdList) {
-                String zhq = jjgLqsHntlmzd.getZhq();
-                String zhz = jjgLqsHntlmzd.getZhz();
-                String bz = jjgLqsHntlmzd.getZdlx();
-                String wz = jjgLqsHntlmzd.getWz();
-                String zdlf = jjgLqsHntlmzd.getLf();
+            if (rolecode.equals("YH")){
+                for (JjgLqsHntlmzd jjgLqsHntlmzd : zdList) {
+                    String zhq = jjgLqsHntlmzd.getZhq();
+                    String zhz = jjgLqsHntlmzd.getZhz();
+                    String bz = jjgLqsHntlmzd.getZdlx();
+                    String wz = jjgLqsHntlmzd.getWz();
+                    String zdlf = jjgLqsHntlmzd.getLf();
 
-                List<JjgLqsSd> jjgLqssd = jjgLqsSdMapper.selectsdList(proname,zhq,zhz,bz,wz,zdlf);
-                if (jjgLqssd.size()>0){
-                    for (JjgLqsSd jjgLqsSd : jjgLqssd) {
-                        String lf = jjgLqsSd.getLf();
-                        Double sdz = jjgLqsSd.getZhz()-100;
-                        String sdzhz = String.valueOf(sdz);
+                    List<JjgLqsSd> jjgLqssd = jjgLqsSdMapper.selectsdList(proname,zhq,zhz,bz,wz,zdlf);
+                    if (jjgLqssd.size()>0){
+                        for (JjgLqsSd jjgLqsSd : jjgLqssd) {
+                            String lf = jjgLqsSd.getLf();
+                            Double sdz = jjgLqsSd.getZhz()-100;
+                            String sdzhz = String.valueOf(sdz);
 
-                        String zhq1 = String.valueOf((jjgLqsSd.getZhq()));
-                        String zhz1 = String.valueOf((jjgLqsSd.getZhz()));
-                        sdpzd.addAll(jjgZdhPzdMapper.selectsdpzd(proname,bz,lf,zx,zhq1,zhz1,sdzhz));
+                            String zhq1 = String.valueOf((jjgLqsSd.getZhq()));
+                            String zhz1 = String.valueOf((jjgLqsSd.getZhz()));
+                            sdpzd.addAll(jjgZdhPzdMapper.selectsdpzdyh(proname,bz,lf,zx,zhq1,zhz1,sdzhz,username));
+                        }
+
                     }
 
+                    List<JjgLqsQl> jjgLqsql = jjgLqsQlMapper.selectqlList(proname,zhq,zhz,bz,wz,zdlf);
+
+                    if (jjgLqsql.size()>0){
+                        for (JjgLqsQl jjgLqsQl : jjgLqsql) {
+                            String lf = jjgLqsQl.getLf();
+                            Double qlz = jjgLqsQl.getZhz()-100;
+                            String qlzhzj = String.valueOf(qlz);
+                            String qlzhq = String.valueOf(jjgLqsQl.getZhq());
+                            String qlzhz = String.valueOf(jjgLqsQl.getZhz());
+                            qlpzd.addAll(jjgZdhPzdMapper.selectqlpzdyh(proname,bz,lf, qlzhq, qlzhz, zx,qlzhzj,username));
+
+                        }
+                    }
                 }
+            }else {
+                for (JjgLqsHntlmzd jjgLqsHntlmzd : zdList) {
+                    String zhq = jjgLqsHntlmzd.getZhq();
+                    String zhz = jjgLqsHntlmzd.getZhz();
+                    String bz = jjgLqsHntlmzd.getZdlx();
+                    String wz = jjgLqsHntlmzd.getWz();
+                    String zdlf = jjgLqsHntlmzd.getLf();
 
-                List<JjgLqsQl> jjgLqsql = jjgLqsQlMapper.selectqlList(proname,zhq,zhz,bz,wz,zdlf);
+                    List<JjgLqsSd> jjgLqssd = jjgLqsSdMapper.selectsdList(proname,zhq,zhz,bz,wz,zdlf);
+                    if (jjgLqssd.size()>0){
+                        for (JjgLqsSd jjgLqsSd : jjgLqssd) {
+                            String lf = jjgLqsSd.getLf();
+                            Double sdz = jjgLqsSd.getZhz()-100;
+                            String sdzhz = String.valueOf(sdz);
 
-                if (jjgLqsql.size()>0){
-                    for (JjgLqsQl jjgLqsQl : jjgLqsql) {
-                        String lf = jjgLqsQl.getLf();
-                        Double qlz = jjgLqsQl.getZhz()-100;
-                        String qlzhzj = String.valueOf(qlz);
-                        String qlzhq = String.valueOf(jjgLqsQl.getZhq());
-                        String qlzhz = String.valueOf(jjgLqsQl.getZhz());
-                        qlpzd.addAll(jjgZdhPzdMapper.selectqlpzd(proname,bz,lf, qlzhq, qlzhz, zx,qlzhzj));
+                            String zhq1 = String.valueOf((jjgLqsSd.getZhq()));
+                            String zhz1 = String.valueOf((jjgLqsSd.getZhz()));
+                            sdpzd.addAll(jjgZdhPzdMapper.selectsdpzd(proname,bz,lf,zx,zhq1,zhz1,sdzhz));
+                        }
 
+                    }
+
+                    List<JjgLqsQl> jjgLqsql = jjgLqsQlMapper.selectqlList(proname,zhq,zhz,bz,wz,zdlf);
+
+                    if (jjgLqsql.size()>0){
+                        for (JjgLqsQl jjgLqsQl : jjgLqsql) {
+                            String lf = jjgLqsQl.getLf();
+                            Double qlz = jjgLqsQl.getZhz()-100;
+                            String qlzhzj = String.valueOf(qlz);
+                            String qlzhq = String.valueOf(jjgLqsQl.getZhq());
+                            String qlzhz = String.valueOf(jjgLqsQl.getZhz());
+                            qlpzd.addAll(jjgZdhPzdMapper.selectqlpzd(proname,bz,lf, qlzhq, qlzhz, zx,qlzhzj));
+
+                        }
                     }
                 }
             }
+
 
             List<Map<String,Object>> zfqlpzd = new ArrayList<>();
             List<Map<String,Object>> yfqlpzd = new ArrayList<>();
@@ -2654,6 +2807,7 @@ public class JjgZdhPzdServiceImpl extends ServiceImpl<JjgZdhPzdMapper, JjgZdhPzd
                                             pzd.setCreatetime(new Date());
                                             pzd.setProname(commonInfoVo.getProname());
                                             pzd.setHtd(commonInfoVo.getHtd());
+                                            pzd.setUsername(commonInfoVo.getUsername());
                                             pzd.setQdzh(Double.parseDouble(pzdVo.getQdzh()));
                                             if (!pzdVo.getZdzh().isEmpty() && pzdVo.getZdzh()!=null){
                                                 pzd.setZdzh(Double.parseDouble(pzdVo.getZdzh()));

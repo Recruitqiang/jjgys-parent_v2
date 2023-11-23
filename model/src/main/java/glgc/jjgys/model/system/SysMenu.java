@@ -2,6 +2,7 @@ package glgc.jjgys.model.system;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import glgc.jjgys.model.base.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -18,10 +19,12 @@ public class SysMenu  {
 	
 	private static final long serialVersionUID = 1L;
 
+	@JsonFormat(shape =JsonFormat.Shape.STRING )
 	@TableId(type = IdType.ID_WORKER)
 	@TableField("id")
 	private Long id;
 
+	@JsonFormat(shape =JsonFormat.Shape.STRING )
 	@ApiModelProperty(value = "所属上级")
 	@TableField("parent_id")
 	private Long parentId;

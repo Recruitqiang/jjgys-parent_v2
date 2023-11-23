@@ -11,8 +11,14 @@ import glgc.jjgys.model.project.JjgFbgcLjgcLjtsfysdHt;
 import glgc.jjgys.model.project.JjgFbgcLjgcLjtsfysdSl;
 import glgc.jjgys.model.projectvo.ljgc.CommonInfoVo;
 import glgc.jjgys.model.system.SysOperLog;
+import glgc.jjgys.model.system.SysRole;
+import glgc.jjgys.model.system.SysUser;
+import glgc.jjgys.model.system.SysUserRole;
+import glgc.jjgys.system.mapper.SysUserRoleMapper;
 import glgc.jjgys.system.service.JjgFbgcLjgcLjtsfysdSlService;
 import glgc.jjgys.system.service.OperLogService;
+import glgc.jjgys.system.service.SysRoleService;
+import glgc.jjgys.system.service.SysUserService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
@@ -47,6 +53,15 @@ public class JjgFbgcLjgcLjtsfysdSlController {
     private JjgFbgcLjgcLjtsfysdSlService jjgFbgcLjgcLjtsfysdSlService;
 
     @Autowired
+    private SysUserService sysUserService;
+
+    @Autowired
+    private SysUserRoleMapper sysUserRoleMapper;
+
+    @Autowired
+    private SysRoleService sysRoleService;
+
+    @Autowired
     private OperLogService operLogService;
 
 
@@ -74,9 +89,32 @@ public class JjgFbgcLjgcLjtsfysdSlController {
             wrapper.like("proname",jjgFbgcLjgcLjtsfysdSl.getProname());
             wrapper.like("htd",jjgFbgcLjgcLjtsfysdSl.getHtd());
             wrapper.like("fbgc",jjgFbgcLjgcLjtsfysdSl.getFbgc());
+
+            String username = jjgFbgcLjgcLjtsfysdSl.getUsername();
+            QueryWrapper<SysUser> sysUserQueryWrapper = new QueryWrapper<>();
+            sysUserQueryWrapper.eq("username", username);
+            SysUser one = sysUserService.getOne(sysUserQueryWrapper);
+            String userid = one.getId().toString();
+
+            QueryWrapper<SysUserRole> sysUserRoleQueryWrapper = new QueryWrapper<>();
+            sysUserRoleQueryWrapper.eq("user_id", userid);
+            SysUserRole sysUserRole = sysUserRoleMapper.selectOne(sysUserRoleQueryWrapper);
+            String roleId = sysUserRole.getRoleId();
+
+            QueryWrapper<SysRole> sysRoleQueryWrapper = new QueryWrapper<>();
+            sysRoleQueryWrapper.eq("id", roleId);
+            SysRole role = sysRoleService.getOne(sysRoleQueryWrapper);
+            String rolecode = role.getRoleCode();
+
+            if (rolecode.equals("YH")){
+                wrapper.eq("username", username);
+            }
             Date sysj = jjgFbgcLjgcLjtsfysdSl.getSysj();
             if (!StringUtils.isEmpty(sysj)){
                 wrapper.like("sysj",sysj);
+            }
+            if (!StringUtils.isEmpty(jjgFbgcLjgcLjtsfysdSl.getZh())){
+                wrapper.like("zh",jjgFbgcLjgcLjtsfysdSl.getZh());
             }
             //调用方法分页查询
             IPage<JjgFbgcLjgcLjtsfysdSl> pageModel = jjgFbgcLjgcLjtsfysdSlService.page(pageParam, wrapper);
@@ -92,6 +130,42 @@ public class JjgFbgcLjgcLjtsfysdSlController {
     public Result removeBeatchSL(@RequestBody List<String> idList){
         boolean hd = jjgFbgcLjgcLjtsfysdSlService.removeByIds(idList);
         if(hd){
+            return Result.ok();
+        } else {
+            return Result.fail().message("删除失败！");
+        }
+
+    }
+
+    @ApiOperation("全部删除")
+    @DeleteMapping("removeAllSl")
+    public Result removeAll(@RequestBody CommonInfoVo commonInfoVo){
+        String proname = commonInfoVo.getProname();
+        String htd = commonInfoVo.getHtd();
+        String username = commonInfoVo.getUsername();
+        QueryWrapper<JjgFbgcLjgcLjtsfysdSl> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("proname",proname);
+        queryWrapper.eq("htd",htd);
+        QueryWrapper<SysUser> sysUserQueryWrapper = new QueryWrapper<>();
+        sysUserQueryWrapper.eq("username", username);
+        SysUser one = sysUserService.getOne(sysUserQueryWrapper);
+        String userid = one.getId().toString();
+
+        QueryWrapper<SysUserRole> sysUserRoleQueryWrapper = new QueryWrapper<>();
+        sysUserRoleQueryWrapper.eq("user_id", userid);
+        SysUserRole sysUserRole = sysUserRoleMapper.selectOne(sysUserRoleQueryWrapper);
+        String roleId = sysUserRole.getRoleId();
+
+        QueryWrapper<SysRole> sysRoleQueryWrapper = new QueryWrapper<>();
+        sysRoleQueryWrapper.eq("id", roleId);
+        SysRole role = sysRoleService.getOne(sysRoleQueryWrapper);
+        String rolecode = role.getRoleCode();
+
+        if (rolecode.equals("YH")){
+            queryWrapper.eq("username", username);
+        }
+        boolean remove = jjgFbgcLjgcLjtsfysdSlService.remove(queryWrapper);
+        if(remove){
             return Result.ok();
         } else {
             return Result.fail().message("删除失败！");

@@ -7,11 +7,17 @@ import glgc.jjgys.common.excel.ExcelUtil;
 import glgc.jjgys.model.project.JjgFbgcLjgcPspqhd;
 import glgc.jjgys.model.projectvo.ljgc.CommonInfoVo;
 import glgc.jjgys.model.projectvo.ljgc.JjgFbgcLjgcPspqhdVo;
+import glgc.jjgys.model.system.SysRole;
+import glgc.jjgys.model.system.SysUser;
+import glgc.jjgys.model.system.SysUserRole;
 import glgc.jjgys.system.easyexcel.ExcelHandler;
 import glgc.jjgys.system.exception.JjgysException;
 import glgc.jjgys.system.mapper.JjgFbgcLjgcPspqhdMapper;
+import glgc.jjgys.system.mapper.SysUserRoleMapper;
 import glgc.jjgys.system.service.JjgFbgcLjgcPspqhdService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import glgc.jjgys.system.service.SysRoleService;
+import glgc.jjgys.system.service.SysUserService;
 import glgc.jjgys.system.utils.JjgFbgcCommonUtils;
 import glgc.jjgys.system.utils.RowCopy;
 import org.apache.commons.lang3.StringUtils;
@@ -52,6 +58,15 @@ public class JjgFbgcLjgcPspqhdServiceImpl extends ServiceImpl<JjgFbgcLjgcPspqhdM
     @Value(value = "${jjgys.path.filepath}")
     private String filepath;
 
+    @Autowired
+    private SysUserService sysUserService;
+
+    @Autowired
+    private SysUserRoleMapper sysUserRoleMapper;
+
+    @Autowired
+    private SysRoleService sysRoleService;
+
 
     @Override
     public void generateJdb(CommonInfoVo commonInfoVo) throws IOException, ParseException {
@@ -59,9 +74,28 @@ public class JjgFbgcLjgcPspqhdServiceImpl extends ServiceImpl<JjgFbgcLjgcPspqhdM
         String htd = commonInfoVo.getHtd();
         String fbgc = commonInfoVo.getFbgc();
         QueryWrapper<JjgFbgcLjgcPspqhd> wrapper=new QueryWrapper<>();
-        wrapper.like("proname",proname);
-        wrapper.like("htd",htd);
-        wrapper.like("fbgc",fbgc);
+        wrapper.eq("proname",proname);
+        wrapper.eq("htd",htd);
+        wrapper.eq("fbgc",fbgc);
+        String username = commonInfoVo.getUsername();
+        QueryWrapper<SysUser> sysUserQueryWrapper = new QueryWrapper<>();
+        sysUserQueryWrapper.eq("username", username);
+        SysUser one = sysUserService.getOne(sysUserQueryWrapper);
+        String userid = one.getId().toString();
+
+        QueryWrapper<SysUserRole> sysUserRoleQueryWrapper = new QueryWrapper<>();
+        sysUserRoleQueryWrapper.eq("user_id", userid);
+        SysUserRole sysUserRole = sysUserRoleMapper.selectOne(sysUserRoleQueryWrapper);
+        String roleId = sysUserRole.getRoleId();
+
+        QueryWrapper<SysRole> sysRoleQueryWrapper = new QueryWrapper<>();
+        sysRoleQueryWrapper.eq("id", roleId);
+        SysRole role = sysRoleService.getOne(sysRoleQueryWrapper);
+        String rolecode = role.getRoleCode();
+
+        if (rolecode.equals("YH")){
+            wrapper.eq("username", username);
+        }
         wrapper.orderByAsc("zh","bw");
         List<JjgFbgcLjgcPspqhd> data = jjgFbgcLjgcPspqhdMapper.selectList(wrapper);
         //鉴定表要存放的路径
@@ -359,6 +393,7 @@ public class JjgFbgcLjgcPspqhdServiceImpl extends ServiceImpl<JjgFbgcLjgcPspqhdM
                                         JjgFbgcLjgcPspqhd fbgcLjgcPspqhd = new JjgFbgcLjgcPspqhd();
                                         BeanUtils.copyProperties(pspqhdVo,fbgcLjgcPspqhd);
                                         fbgcLjgcPspqhd.setCreatetime(new Date());
+                                        fbgcLjgcPspqhd.setUsername(commonInfoVo.getUsername());
                                         fbgcLjgcPspqhd.setProname(commonInfoVo.getProname());
                                         fbgcLjgcPspqhd.setHtd(commonInfoVo.getHtd());
                                         fbgcLjgcPspqhd.setFbgc(commonInfoVo.getFbgc());

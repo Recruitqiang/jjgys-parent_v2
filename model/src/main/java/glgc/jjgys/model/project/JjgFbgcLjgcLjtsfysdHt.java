@@ -120,6 +120,9 @@ public class JjgFbgcLjgcLjtsfysdHt implements Serializable {
     @TableField("fbgc")
     private String fbgc;
 
+    @TableField("username")
+    private String username;
+
     @TableField("createTime")
     private Date createtime;
 

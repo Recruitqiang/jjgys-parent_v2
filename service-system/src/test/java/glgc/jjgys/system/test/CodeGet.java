@@ -49,7 +49,7 @@ public class CodeGet {
         // 5、策略配置
         StrategyConfig strategy = new StrategyConfig();
 
-        strategy.setInclude("jjg_lqs_jg_ql");
+        strategy.setInclude("jjg_wgjc");
         strategy.setEntityTableFieldAnnotationEnable(true);
 
 

@@ -47,7 +47,7 @@ public class SysRoleServiceTest {
 
 
 
-    @Test
+    /*@Test
     public void hdgqdsc() throws Exception {
         List<JjgFileInfo> getfilelist = jjgFileInfoService.getfilelist();
         System.out.println(getfilelist);
@@ -56,17 +56,17 @@ public class SysRoleServiceTest {
 
 
         //jjgJgProjectinfoService.getlqsData("陕西高速");
-        /*CommonInfoVo commonInfoVo = new CommonInfoVo();
+        *//*CommonInfoVo commonInfoVo = new CommonInfoVo();
         commonInfoVo.setHtd("LJ-1");
         commonInfoVo.setProname("陕西高速");
-        jjgFbgcLmgcLmhpService.generateJdb(commonInfoVo);*/
+        jjgFbgcLmgcLmhpService.generateJdb(commonInfoVo);*//*
         //jjgDpkshService.getjsxmdata("陕西高速");
         //Map<String, Map<String, Map<String, List<Map<String, Object>>>>> ss = jjgDpkshService.getdwgc("陕西高速");
         //Map<String, Map<String, Map<String, List<Map<String, Object>>>>> s = jjgDpkshService.gethtddata("陕西高速");
         //System.out.println(s);
         //System.out.println(ss);
         //jjgDpkshService.getjsxmdata("陕西高速");
-    }
+    }*/
 
 }
 

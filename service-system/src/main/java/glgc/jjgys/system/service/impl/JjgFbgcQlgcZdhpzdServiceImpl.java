@@ -7,12 +7,18 @@ import glgc.jjgys.model.project.JjgFbgcQlgcZdhpzd;
 import glgc.jjgys.model.project.JjgLqsQl;
 import glgc.jjgys.model.projectvo.ljgc.CommonInfoVo;
 import glgc.jjgys.model.projectvo.qlgc.JjgFbgcQlgcZdhpzdVo;
+import glgc.jjgys.model.system.SysRole;
+import glgc.jjgys.model.system.SysUser;
+import glgc.jjgys.model.system.SysUserRole;
 import glgc.jjgys.system.easyexcel.ExcelHandler;
 import glgc.jjgys.system.exception.JjgysException;
 import glgc.jjgys.system.mapper.JjgFbgcQlgcZdhpzdMapper;
+import glgc.jjgys.system.mapper.SysUserRoleMapper;
 import glgc.jjgys.system.service.JjgFbgcQlgcZdhpzdService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import glgc.jjgys.system.service.JjgLqsQlService;
+import glgc.jjgys.system.service.SysRoleService;
+import glgc.jjgys.system.service.SysUserService;
 import glgc.jjgys.system.utils.RowCopy;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -77,6 +83,7 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
                                             JjgFbgcQlgcZdhpzd pzd = new JjgFbgcQlgcZdhpzd();
                                             BeanUtils.copyProperties(pzdVo,pzd);
                                             pzd.setCreatetime(new Date());
+                                            pzd.setUsername(commonInfoVo.getUsername());
                                             pzd.setProname(commonInfoVo.getProname());
                                             pzd.setHtd(commonInfoVo.getHtd());
                                             pzd.setQdzh(pzdVo.getQdzh());
@@ -132,7 +139,7 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
         List<Map<String,Object>> lxlist = jjgFbgcQlgcZdhpzdMapper.selectlx(proname,htd);
         if (lxlist.size()>0){
             for (Map<String, Object> map : lxlist) {
-                String zx = map.get("lxbs").toString();
+                String zx = map.get("qlname").toString();
                 int num = jjgFbgcQlgcZdhpzdMapper.selectcdnum(proname,htd,zx);
                 List<Map<String, Object>> looksdjdb = lookdata(proname, htd, zx,num);
                 mapList.addAll(looksdjdb);
@@ -218,10 +225,19 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
     }
 
 
+    @Autowired
+    private SysUserService sysUserService;
+
+    @Autowired
+    private SysUserRoleMapper sysUserRoleMapper;
+
+    @Autowired
+    private SysRoleService sysRoleService;
     @Override
     public void generateJdb(CommonInfoVo commonInfoVo) throws IOException, ParseException {
         String proname = commonInfoVo.getProname();
         String htd = commonInfoVo.getHtd();
+        String username = commonInfoVo.getUsername();
         List<Map<String,Object>> lxlist = jjgFbgcQlgcZdhpzdMapper.selectlx(proname,htd);
         for (Map<String, Object> map : lxlist) {
             String zx = map.get("lxbs").toString();
@@ -232,7 +248,7 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
             }else {
                 cds=num;
             }
-            handlezxData(proname,htd,zx,cds,commonInfoVo.getSjz());
+            handlezxData(proname,htd,zx,cds,commonInfoVo.getSjz(),username);
         }
         /*int cds = 0;
         int maxNum = 2;
@@ -250,13 +266,14 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
     }
 
     /**
-     *  @param proname
+     * @param proname
      * @param htd
      * @param zx
      * @param cdsl
      * @param sjz
+     * @param username
      */
-    private void handlezxData(String proname, String htd, String zx, int cdsl, String sjz) throws IOException, ParseException {
+    private void handlezxData(String proname, String htd, String zx, int cdsl, String sjz, String username) throws IOException, ParseException {
         String[] arr = null;
         if (cdsl == 2) {
             arr = new String[] {"左幅一车道", "左幅二车道", "右幅一车道", "右幅二车道"};
@@ -273,8 +290,33 @@ public class JjgFbgcQlgcZdhpzdServiceImpl extends ServiceImpl<JjgFbgcQlgcZdhpzdM
         }
         String result = sb.substring(0, sb.length() - 1); // 去掉最后一个逗号
 
-        List<Map<String,Object>> datazf = jjgFbgcQlgcZdhpzdMapper.selectzfList(proname,htd,zx,result);
-        List<Map<String,Object>> datayf = jjgFbgcQlgcZdhpzdMapper.selectyfList(proname,htd,zx,result);
+        QueryWrapper<SysUser> sysUserQueryWrapper = new QueryWrapper<>();
+        sysUserQueryWrapper.eq("username", username);
+        SysUser one = sysUserService.getOne(sysUserQueryWrapper);
+        String userid = one.getId().toString();
+
+        QueryWrapper<SysUserRole> sysUserRoleQueryWrapper = new QueryWrapper<>();
+        sysUserRoleQueryWrapper.eq("user_id", userid);
+        SysUserRole sysUserRole = sysUserRoleMapper.selectOne(sysUserRoleQueryWrapper);
+        String roleId = sysUserRole.getRoleId();
+
+        QueryWrapper<SysRole> sysRoleQueryWrapper = new QueryWrapper<>();
+        sysRoleQueryWrapper.eq("id", roleId);
+        SysRole role = sysRoleService.getOne(sysRoleQueryWrapper);
+        String rolecode = role.getRoleCode();
+
+        List<Map<String,Object>> datazf = new ArrayList<>();
+        List<Map<String,Object>> datayf = new ArrayList<>();
+        if (rolecode.equals("YH")){
+            datazf = jjgFbgcQlgcZdhpzdMapper.selectzfListyh(proname,htd,zx,result,username);
+            datayf = jjgFbgcQlgcZdhpzdMapper.selectyfListyh(proname,htd,zx,result,username);
+
+        }else {
+            datazf = jjgFbgcQlgcZdhpzdMapper.selectzfList(proname,htd,zx,result);
+            datayf = jjgFbgcQlgcZdhpzdMapper.selectyfList(proname,htd,zx,result);
+
+        }
+
 
         List<Map<String, Object>> lmzfList = montageIRI(datazf);
         Collections.sort(lmzfList, new Comparator<Map<String, Object>>() {

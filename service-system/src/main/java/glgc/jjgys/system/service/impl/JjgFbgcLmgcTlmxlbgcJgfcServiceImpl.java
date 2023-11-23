@@ -3,15 +3,19 @@ package glgc.jjgys.system.service.impl;
 import com.alibaba.excel.EasyExcel;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import glgc.jjgys.common.excel.ExcelUtil;
-import glgc.jjgys.model.project.JjgFbgcLmgcTlmxlbgc;
 import glgc.jjgys.model.project.JjgFbgcLmgcTlmxlbgcJgfc;
 import glgc.jjgys.model.projectvo.lmgc.JjgFbgcLmgcTlmxlbgcJgfcVo;
-import glgc.jjgys.model.projectvo.lmgc.JjgFbgcLmgcTlmxlbgcVo;
+import glgc.jjgys.model.system.SysRole;
+import glgc.jjgys.model.system.SysUser;
+import glgc.jjgys.model.system.SysUserRole;
 import glgc.jjgys.system.easyexcel.ExcelHandler;
 import glgc.jjgys.system.exception.JjgysException;
 import glgc.jjgys.system.mapper.JjgFbgcLmgcTlmxlbgcJgfcMapper;
+import glgc.jjgys.system.mapper.SysUserRoleMapper;
 import glgc.jjgys.system.service.JjgFbgcLmgcTlmxlbgcJgfcService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import glgc.jjgys.system.service.SysRoleService;
+import glgc.jjgys.system.service.SysUserService;
 import glgc.jjgys.system.utils.JjgFbgcCommonUtils;
 import glgc.jjgys.system.utils.RowCopy;
 import org.apache.commons.lang3.StringUtils;
@@ -66,7 +70,7 @@ public class JjgFbgcLmgcTlmxlbgcJgfcServiceImpl extends ServiceImpl<JjgFbgcLmgcT
     }
 
     @Override
-    public void importxlbgs(MultipartFile file, String proname) {
+    public void importxlbgs(MultipartFile file, String proname, String username) {
         try {
             EasyExcel.read(file.getInputStream())
                     .sheet(0)
@@ -103,6 +107,7 @@ public class JjgFbgcLmgcTlmxlbgcJgfcServiceImpl extends ServiceImpl<JjgFbgcLmgcT
                                         }
                                         JjgFbgcLmgcTlmxlbgcJgfc tlmxlbgc = new JjgFbgcLmgcTlmxlbgcJgfc();
                                         BeanUtils.copyProperties(tlmxlbgcVo,tlmxlbgc);
+                                        tlmxlbgc.setUsername(username);
                                         tlmxlbgc.setCreatetime(new Date());
                                         tlmxlbgc.setProname(proname);
                                         tlmxlbgc.setFbgc("路面工程");
@@ -117,12 +122,20 @@ public class JjgFbgcLmgcTlmxlbgcJgfcServiceImpl extends ServiceImpl<JjgFbgcLmgcT
         }
 
     }
+    @Autowired
+    private SysUserService sysUserService;
+
+    @Autowired
+    private SysUserRoleMapper sysUserRoleMapper;
+
+    @Autowired
+    private SysRoleService sysRoleService;
 
     @Override
-    public void generateJdb(String proname) throws IOException, ParseException {
+    public void generateJdb(String proname, String username) throws IOException, ParseException {
         List<String> htds =  jjgFbgcLmgcTlmxlbgcJgfcMapper.gethtd(proname);
         for (String htd : htds) {
-            gethtdjdb(proname,htd);
+            gethtdjdb(proname,htd,username);
         }
 
     }
@@ -133,12 +146,30 @@ public class JjgFbgcLmgcTlmxlbgcJgfcServiceImpl extends ServiceImpl<JjgFbgcLmgcT
         return htdList;
     }
 
-    private void gethtdjdb(String proname, String htd) throws IOException, ParseException {
+    private void gethtdjdb(String proname, String htd, String username) throws IOException, ParseException {
         XSSFWorkbook wb = null;
         //获取数据
         QueryWrapper<JjgFbgcLmgcTlmxlbgcJgfc> wrapper=new QueryWrapper<>();
         wrapper.eq("proname",proname);
         wrapper.eq("htd",htd);
+        QueryWrapper<SysUser> sysUserQueryWrapper = new QueryWrapper<>();
+        sysUserQueryWrapper.eq("username", username);
+        SysUser one = sysUserService.getOne(sysUserQueryWrapper);
+        String userid = one.getId().toString();
+
+        QueryWrapper<SysUserRole> sysUserRoleQueryWrapper = new QueryWrapper<>();
+        sysUserRoleQueryWrapper.eq("user_id", userid);
+        SysUserRole sysUserRole = sysUserRoleMapper.selectOne(sysUserRoleQueryWrapper);
+        String roleId = sysUserRole.getRoleId();
+
+        QueryWrapper<SysRole> sysRoleQueryWrapper = new QueryWrapper<>();
+        sysRoleQueryWrapper.eq("id", roleId);
+        SysRole role = sysRoleService.getOne(sysRoleQueryWrapper);
+        String rolecode = role.getRoleCode();
+
+        if (rolecode.equals("YH")){
+            wrapper.eq("username", username);
+        }
         wrapper.orderByAsc("zh");
         List<JjgFbgcLmgcTlmxlbgcJgfc> data = jjgFbgcLmgcTlmxlbgcJgfcMapper.selectList(wrapper);
         File f = new File(jgfilepath+File.separator+proname+File.separator+htd+File.separator+"17混凝土路面相邻板高差.xlsx");

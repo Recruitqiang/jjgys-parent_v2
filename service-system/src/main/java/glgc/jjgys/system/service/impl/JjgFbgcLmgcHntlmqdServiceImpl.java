@@ -7,11 +7,17 @@ import glgc.jjgys.model.project.JjgFbgcLmgcHntlmqd;
 import glgc.jjgys.model.project.JjgFbgcLmgcLmssxs;
 import glgc.jjgys.model.projectvo.ljgc.CommonInfoVo;
 import glgc.jjgys.model.projectvo.lmgc.JjgFbgcLmgcHntlmqdVo;
+import glgc.jjgys.model.system.SysRole;
+import glgc.jjgys.model.system.SysUser;
+import glgc.jjgys.model.system.SysUserRole;
 import glgc.jjgys.system.easyexcel.ExcelHandler;
 import glgc.jjgys.system.exception.JjgysException;
 import glgc.jjgys.system.mapper.JjgFbgcLmgcHntlmqdMapper;
+import glgc.jjgys.system.mapper.SysUserRoleMapper;
 import glgc.jjgys.system.service.JjgFbgcLmgcHntlmqdService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import glgc.jjgys.system.service.SysRoleService;
+import glgc.jjgys.system.service.SysUserService;
 import glgc.jjgys.system.utils.JjgFbgcCommonUtils;
 import glgc.jjgys.system.utils.RowCopy;
 import org.apache.commons.lang3.StringUtils;
@@ -53,6 +59,16 @@ public class JjgFbgcLmgcHntlmqdServiceImpl extends ServiceImpl<JjgFbgcLmgcHntlmq
     @Value(value = "${jjgys.path.filepath}")
     private String filepath;
 
+    @Autowired
+    private SysUserService sysUserService;
+
+    @Autowired
+    private SysUserRoleMapper sysUserRoleMapper;
+
+    @Autowired
+    private SysRoleService sysRoleService;
+
+
     @Override
     public void generateJdb(CommonInfoVo commonInfoVo) throws IOException, ParseException {
         XSSFWorkbook wb = null;
@@ -64,6 +80,25 @@ public class JjgFbgcLmgcHntlmqdServiceImpl extends ServiceImpl<JjgFbgcLmgcHntlmq
         wrapper.like("proname",proname);
         wrapper.like("htd",htd);
         wrapper.like("fbgc",fbgc);
+        String username = commonInfoVo.getUsername();
+        QueryWrapper<SysUser> sysUserQueryWrapper = new QueryWrapper<>();
+        sysUserQueryWrapper.eq("username", username);
+        SysUser one = sysUserService.getOne(sysUserQueryWrapper);
+        String userid = one.getId().toString();
+
+        QueryWrapper<SysUserRole> sysUserRoleQueryWrapper = new QueryWrapper<>();
+        sysUserRoleQueryWrapper.eq("user_id", userid);
+        SysUserRole sysUserRole = sysUserRoleMapper.selectOne(sysUserRoleQueryWrapper);
+        String roleId = sysUserRole.getRoleId();
+
+        QueryWrapper<SysRole> sysRoleQueryWrapper = new QueryWrapper<>();
+        sysRoleQueryWrapper.eq("id", roleId);
+        SysRole role = sysRoleService.getOne(sysRoleQueryWrapper);
+        String rolecode = role.getRoleCode();
+
+        if (rolecode.equals("YH")){
+            wrapper.eq("username", username);
+        }
         wrapper.orderByAsc("zh");
         List<JjgFbgcLmgcHntlmqd> data = jjgFbgcLmgcHntlmqdMapper.selectList(wrapper);
         File f = new File(filepath+File.separator+proname+File.separator+htd+File.separator+"16混凝土路面强度.xlsx");
@@ -438,6 +473,7 @@ public class JjgFbgcLmgcHntlmqdServiceImpl extends ServiceImpl<JjgFbgcLmgcHntlmq
                                         JjgFbgcLmgcHntlmqd hntlmqd = new JjgFbgcLmgcHntlmqd();
                                         BeanUtils.copyProperties(hntlmqdVo,hntlmqd);
                                         hntlmqd.setCreatetime(new Date());
+                                        hntlmqd.setUsername(commonInfoVo.getUsername());
                                         hntlmqd.setProname(commonInfoVo.getProname());
                                         hntlmqd.setHtd(commonInfoVo.getHtd());
                                         hntlmqd.setFbgc(commonInfoVo.getFbgc());

@@ -7,16 +7,24 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import glgc.jjgys.common.result.Result;
 import glgc.jjgys.common.utils.IpUtil;
 import glgc.jjgys.common.utils.JwtHelper;
+import glgc.jjgys.model.project.JjgFbgcSdgcZtkd;
 import glgc.jjgys.model.project.JjgZdhCz;
 import glgc.jjgys.model.project.JjgZdhGzsd;
 import glgc.jjgys.model.projectvo.ljgc.CommonInfoVo;
 import glgc.jjgys.model.system.SysOperLog;
+import glgc.jjgys.model.system.SysRole;
+import glgc.jjgys.model.system.SysUser;
+import glgc.jjgys.model.system.SysUserRole;
+import glgc.jjgys.system.mapper.SysUserRoleMapper;
 import glgc.jjgys.system.service.JjgZdhCzService;
 import glgc.jjgys.system.service.OperLogService;
+import glgc.jjgys.system.service.SysRoleService;
+import glgc.jjgys.system.service.SysUserService;
 import glgc.jjgys.system.utils.JjgFbgcCommonUtils;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -49,6 +57,15 @@ public class JjgZdhCzController {
     private JjgZdhCzService jjgZdhCzService;
 
     @Autowired
+    private SysUserService sysUserService;
+
+    @Autowired
+    private SysUserRoleMapper sysUserRoleMapper;
+
+    @Autowired
+    private SysRoleService sysRoleService;
+
+    @Autowired
     private OperLogService operLogService;
 
     @Value(value = "${jjgys.path.filepath}")
@@ -68,6 +85,42 @@ public class JjgZdhCzController {
         }
         String zipname = "车辙鉴定表";
         JjgFbgcCommonUtils.batchDowndFile(response,zipname,fileName,filespath+File.separator+proname+File.separator+htd);
+    }
+
+    @ApiOperation("全部删除")
+    @DeleteMapping("removeAll")
+    public Result removeAll(@RequestBody CommonInfoVo commonInfoVo){
+        String proname = commonInfoVo.getProname();
+        String htd = commonInfoVo.getHtd();
+        String username = commonInfoVo.getUsername();
+        QueryWrapper<JjgZdhCz> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("proname",proname);
+        queryWrapper.eq("htd",htd);
+        QueryWrapper<SysUser> sysUserQueryWrapper = new QueryWrapper<>();
+        sysUserQueryWrapper.eq("username", username);
+        SysUser one = sysUserService.getOne(sysUserQueryWrapper);
+        String userid = one.getId().toString();
+
+        QueryWrapper<SysUserRole> sysUserRoleQueryWrapper = new QueryWrapper<>();
+        sysUserRoleQueryWrapper.eq("user_id", userid);
+        SysUserRole sysUserRole = sysUserRoleMapper.selectOne(sysUserRoleQueryWrapper);
+        String roleId = sysUserRole.getRoleId();
+
+        QueryWrapper<SysRole> sysRoleQueryWrapper = new QueryWrapper<>();
+        sysRoleQueryWrapper.eq("id", roleId);
+        SysRole role = sysRoleService.getOne(sysRoleQueryWrapper);
+        String rolecode = role.getRoleCode();
+
+        if (rolecode.equals("YH")){
+            queryWrapper.eq("username", username);
+        }
+        boolean remove = jjgZdhCzService.remove(queryWrapper);
+        if(remove){
+            return Result.ok();
+        } else {
+            return Result.fail().message("删除失败！");
+        }
+
     }
 
     @ApiOperation("生成车辙鉴定表")
@@ -107,8 +160,34 @@ public class JjgZdhCzController {
         Page<JjgZdhCz> pageParam = new Page<>(current, limit);
         if (jjgZdhCz != null) {
             QueryWrapper<JjgZdhCz> wrapper = new QueryWrapper<>();
-            wrapper.like("proname", jjgZdhCz.getProname());
-            wrapper.like("htd", jjgZdhCz.getHtd());
+            wrapper.eq("proname", jjgZdhCz.getProname());
+            wrapper.eq("htd", jjgZdhCz.getHtd());
+
+            String username = jjgZdhCz.getUsername();
+            QueryWrapper<SysUser> sysUserQueryWrapper = new QueryWrapper<>();
+            sysUserQueryWrapper.eq("username", username);
+            SysUser one = sysUserService.getOne(sysUserQueryWrapper);
+            String userid = one.getId().toString();
+
+            QueryWrapper<SysUserRole> sysUserRoleQueryWrapper = new QueryWrapper<>();
+            sysUserRoleQueryWrapper.eq("user_id", userid);
+            SysUserRole sysUserRole = sysUserRoleMapper.selectOne(sysUserRoleQueryWrapper);
+            String roleId = sysUserRole.getRoleId();
+
+            QueryWrapper<SysRole> sysRoleQueryWrapper = new QueryWrapper<>();
+            sysRoleQueryWrapper.eq("id", roleId);
+            SysRole role = sysRoleService.getOne(sysRoleQueryWrapper);
+            String rolecode = role.getRoleCode();
+
+            if (rolecode.equals("YH")){
+                wrapper.eq("username", username);
+            }
+            if (!StringUtils.isEmpty(jjgZdhCz.getQdzh())) {
+                wrapper.like("qdzh", jjgZdhCz.getQdzh());
+            }
+            if (!StringUtils.isEmpty(jjgZdhCz.getZdzh())) {
+                wrapper.like("zdzh", jjgZdhCz.getZdzh());
+            }
 
             //调用方法分页查询
             IPage<JjgZdhCz> pageModel = jjgZdhCzService.page(pageParam, wrapper);

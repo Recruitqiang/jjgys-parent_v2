@@ -32,6 +32,7 @@ public class JjgFbgcQlgcZdhgzsd implements Serializable {
     @TableField("id")
     private String id;
 
+
     /**
      * 起点桩号
      */
@@ -79,6 +80,9 @@ public class JjgFbgcQlgcZdhgzsd implements Serializable {
 
     @TableField("createTime")
     private Date createtime;
+
+    @TableField("username")
+    private String username;
 
 
 }

@@ -3,17 +3,20 @@ package glgc.jjgys.system.service.impl;
 import com.alibaba.excel.EasyExcel;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import glgc.jjgys.common.excel.ExcelUtil;
-import glgc.jjgys.model.project.JjgFbgcLmgcLqlmysd;
-import glgc.jjgys.model.project.JjgFbgcSdgcLmssxs;
 import glgc.jjgys.model.project.JjgFbgcSdgcSdlqlmysd;
 import glgc.jjgys.model.projectvo.ljgc.CommonInfoVo;
-import glgc.jjgys.model.projectvo.lmgc.JjgFbgcLmgcLqlmysdVo;
 import glgc.jjgys.model.projectvo.sdgc.JjgFbgcSdgcSdlqlmysdVo;
+import glgc.jjgys.model.system.SysRole;
+import glgc.jjgys.model.system.SysUser;
+import glgc.jjgys.model.system.SysUserRole;
 import glgc.jjgys.system.easyexcel.ExcelHandler;
 import glgc.jjgys.system.exception.JjgysException;
 import glgc.jjgys.system.mapper.JjgFbgcSdgcSdlqlmysdMapper;
+import glgc.jjgys.system.mapper.SysUserRoleMapper;
 import glgc.jjgys.system.service.JjgFbgcSdgcSdlqlmysdService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import glgc.jjgys.system.service.SysRoleService;
+import glgc.jjgys.system.service.SysUserService;
 import glgc.jjgys.system.utils.JjgFbgcCommonUtils;
 import glgc.jjgys.system.utils.RowCopy;
 import org.apache.commons.lang3.StringUtils;
@@ -55,18 +58,28 @@ public class JjgFbgcSdgcSdlqlmysdServiceImpl extends ServiceImpl<JjgFbgcSdgcSdlq
     @Value(value = "${jjgys.path.filepath}")
     private String filepath;
 
+    @Autowired
+    private SysUserService sysUserService;
+
+    @Autowired
+    private SysUserRoleMapper sysUserRoleMapper;
+
+    @Autowired
+    private SysRoleService sysRoleService;
+
     @Override
     public void generateJdb(CommonInfoVo commonInfoVo) throws IOException {
         String proname = commonInfoVo.getProname();
         String htd = commonInfoVo.getHtd();
         String fbgc = commonInfoVo.getFbgc();
+        String username = commonInfoVo.getUsername();
         List<Map<String,Object>> sdmclist = jjgFbgcSdgcSdlqlmysdMapper.selectsdmc(proname,htd,fbgc);
         if (sdmclist.size()>0){
             for (Map<String, Object> m : sdmclist)
             {
                 for (String k : m.keySet()){
                     String sdmc = m.get(k).toString();
-                    DBtoExcelsd(proname,htd,fbgc,sdmc);
+                    DBtoExcelsd(proname,htd,fbgc,sdmc,username);
                 }
             }
         }
@@ -79,15 +92,34 @@ public class JjgFbgcSdgcSdlqlmysdServiceImpl extends ServiceImpl<JjgFbgcSdgcSdlq
      * @param htd
      * @param fbgc
      * @param sdmc
+     * @param username
      * @throws IOException
      */
-    private void DBtoExcelsd(String proname, String htd, String fbgc, String sdmc) throws IOException {
+    private void DBtoExcelsd(String proname, String htd, String fbgc, String sdmc, String username) throws IOException {
         XSSFWorkbook wb = null;
         QueryWrapper<JjgFbgcSdgcSdlqlmysd> wrapper=new QueryWrapper<>();
         wrapper.like("proname",proname);
         wrapper.like("htd",htd);
         wrapper.like("fbgc",fbgc);
         wrapper.like("sdmc",sdmc);
+        QueryWrapper<SysUser> sysUserQueryWrapper = new QueryWrapper<>();
+        sysUserQueryWrapper.eq("username", username);
+        SysUser one = sysUserService.getOne(sysUserQueryWrapper);
+        String userid = one.getId().toString();
+
+        QueryWrapper<SysUserRole> sysUserRoleQueryWrapper = new QueryWrapper<>();
+        sysUserRoleQueryWrapper.eq("user_id", userid);
+        SysUserRole sysUserRole = sysUserRoleMapper.selectOne(sysUserRoleQueryWrapper);
+        String roleId = sysUserRole.getRoleId();
+
+        QueryWrapper<SysRole> sysRoleQueryWrapper = new QueryWrapper<>();
+        sysRoleQueryWrapper.eq("id", roleId);
+        SysRole role = sysRoleService.getOne(sysRoleQueryWrapper);
+        String rolecode = role.getRoleCode();
+
+        if (rolecode.equals("YH")){
+            wrapper.eq("username", username);
+        }
         wrapper.orderByAsc("zh");
         List<JjgFbgcSdgcSdlqlmysd> data = jjgFbgcSdgcSdlqlmysdMapper.selectList(wrapper);
 
@@ -778,6 +810,7 @@ public class JjgFbgcSdgcSdlqlmysdServiceImpl extends ServiceImpl<JjgFbgcSdgcSdlq
                                         JjgFbgcSdgcSdlqlmysd fbgcLmgcLqlmysd = new JjgFbgcSdgcSdlqlmysd();
                                         BeanUtils.copyProperties(sdlqlmysdVo,fbgcLmgcLqlmysd);
                                         fbgcLmgcLqlmysd.setCreatetime(new Date());
+                                        fbgcLmgcLqlmysd.setUsername(commonInfoVo.getUsername());
                                         fbgcLmgcLqlmysd.setProname(commonInfoVo.getProname());
                                         fbgcLmgcLqlmysd.setHtd(commonInfoVo.getHtd());
                                         fbgcLmgcLqlmysd.setFbgc(commonInfoVo.getFbgc());

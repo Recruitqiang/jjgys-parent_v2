@@ -24,14 +24,18 @@ public interface JjgFbgcSdgcZdhldhdMapper extends BaseMapper<JjgFbgcSdgcZdhldhd>
     int selectcdnum(String proname, String htd, String zx);
 
     List<Map<String, Object>> selectzfList(String proname, String htd, String result, String s);
+    List<Map<String, Object>> selectzfListyh(String proname, String htd, String result, String s, String username);
 
     List<Map<String, Object>> selectyfList(String proname, String htd, String result, String s);
+    List<Map<String, Object>> selectyfListyh(String proname, String htd, String result, String s, String username);
 
 
     Collection<? extends Map<String, Object>> seletcfhlmzfData(String proname, String htd, String zhq, String zhz);
+    Collection<? extends Map<String, Object>> seletcfhlmzfDatayh(String proname, String htd, String zhq, String zhz, String username);
 
 
     Collection<? extends Map<String, Object>> seletcfhlmyfData(String proname, String htd, String zhq, String zhz);
+    Collection<? extends Map<String, Object>> seletcfhlmyfDatayh(String proname, String htd, String zhq, String zhz, String username);
 
 
 }

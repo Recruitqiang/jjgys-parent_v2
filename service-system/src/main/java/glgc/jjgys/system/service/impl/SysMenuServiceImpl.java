@@ -62,8 +62,8 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
     @Override
     public List<SysMenu> findMenuByRoleId(String roleId) {
         //获取所有菜单 status=1
-//        QueryWrapper<SysMenu> wrapperMenu = new QueryWrapper<>();
-//        wrapperMenu.eq("status",1);
+        /*QueryWrapper<SysMenu> wrapperMenu = new QueryWrapper<>();
+        wrapperMenu.eq("status",1);*/
         List<SysMenu> menuList = baseMapper.selectList(null);
 
         //根据角色id查询 角色分配过的菜单列表
@@ -81,7 +81,8 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
         //数据处理：isSelect 如果菜单选中 true，否则false
         // 拿着分配菜单id 和 所有菜单比对，有相同的，让isSelect值true
         for (SysMenu sysMenu:menuList) {
-            if(roleMenuIds.contains(sysMenu.getId())) {
+            String s = sysMenu.getId().toString();
+            if(roleMenuIds.contains(s)) {
                 sysMenu.setSelect(true);
             } else {
                 sysMenu.setSelect(false);

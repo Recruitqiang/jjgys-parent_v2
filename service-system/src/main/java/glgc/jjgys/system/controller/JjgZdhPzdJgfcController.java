@@ -9,11 +9,18 @@ import glgc.jjgys.model.base.JgCommonEntity;
 import glgc.jjgys.model.project.JjgZdhPzd;
 import glgc.jjgys.model.project.JjgZdhPzdJgfc;
 import glgc.jjgys.model.projectvo.ljgc.CommonInfoVo;
+import glgc.jjgys.model.system.SysRole;
+import glgc.jjgys.model.system.SysUser;
+import glgc.jjgys.model.system.SysUserRole;
+import glgc.jjgys.system.mapper.SysUserRoleMapper;
 import glgc.jjgys.system.service.JjgZdhPzdJgfcService;
+import glgc.jjgys.system.service.SysRoleService;
+import glgc.jjgys.system.service.SysUserService;
 import glgc.jjgys.system.utils.JjgFbgcCommonUtils;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,6 +44,15 @@ import java.util.Map;
 @RequestMapping("/jjg/jgfc/zdh/pzd")
 @CrossOrigin
 public class JjgZdhPzdJgfcController {
+
+    @Autowired
+    private SysUserService sysUserService;
+
+    @Autowired
+    private SysUserRoleMapper sysUserRoleMapper;
+
+    @Autowired
+    private SysRoleService sysRoleService;
 
     @Autowired
     private JjgZdhPzdJgfcService jjgZdhPzdJgfcService;
@@ -74,6 +90,42 @@ public class JjgZdhPzdJgfcController {
         JjgFbgcCommonUtils.batchDowndFile(response,zipname,fileName,jgfilepath+ File.separator+proname);
     }
 
+    @ApiOperation("全部删除")
+    @DeleteMapping("removeAll")
+    public Result removeAll(@RequestBody CommonInfoVo commonInfoVo){
+        String proname = commonInfoVo.getProname();
+        String htd = commonInfoVo.getHtd();
+        String username = commonInfoVo.getUsername();
+        QueryWrapper<JjgZdhPzdJgfc> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("proname",proname);
+        queryWrapper.eq("htd",htd);
+        QueryWrapper<SysUser> sysUserQueryWrapper = new QueryWrapper<>();
+        sysUserQueryWrapper.eq("username", username);
+        SysUser one = sysUserService.getOne(sysUserQueryWrapper);
+        String userid = one.getId().toString();
+
+        QueryWrapper<SysUserRole> sysUserRoleQueryWrapper = new QueryWrapper<>();
+        sysUserRoleQueryWrapper.eq("user_id", userid);
+        SysUserRole sysUserRole = sysUserRoleMapper.selectOne(sysUserRoleQueryWrapper);
+        String roleId = sysUserRole.getRoleId();
+
+        QueryWrapper<SysRole> sysRoleQueryWrapper = new QueryWrapper<>();
+        sysRoleQueryWrapper.eq("id", roleId);
+        SysRole role = sysRoleService.getOne(sysRoleQueryWrapper);
+        String rolecode = role.getRoleCode();
+
+        if (rolecode.equals("YH")){
+            queryWrapper.eq("username", username);
+        }
+        boolean remove = jjgZdhPzdJgfcService.remove(queryWrapper);
+        if(remove){
+            return Result.ok();
+        } else {
+            return Result.fail().message("删除失败！");
+        }
+
+    }
+
     @ApiOperation("生成平整度鉴定表")
     @PostMapping("generateJdb")
     public void generateJdb(@RequestBody JgCommonEntity commonInfoVo) throws Exception {
@@ -90,8 +142,8 @@ public class JjgZdhPzdJgfcController {
 
     @ApiOperation(value = "平整度数据文件导入")
     @PostMapping("importpzd")
-    public Result importpzd(@RequestParam("file") MultipartFile file, String proname) throws IOException, ParseException {
-        jjgZdhPzdJgfcService.importpzd(file,proname);
+    public Result importpzd(@RequestParam("file") MultipartFile file, String proname,String username) throws IOException, ParseException {
+        jjgZdhPzdJgfcService.importpzd(file,proname,username);
         return Result.ok();
     }
 
@@ -104,6 +156,31 @@ public class JjgZdhPzdJgfcController {
         if (jjgZdhpzd != null) {
             QueryWrapper<JjgZdhPzdJgfc> wrapper = new QueryWrapper<>();
             wrapper.like("proname", jjgZdhpzd.getProname());
+            String username = jjgZdhpzd.getUsername();
+            QueryWrapper<SysUser> sysUserQueryWrapper = new QueryWrapper<>();
+            sysUserQueryWrapper.eq("username", username);
+            SysUser one = sysUserService.getOne(sysUserQueryWrapper);
+            String userid = one.getId().toString();
+
+            QueryWrapper<SysUserRole> sysUserRoleQueryWrapper = new QueryWrapper<>();
+            sysUserRoleQueryWrapper.eq("user_id", userid);
+            SysUserRole sysUserRole = sysUserRoleMapper.selectOne(sysUserRoleQueryWrapper);
+            String roleId = sysUserRole.getRoleId();
+
+            QueryWrapper<SysRole> sysRoleQueryWrapper = new QueryWrapper<>();
+            sysRoleQueryWrapper.eq("id", roleId);
+            SysRole role = sysRoleService.getOne(sysRoleQueryWrapper);
+            String rolecode = role.getRoleCode();
+
+            if (rolecode.equals("YH")){
+                wrapper.eq("username", username);
+            }
+            if (!StringUtils.isEmpty(jjgZdhpzd.getQdzh())) {
+                wrapper.like("qdzh", jjgZdhpzd.getQdzh());
+            }
+            if (!StringUtils.isEmpty(jjgZdhpzd.getZdzh())) {
+                wrapper.like("zdzh", jjgZdhpzd.getZdzh());
+            }
             //调用方法分页查询
             IPage<JjgZdhPzdJgfc> pageModel = jjgZdhPzdJgfcService.page(pageParam, wrapper);
             //返回

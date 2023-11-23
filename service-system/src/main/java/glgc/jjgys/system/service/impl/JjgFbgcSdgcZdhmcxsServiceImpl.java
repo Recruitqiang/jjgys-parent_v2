@@ -1,15 +1,22 @@
 package glgc.jjgys.system.service.impl;
 
 import com.alibaba.excel.EasyExcel;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import glgc.jjgys.common.excel.ExcelUtil;
 import glgc.jjgys.model.project.JjgFbgcSdgcZdhmcxs;
 import glgc.jjgys.model.projectvo.ljgc.CommonInfoVo;
 import glgc.jjgys.model.projectvo.sdgc.JjgFbgcSdgcZdhmcxsVo;
+import glgc.jjgys.model.system.SysRole;
+import glgc.jjgys.model.system.SysUser;
+import glgc.jjgys.model.system.SysUserRole;
 import glgc.jjgys.system.easyexcel.ExcelHandler;
 import glgc.jjgys.system.exception.JjgysException;
 import glgc.jjgys.system.mapper.JjgFbgcSdgcZdhmcxsMapper;
+import glgc.jjgys.system.mapper.SysUserRoleMapper;
 import glgc.jjgys.system.service.JjgFbgcSdgcZdhmcxsService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import glgc.jjgys.system.service.SysRoleService;
+import glgc.jjgys.system.service.SysUserService;
 import glgc.jjgys.system.utils.JjgFbgcCommonUtils;
 import glgc.jjgys.system.utils.RowCopy;
 import org.apache.commons.lang3.StringUtils;
@@ -48,12 +55,21 @@ public class JjgFbgcSdgcZdhmcxsServiceImpl extends ServiceImpl<JjgFbgcSdgcZdhmcx
     @Value(value = "${jjgys.path.filepath}")
     private String filepath;
 
+    @Autowired
+    private SysUserService sysUserService;
+
+    @Autowired
+    private SysUserRoleMapper sysUserRoleMapper;
+
+    @Autowired
+    private SysRoleService sysRoleService;
+
 
     @Override
     public void generateJdb(CommonInfoVo commonInfoVo) throws IOException, ParseException {
         String proname = commonInfoVo.getProname();
         String htd = commonInfoVo.getHtd();
-
+        String username = commonInfoVo.getUsername();
         List<Map<String,Object>> lxlist = jjgFbgcSdgcZdhmcxsMapper.selectlx(proname,htd);
         for (Map<String, Object> map : lxlist) {
             String zx = map.get("lxbs").toString();
@@ -64,7 +80,7 @@ public class JjgFbgcSdgcZdhmcxsServiceImpl extends ServiceImpl<JjgFbgcSdgcZdhmcx
             }else {
                 cds=num;
             }
-            handlezxData(proname,htd,zx,cds,commonInfoVo.getSjz());
+            handlezxData(proname,htd,zx,cds,commonInfoVo.getSjz(),username);
         }
         /*int cds = 0;
         int maxNum = 2; // 添加一个变量用来保存最大值
@@ -80,10 +96,31 @@ public class JjgFbgcSdgcZdhmcxsServiceImpl extends ServiceImpl<JjgFbgcSdgcZdhmcx
 
     }
 
-    private void handlezxData(String proname, String htd, String zx, int cdsl, String sjz) throws IOException, ParseException {
+    private void handlezxData(String proname, String htd, String zx, int cdsl, String sjz, String username) throws IOException, ParseException {
 
-        List<Map<String,Object>> datazf = jjgFbgcSdgcZdhmcxsMapper.selectzfList(proname,htd,zx);
-        List<Map<String,Object>> datayf = jjgFbgcSdgcZdhmcxsMapper.selectyfList(proname,htd,zx);
+        QueryWrapper<SysUser> sysUserQueryWrapper = new QueryWrapper<>();
+        sysUserQueryWrapper.eq("username", username);
+        SysUser one = sysUserService.getOne(sysUserQueryWrapper);
+        String userid = one.getId().toString();
+
+        QueryWrapper<SysUserRole> sysUserRoleQueryWrapper = new QueryWrapper<>();
+        sysUserRoleQueryWrapper.eq("user_id", userid);
+        SysUserRole sysUserRole = sysUserRoleMapper.selectOne(sysUserRoleQueryWrapper);
+        String roleId = sysUserRole.getRoleId();
+
+        QueryWrapper<SysRole> sysRoleQueryWrapper = new QueryWrapper<>();
+        sysRoleQueryWrapper.eq("id", roleId);
+        SysRole role = sysRoleService.getOne(sysRoleQueryWrapper);
+        String rolecode = role.getRoleCode();
+        List<Map<String,Object>> datazf = new ArrayList<>();
+        List<Map<String,Object>> datayf = new ArrayList<>();
+        if (rolecode.equals("YH")){
+            datazf = jjgFbgcSdgcZdhmcxsMapper.selectzfListyh(proname,htd,zx,username);
+            datayf = jjgFbgcSdgcZdhmcxsMapper.selectyfListyh(proname,htd,zx,username);
+        }else {
+            datazf = jjgFbgcSdgcZdhmcxsMapper.selectzfList(proname,htd,zx);
+            datayf = jjgFbgcSdgcZdhmcxsMapper.selectyfList(proname,htd,zx);
+        }
 
         //处理数据
 
@@ -1068,6 +1105,7 @@ public class JjgFbgcSdgcZdhmcxsServiceImpl extends ServiceImpl<JjgFbgcSdgcZdhmcx
                                             mcxs.setCreatetime(new Date());
                                             mcxs.setProname(commonInfoVo.getProname());
                                             mcxs.setHtd(commonInfoVo.getHtd());
+                                            mcxs.setUsername(commonInfoVo.getUsername());
                                             /*mcxs.setQdzh(Double.parseDouble(mcxsVo.getQdzh()));
                                             if (!mcxsVo.getZdzh().isEmpty() && mcxsVo.getZdzh()!=null){
                                                 mcxs.setZdzh(Double.parseDouble(mcxsVo.getZdzh()));

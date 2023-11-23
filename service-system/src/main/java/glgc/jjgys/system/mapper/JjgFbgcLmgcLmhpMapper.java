@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import glgc.jjgys.model.project.JjgFbgcLmgcLmhp;
 import org.apache.ibatis.annotations.Mapper;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -25,13 +24,23 @@ public interface JjgFbgcLmgcLmhpMapper extends BaseMapper<JjgFbgcLmgcLmhp> {
 
     List<Map<String,String>> selectSdZfData(String proname, String htd, String fbgc, String zhq, String zhz);
 
+    List<Map<String,String>> selectSdZfDatayh(String proname, String htd, String fbgc, String zhq, String zhz, String username);
+
     List<Map<String,String>> selectSdYfData(String proname, String htd, String fbgc, String zhq, String zhz);
+
+    List<Map<String,String>> selectSdYfDatayh(String proname, String htd, String fbgc, String zhq, String zhz, String username);
 
     List<Map<String,String>> selectQlZfData(String proname, String htd, String fbgc, String zhq, String zhz);
 
+    List<Map<String,String>> selectQlZfDatayh(String proname, String htd, String fbgc, String zhq, String zhz, String username);
+
     List<Map<String,String>> selectQlYfData(String proname, String htd, String fbgc, String zhq, String zhz);
 
+    List<Map<String,String>> selectQlYfDatayh(String proname, String htd, String fbgc, String zhq, String zhz, String username);
+
     List<Map<String, String>> selectAllList(String proname, String htd, String fbgc);
+
+    List<Map<String, String>> selectAllListyh(String proname, String htd, String fbgc, String username);
 
     List<JjgFbgcLmgcLmhp> selecthpzd(Map<String, String> map);
 

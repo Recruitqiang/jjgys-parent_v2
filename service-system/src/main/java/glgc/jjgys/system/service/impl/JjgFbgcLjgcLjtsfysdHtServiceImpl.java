@@ -11,12 +11,14 @@ import glgc.jjgys.model.projectvo.ljgc.CommonInfoVo;
 import glgc.jjgys.model.projectvo.ljgc.JjgFbgcLjgcLjbpVo;
 import glgc.jjgys.model.projectvo.ljgc.JjgFbgcLjgcLjcjVo;
 import glgc.jjgys.model.projectvo.ljgc.JjgFbgcLjgcLjtsfysdHtVo;
+import glgc.jjgys.model.system.SysRole;
+import glgc.jjgys.model.system.SysUser;
+import glgc.jjgys.model.system.SysUserRole;
 import glgc.jjgys.system.exception.JjgysException;
 import glgc.jjgys.system.mapper.JjgFbgcLjgcLjtsfysdHtMapper;
-import glgc.jjgys.system.service.JjgFbgcLjgcLjtsfysdHtService;
+import glgc.jjgys.system.mapper.SysUserRoleMapper;
+import glgc.jjgys.system.service.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import glgc.jjgys.system.service.JjgFbgcLjgcLjtsfysdSlService;
-import glgc.jjgys.system.service.ProjectService;
 import glgc.jjgys.system.utils.JjgFbgcCommonUtils;
 import glgc.jjgys.system.utils.RowCopy;
 import io.swagger.annotations.Authorization;
@@ -70,6 +72,15 @@ public class JjgFbgcLjgcLjtsfysdHtServiceImpl extends ServiceImpl<JjgFbgcLjgcLjt
 
     private int index = 1;
 
+    @Autowired
+    private SysUserService sysUserService;
+
+    @Autowired
+    private SysUserRoleMapper sysUserRoleMapper;
+
+    @Autowired
+    private SysRoleService sysRoleService;
+
 
     @Override
     public void generateJdb(CommonInfoVo commonInfoVo) throws IOException {
@@ -82,6 +93,26 @@ public class JjgFbgcLjgcLjtsfysdHtServiceImpl extends ServiceImpl<JjgFbgcLjgcLjt
         wrapper.like("proname",proname);
         wrapper.like("htd",htd);
         wrapper.like("fbgc",fbgc);
+
+        String username = commonInfoVo.getUsername();
+        QueryWrapper<SysUser> sysUserQueryWrapper = new QueryWrapper<>();
+        sysUserQueryWrapper.eq("username", username);
+        SysUser one = sysUserService.getOne(sysUserQueryWrapper);
+        String userid = one.getId().toString();
+
+        QueryWrapper<SysUserRole> sysUserRoleQueryWrapper = new QueryWrapper<>();
+        sysUserRoleQueryWrapper.eq("user_id", userid);
+        SysUserRole sysUserRole = sysUserRoleMapper.selectOne(sysUserRoleQueryWrapper);
+        String roleId = sysUserRole.getRoleId();
+
+        QueryWrapper<SysRole> sysRoleQueryWrapper = new QueryWrapper<>();
+        sysRoleQueryWrapper.eq("id", roleId);
+        SysRole role = sysRoleService.getOne(sysRoleQueryWrapper);
+        String rolecode = role.getRoleCode();
+
+        if (rolecode.equals("YH")) {
+            wrapper.like("username", username);
+        }
         wrapper.orderByAsc("xh","qyzhjwz");
         List<JjgFbgcLjgcLjtsfysdHt> htdata = jjgFbgcLjgcLjtsfysdHtMapper.selectList(wrapper);
         List<JjgFbgcLjgcLjtsfysdSl> sldata = jjgFbgcLjgcLjtsfysdSlService.getdata(proname, htd, fbgc);
@@ -979,7 +1010,6 @@ public class JjgFbgcLjgcLjtsfysdHtServiceImpl extends ServiceImpl<JjgFbgcLjgcLjt
                     XSSFCell cell = row.getCell(j);
 
                     //cell.setCellType(CellType.STRING);
-                    System.out.println(cell.getCellType());
                     switch (cell.getCellType()){
                         case XSSFCell.CELL_TYPE_STRING ://String
                             cell.setCellType(CellType.STRING);
@@ -1015,7 +1045,6 @@ public class JjgFbgcLjgcLjtsfysdHtServiceImpl extends ServiceImpl<JjgFbgcLjgcLjt
                 }
                 jjgFbgcLjgcLjtsfysdHt.setHtgdz((String) map.get("htgdz"));
                 jjgFbgcLjgcLjtsfysdHt.setSysj(simpleDateFormat.parse((String) map.get("sysj")));
-                System.out.println(map.get("zh"));
                 jjgFbgcLjgcLjtsfysdHt.setZh(String.valueOf(map.get("zh")));
                 jjgFbgcLjgcLjtsfysdHt.setJgcc((String) map.get("jgcc"));
                 jjgFbgcLjgcLjtsfysdHt.setJglx((String) map.get("jglx"));
@@ -1032,6 +1061,7 @@ public class JjgFbgcLjgcLjtsfysdHtServiceImpl extends ServiceImpl<JjgFbgcLjgcLjt
                 jjgFbgcLjgcLjtsfysdHt.setHsshzl((String) map.get("hsshzl"));
                 jjgFbgcLjgcLjtsfysdHt.setHgsyzl((String) map.get("hgsyzl"));
                 jjgFbgcLjgcLjtsfysdHt.setXh((String) map.get("xh"));
+                jjgFbgcLjgcLjtsfysdHt.setUsername(commonInfoVo.getUsername());
                 jjgFbgcLjgcLjtsfysdHt.setProname(commonInfoVo.getProname());
                 jjgFbgcLjgcLjtsfysdHt.setHtd(commonInfoVo.getHtd());
                 jjgFbgcLjgcLjtsfysdHt.setFbgc("路基土石方");

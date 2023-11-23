@@ -12,8 +12,14 @@ import glgc.jjgys.model.project.JjgFbgcLjgcPspqhd;
 import glgc.jjgys.model.project.JjgFbgcLjgcXqgqd;
 import glgc.jjgys.model.projectvo.ljgc.CommonInfoVo;
 import glgc.jjgys.model.system.SysOperLog;
+import glgc.jjgys.model.system.SysRole;
+import glgc.jjgys.model.system.SysUser;
+import glgc.jjgys.model.system.SysUserRole;
+import glgc.jjgys.system.mapper.SysUserRoleMapper;
 import glgc.jjgys.system.service.JjgFbgcLjgcXqgqdService;
 import glgc.jjgys.system.service.OperLogService;
+import glgc.jjgys.system.service.SysRoleService;
+import glgc.jjgys.system.service.SysUserService;
 import glgc.jjgys.system.utils.JjgFbgcCommonUtils;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +54,15 @@ public class JjgFbgcLjgcXqgqdController {
 
     @Autowired
     private JjgFbgcLjgcXqgqdService jjgFbgcLjgcXqgqdService;
+
+    @Autowired
+    private SysUserService sysUserService;
+
+    @Autowired
+    private SysUserRoleMapper sysUserRoleMapper;
+
+    @Autowired
+    private SysRoleService sysRoleService;
 
     @Autowired
     private OperLogService operLogService;
@@ -112,10 +127,37 @@ public class JjgFbgcLjgcXqgqdController {
             return Result.ok(pageModel);
         }else {
             //获取条件值，进行非空判断，条件封装
-            Date jcsj = jjgFbgcLjgcXqgqd.getJcsj();
+
             QueryWrapper<JjgFbgcLjgcXqgqd> wrapper=new QueryWrapper<>();
+            wrapper.eq("proname", jjgFbgcLjgcXqgqd.getProname());
+            wrapper.eq("htd", jjgFbgcLjgcXqgqd.getHtd());
+            wrapper.eq("fbgc", jjgFbgcLjgcXqgqd.getFbgc());
+
+            String username = jjgFbgcLjgcXqgqd.getUsername();
+            QueryWrapper<SysUser> sysUserQueryWrapper = new QueryWrapper<>();
+            sysUserQueryWrapper.eq("username", username);
+            SysUser one = sysUserService.getOne(sysUserQueryWrapper);
+            String userid = one.getId().toString();
+
+            QueryWrapper<SysUserRole> sysUserRoleQueryWrapper = new QueryWrapper<>();
+            sysUserRoleQueryWrapper.eq("user_id", userid);
+            SysUserRole sysUserRole = sysUserRoleMapper.selectOne(sysUserRoleQueryWrapper);
+            String roleId = sysUserRole.getRoleId();
+
+            QueryWrapper<SysRole> sysRoleQueryWrapper = new QueryWrapper<>();
+            sysRoleQueryWrapper.eq("id", roleId);
+            SysRole role = sysRoleService.getOne(sysRoleQueryWrapper);
+            String rolecode = role.getRoleCode();
+
+            if (rolecode.equals("YH")){
+                wrapper.eq("username", username);
+            }
+            Date jcsj = jjgFbgcLjgcXqgqd.getJcsj();
             if (!StringUtils.isEmpty(jcsj)){
                 wrapper.like("jcsj",jcsj);
+            }
+            if (!StringUtils.isEmpty(jjgFbgcLjgcXqgqd.getZh())){
+                wrapper.like("zh",jjgFbgcLjgcXqgqd.getZh());
             }
             wrapper.orderByAsc("zh","bw1");
 //            wrapper.like("fbgc",jjgFbgcLjgcHdgqd.getFbgc());
@@ -125,6 +167,42 @@ public class JjgFbgcLjgcXqgqdController {
             return Result.ok(pageModel);
 
         }
+    }
+
+    @ApiOperation("全部删除")
+    @DeleteMapping("removeAll")
+    public Result removeAll(@RequestBody CommonInfoVo commonInfoVo){
+        String proname = commonInfoVo.getProname();
+        String htd = commonInfoVo.getHtd();
+        String username = commonInfoVo.getUsername();
+        QueryWrapper<JjgFbgcLjgcXqgqd> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("proname",proname);
+        queryWrapper.eq("htd",htd);
+        QueryWrapper<SysUser> sysUserQueryWrapper = new QueryWrapper<>();
+        sysUserQueryWrapper.eq("username", username);
+        SysUser one = sysUserService.getOne(sysUserQueryWrapper);
+        String userid = one.getId().toString();
+
+        QueryWrapper<SysUserRole> sysUserRoleQueryWrapper = new QueryWrapper<>();
+        sysUserRoleQueryWrapper.eq("user_id", userid);
+        SysUserRole sysUserRole = sysUserRoleMapper.selectOne(sysUserRoleQueryWrapper);
+        String roleId = sysUserRole.getRoleId();
+
+        QueryWrapper<SysRole> sysRoleQueryWrapper = new QueryWrapper<>();
+        sysRoleQueryWrapper.eq("id", roleId);
+        SysRole role = sysRoleService.getOne(sysRoleQueryWrapper);
+        String rolecode = role.getRoleCode();
+
+        if (rolecode.equals("YH")){
+            queryWrapper.eq("username", username);
+        }
+        boolean remove = jjgFbgcLjgcXqgqdService.remove(queryWrapper);
+        if(remove){
+            return Result.ok();
+        } else {
+            return Result.fail().message("删除失败！");
+        }
+
     }
 
     @ApiOperation("批量删除小桥砼强度数据")

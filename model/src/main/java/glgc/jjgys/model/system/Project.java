@@ -35,6 +35,12 @@ public class Project{
     @TableField("grade")
     private String grade;
 
+    @TableField("participant")
+    private String participant;
+
+    @TableField("username")
+    private String username;
+
     @TableField("create_time")
     private Date createTime;
 }

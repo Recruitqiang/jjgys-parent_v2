@@ -8,11 +8,17 @@ import glgc.jjgys.common.excel.ExcelUtil;
 import glgc.jjgys.model.project.JjgFbgcLjgcHdgqd;
 import glgc.jjgys.model.projectvo.ljgc.CommonInfoVo;
 import glgc.jjgys.model.projectvo.ljgc.JjgFbgcLjgcHdgqdVo;
+import glgc.jjgys.model.system.SysRole;
+import glgc.jjgys.model.system.SysUser;
+import glgc.jjgys.model.system.SysUserRole;
 import glgc.jjgys.system.easyexcel.ExcelHandler;
 import glgc.jjgys.system.exception.JjgysException;
 import glgc.jjgys.system.mapper.JjgFbgcLjgcHdgqdMapper;
+import glgc.jjgys.system.mapper.SysUserRoleMapper;
 import glgc.jjgys.system.service.JjgFbgcLjgcHdgqdService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import glgc.jjgys.system.service.SysRoleService;
+import glgc.jjgys.system.service.SysUserService;
 import glgc.jjgys.system.utils.JjgFbgcCommonUtils;
 import glgc.jjgys.system.utils.RowCopy;
 import org.apache.commons.lang3.StringUtils;
@@ -212,6 +218,7 @@ public class JjgFbgcLjgcHdgqdServiceImpl extends ServiceImpl<JjgFbgcLjgcHdgqdMap
                                         JjgFbgcLjgcHdgqd fbgcLjgcHdgqd = new JjgFbgcLjgcHdgqd();
                                         BeanUtils.copyProperties(hdgqdVo,fbgcLjgcHdgqd);
                                         fbgcLjgcHdgqd.setCreatetime(new Date());
+                                        fbgcLjgcHdgqd.setUsername(commonInfoVo.getUsername());
                                         fbgcLjgcHdgqd.setProname(commonInfoVo.getProname());
                                         fbgcLjgcHdgqd.setHtd(commonInfoVo.getHtd());
                                         fbgcLjgcHdgqd.setFbgc(commonInfoVo.getFbgc());
@@ -227,6 +234,15 @@ public class JjgFbgcLjgcHdgqdServiceImpl extends ServiceImpl<JjgFbgcLjgcHdgqdMap
 
     }
 
+    @Autowired
+    private SysUserService sysUserService;
+
+    @Autowired
+    private SysUserRoleMapper sysUserRoleMapper;
+
+    @Autowired
+    private SysRoleService sysRoleService;
+
     /**
      * 平均值：将测定值去掉3个最大的，去掉3个最小的，然后求平均值
      * 每个结构名称有10个数据点，每页有20个
@@ -239,16 +255,35 @@ public class JjgFbgcLjgcHdgqdServiceImpl extends ServiceImpl<JjgFbgcLjgcHdgqdMap
         String fbgc = commonInfoVo.getFbgc();
         //获取数据
         QueryWrapper<JjgFbgcLjgcHdgqd> wrapper=new QueryWrapper<>();
-        wrapper.like("proname",proname);
-        wrapper.like("htd",htd);
-        wrapper.like("fbgc",fbgc);
+        wrapper.eq("proname",proname);
+        wrapper.eq("htd",htd);
+        wrapper.eq("fbgc",fbgc);
+        String username = commonInfoVo.getUsername();
+        QueryWrapper<SysUser> sysUserQueryWrapper = new QueryWrapper<>();
+        sysUserQueryWrapper.eq("username", username);
+        SysUser one = sysUserService.getOne(sysUserQueryWrapper);
+        String userid = one.getId().toString();
+
+        QueryWrapper<SysUserRole> sysUserRoleQueryWrapper = new QueryWrapper<>();
+        sysUserRoleQueryWrapper.eq("user_id", userid);
+        SysUserRole sysUserRole = sysUserRoleMapper.selectOne(sysUserRoleQueryWrapper);
+        String roleId = sysUserRole.getRoleId();
+
+        QueryWrapper<SysRole> sysRoleQueryWrapper = new QueryWrapper<>();
+        sysRoleQueryWrapper.eq("id", roleId);
+        SysRole role = sysRoleService.getOne(sysRoleQueryWrapper);
+        String rolecode = role.getRoleCode();
+
+        if (rolecode.equals("YH")) {
+            wrapper.eq("username", username);
+        }
         wrapper.orderByAsc("zh","bw1");
         List<JjgFbgcLjgcHdgqd> data = jjgFbgcLjgcHdgqdMapper.selectList(wrapper);
         //鉴定表要存放的路径
         File f = new File(filepath+File.separator+proname+File.separator+htd+File.separator+"08路基涵洞砼强度.xlsx");
         //健壮性判断如果没有数据返回"请导入数据"
         if (data == null || data.size()==0){
-            return;
+            return ;
         }else {
             //存放鉴定表的目录
             File fdir = new File(filepath+File.separator+proname+File.separator+htd);

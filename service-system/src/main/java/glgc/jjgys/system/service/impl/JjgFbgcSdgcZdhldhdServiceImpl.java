@@ -6,12 +6,18 @@ import glgc.jjgys.common.excel.ExcelUtil;
 import glgc.jjgys.model.project.*;
 import glgc.jjgys.model.projectvo.ljgc.CommonInfoVo;
 import glgc.jjgys.model.projectvo.sdgc.JjgFbgcSdgcZdhldhdVo;
+import glgc.jjgys.model.system.SysRole;
+import glgc.jjgys.model.system.SysUser;
+import glgc.jjgys.model.system.SysUserRole;
 import glgc.jjgys.system.easyexcel.ExcelHandler;
 import glgc.jjgys.system.exception.JjgysException;
 import glgc.jjgys.system.mapper.JjgFbgcSdgcZdhldhdMapper;
 import glgc.jjgys.system.mapper.JjgLqsFhlmMapper;
+import glgc.jjgys.system.mapper.SysUserRoleMapper;
 import glgc.jjgys.system.service.JjgFbgcSdgcZdhldhdService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import glgc.jjgys.system.service.SysRoleService;
+import glgc.jjgys.system.service.SysUserService;
 import glgc.jjgys.system.utils.RowCopy;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -55,12 +61,20 @@ public class JjgFbgcSdgcZdhldhdServiceImpl extends ServiceImpl<JjgFbgcSdgcZdhldh
     @Value(value = "${jjgys.path.filepath}")
     private String filepath;
 
+    @Autowired
+    private SysUserService sysUserService;
+
+    @Autowired
+    private SysUserRoleMapper sysUserRoleMapper;
+
+    @Autowired
+    private SysRoleService sysRoleService;
+
 
     @Override
     public void generateJdb(CommonInfoVo commonInfoVo) throws IOException, ParseException {
         String proname = commonInfoVo.getProname();
         String htd = commonInfoVo.getHtd();
-
         List<Map<String,Object>> lxlist = jjgFbgcSdgcZdhldhdMapper.selectlx(proname,htd);
         for (Map<String, Object> map : lxlist) {
             String zx = map.get("lxbs").toString();
@@ -104,53 +118,107 @@ public class JjgFbgcSdgcZdhldhdServiceImpl extends ServiceImpl<JjgFbgcSdgcZdhldh
         }
         String result = sb.substring(0, sb.length() - 1); // 去掉最后一个逗号
 
+        String username = commonInfoVo.getUsername();
+        QueryWrapper<SysUser> sysUserQueryWrapper = new QueryWrapper<>();
+        sysUserQueryWrapper.eq("username", username);
+        SysUser one = sysUserService.getOne(sysUserQueryWrapper);
+        String userid = one.getId().toString();
 
-            List<Map<String,Object>> datazf = jjgFbgcSdgcZdhldhdMapper.selectzfList(proname,htd,zx,result);
-            List<Map<String,Object>> datayf = jjgFbgcSdgcZdhldhdMapper.selectyfList(proname,htd,zx,result);
+        QueryWrapper<SysUserRole> sysUserRoleQueryWrapper = new QueryWrapper<>();
+        sysUserRoleQueryWrapper.eq("user_id", userid);
+        SysUserRole sysUserRole = sysUserRoleMapper.selectOne(sysUserRoleQueryWrapper);
+        String roleId = sysUserRole.getRoleId();
 
+        QueryWrapper<SysRole> sysRoleQueryWrapper = new QueryWrapper<>();
+        sysRoleQueryWrapper.eq("id", roleId);
+        SysRole role = sysRoleService.getOne(sysRoleQueryWrapper);
+        String rolecode = role.getRoleCode();
+
+        List<Map<String, Object>> datazf = new ArrayList<>();
+        List<Map<String, Object>> datayf = new ArrayList<>();
+
+        List<Map<String, Object>> flmzfdata = new ArrayList<>();
+        List<Map<String, Object>> flmyfdata = new ArrayList<>();
+
+        if (rolecode.equals("YH")){
+            datazf = jjgFbgcSdgcZdhldhdMapper.selectzfListyh(proname, htd, zx, result,username);
+            datayf = jjgFbgcSdgcZdhldhdMapper.selectyfListyh(proname, htd, zx, result,username);
 
             QueryWrapper<JjgLqsFhlm> wrapperfhlmzf = new QueryWrapper<>();
-            wrapperfhlmzf.like("proname",proname);
-            wrapperfhlmzf.like("htd",htd);
-            wrapperfhlmzf.like("lf","左幅");
+            wrapperfhlmzf.like("proname", proname);
+            wrapperfhlmzf.like("htd", htd);
+            wrapperfhlmzf.like("lf", "左幅");
             List<JjgLqsFhlm> jjgLqsFhlmzf = jjgLqsFhlmMapper.selectList(wrapperfhlmzf);
 
             QueryWrapper<JjgLqsFhlm> wrapperfhlmyf = new QueryWrapper<>();
-            wrapperfhlmyf.like("proname",proname);
-            wrapperfhlmyf.like("htd",htd);
-            wrapperfhlmyf.like("lf","右幅");
+            wrapperfhlmyf.like("proname", proname);
+            wrapperfhlmyf.like("htd", htd);
+            wrapperfhlmyf.like("lf", "右幅");
             List<JjgLqsFhlm> jjgLqsFhlmyf = jjgLqsFhlmMapper.selectList(wrapperfhlmyf);
 
-
-            List<Map<String,Object>> flmzfdata = new ArrayList<>();
-            if (jjgLqsFhlmzf.size()>0){
+            if (jjgLqsFhlmzf.size() > 0) {
                 for (JjgLqsFhlm jjgLqsFhlm : jjgLqsFhlmzf) {
                     String zhq = String.valueOf(jjgLqsFhlm.getZhq());
                     String zhz = String.valueOf(jjgLqsFhlm.getZhz());
-                    flmzfdata.addAll(jjgFbgcSdgcZdhldhdMapper.seletcfhlmzfData(proname,htd,zhq,zhz));
+                    flmzfdata.addAll(jjgFbgcSdgcZdhldhdMapper.seletcfhlmzfDatayh(proname, htd, zhq, zhz,username));
 
                 }
 
             }
-            List<Map<String,Object>> flmyfdata = new ArrayList<>();
 
-            if (jjgLqsFhlmyf.size()>0){
+            if (jjgLqsFhlmyf.size() > 0) {
                 for (JjgLqsFhlm jjgLqsFhlm : jjgLqsFhlmyf) {
                     String zhq = String.valueOf(jjgLqsFhlm.getZhq());
                     String zhz = String.valueOf(jjgLqsFhlm.getZhz());
-                    flmyfdata.addAll(jjgFbgcSdgcZdhldhdMapper.seletcfhlmyfData(proname,htd,zhq,zhz));
+                    flmyfdata.addAll(jjgFbgcSdgcZdhldhdMapper.seletcfhlmyfDatayh(proname, htd, zhq, zhz,username));
+                }
+
+            }
+        }else {
+            datazf = jjgFbgcSdgcZdhldhdMapper.selectzfList(proname, htd, zx, result);
+            datayf = jjgFbgcSdgcZdhldhdMapper.selectyfList(proname, htd, zx, result);
+
+            QueryWrapper<JjgLqsFhlm> wrapperfhlmzf = new QueryWrapper<>();
+            wrapperfhlmzf.like("proname", proname);
+            wrapperfhlmzf.like("htd", htd);
+            wrapperfhlmzf.like("lf", "左幅");
+            List<JjgLqsFhlm> jjgLqsFhlmzf = jjgLqsFhlmMapper.selectList(wrapperfhlmzf);
+
+            QueryWrapper<JjgLqsFhlm> wrapperfhlmyf = new QueryWrapper<>();
+            wrapperfhlmyf.like("proname", proname);
+            wrapperfhlmyf.like("htd", htd);
+            wrapperfhlmyf.like("lf", "右幅");
+            List<JjgLqsFhlm> jjgLqsFhlmyf = jjgLqsFhlmMapper.selectList(wrapperfhlmyf);
+
+            if (jjgLqsFhlmzf.size() > 0) {
+                for (JjgLqsFhlm jjgLqsFhlm : jjgLqsFhlmzf) {
+                    String zhq = String.valueOf(jjgLqsFhlm.getZhq());
+                    String zhz = String.valueOf(jjgLqsFhlm.getZhz());
+                    flmzfdata.addAll(jjgFbgcSdgcZdhldhdMapper.seletcfhlmzfData(proname, htd, zhq, zhz));
+
                 }
 
             }
 
-            //处理数据
-            List<Map<String, Object>> sdzxList = montageld(datazf);
-            List<Map<String, Object>> sdyxList = montageld(datayf);
+            if (jjgLqsFhlmyf.size() > 0) {
+                for (JjgLqsFhlm jjgLqsFhlm : jjgLqsFhlmyf) {
+                    String zhq = String.valueOf(jjgLqsFhlm.getZhq());
+                    String zhz = String.valueOf(jjgLqsFhlm.getZhz());
+                    flmyfdata.addAll(jjgFbgcSdgcZdhldhdMapper.seletcfhlmyfData(proname, htd, zhq, zhz));
+                }
 
-            List<Map<String, Object>> flmzxList = montageld(flmzfdata);
-            List<Map<String, Object>> flmyxList = montageld(flmyfdata);
+            }
+        }
 
-            writeExcelData(proname,htd,sdzxList,sdyxList,flmzxList,flmyxList,cdsl,zx,commonInfoVo);
+
+        //处理数据
+        List<Map<String, Object>> sdzxList = montageld(datazf);
+        List<Map<String, Object>> sdyxList = montageld(datayf);
+
+        List<Map<String, Object>> flmzxList = montageld(flmzfdata);
+        List<Map<String, Object>> flmyxList = montageld(flmyfdata);
+
+        writeExcelData(proname, htd, sdzxList, sdyxList, flmzxList, flmyxList, cdsl, zx, commonInfoVo);
 
     }
 
@@ -1352,6 +1420,7 @@ public class JjgFbgcSdgcZdhldhdServiceImpl extends ServiceImpl<JjgFbgcSdgcZdhldh
                                             ldhd.setCreatetime(new Date());
                                             ldhd.setProname(commonInfoVo.getProname());
                                             ldhd.setHtd(commonInfoVo.getHtd());
+                                            ldhd.setUsername(commonInfoVo.getUsername());
                                            /* ldhd.setZh(Double.parseDouble(ldhdVo.getZh()));
                                             ldhd.setZhz(Double.parseDouble(ldhdVo.getZdzh()));*/
                                             ldhd.setCd(sheetName);

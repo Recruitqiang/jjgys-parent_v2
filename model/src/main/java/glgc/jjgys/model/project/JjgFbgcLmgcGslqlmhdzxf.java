@@ -122,5 +122,8 @@ public class JjgFbgcLmgcGslqlmhdzxf implements Serializable {
     @TableField("createTime")
     private Date createtime;
 
+    @TableField("username")
+    private String username;
+
 
 }

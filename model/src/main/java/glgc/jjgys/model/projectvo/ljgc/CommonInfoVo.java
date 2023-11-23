@@ -20,4 +20,5 @@ public class CommonInfoVo implements Serializable {
     private String sdsjz;
     private String qlsjz;
     private String fhlmsjz;
+    private String username;
 }

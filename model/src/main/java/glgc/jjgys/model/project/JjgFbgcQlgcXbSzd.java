@@ -82,5 +82,8 @@ public class JjgFbgcQlgcXbSzd implements Serializable {
     @TableField("fbgc")
     private String fbgc;
 
+    @TableField("username")
+    private String username;
+
 
 }

@@ -3,15 +3,19 @@ package glgc.jjgys.system.service.impl;
 import com.alibaba.excel.EasyExcel;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import glgc.jjgys.common.excel.ExcelUtil;
-import glgc.jjgys.model.project.JjgFbgcLmgcLmgzsdsgpsf;
 import glgc.jjgys.model.project.JjgFbgcLmgcLmgzsdsgpsfJgfc;
 import glgc.jjgys.model.projectvo.lmgc.JjgFbgcLmgcLmgzsdsgpsfJgfcVo;
-import glgc.jjgys.model.projectvo.lmgc.JjgFbgcLmgcLmgzsdsgpsfVo;
+import glgc.jjgys.model.system.SysRole;
+import glgc.jjgys.model.system.SysUser;
+import glgc.jjgys.model.system.SysUserRole;
 import glgc.jjgys.system.easyexcel.ExcelHandler;
 import glgc.jjgys.system.exception.JjgysException;
 import glgc.jjgys.system.mapper.JjgFbgcLmgcLmgzsdsgpsfJgfcMapper;
+import glgc.jjgys.system.mapper.SysUserRoleMapper;
 import glgc.jjgys.system.service.JjgFbgcLmgcLmgzsdsgpsfJgfcService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import glgc.jjgys.system.service.SysRoleService;
+import glgc.jjgys.system.service.SysUserService;
 import glgc.jjgys.system.utils.JjgFbgcCommonUtils;
 import glgc.jjgys.system.utils.RowCopy;
 import org.apache.commons.lang3.StringUtils;
@@ -54,24 +58,52 @@ public class JjgFbgcLmgcLmgzsdsgpsfJgfcServiceImpl extends ServiceImpl<JjgFbgcLm
     @Autowired
     private JjgFbgcLmgcLmgzsdsgpsfJgfcMapper jjgFbgcLmgcLmgzsdsgpsfJgfcMapper;
 
+    @Autowired
+    private SysUserService sysUserService;
+
+    @Autowired
+    private SysUserRoleMapper sysUserRoleMapper;
+
+    @Autowired
+    private SysRoleService sysRoleService;
+
+
     @Value(value = "${jjgys.path.jgfilepath}")
     private String jgfilepath;
 
     @Override
-    public void generateJdb(String proname) throws IOException {
+    public void generateJdb(String proname, String username) throws IOException {
         List<String> htds = jjgFbgcLmgcLmgzsdsgpsfJgfcMapper.gethtd(proname);
         for (String htd : htds) {
-            gethtdjdb(proname,htd);
+            gethtdjdb(proname,htd,username);
         }
 
     }
 
-    private void gethtdjdb(String proname, String htd) throws IOException {
+    private void gethtdjdb(String proname, String htd, String username) throws IOException {
         XSSFWorkbook wb = null;
         //获取数据
         QueryWrapper<JjgFbgcLmgcLmgzsdsgpsfJgfc> wrapper=new QueryWrapper<>();
         wrapper.eq("proname",proname);
         wrapper.eq("htd",htd);
+        QueryWrapper<SysUser> sysUserQueryWrapper = new QueryWrapper<>();
+        sysUserQueryWrapper.eq("username", username);
+        SysUser one = sysUserService.getOne(sysUserQueryWrapper);
+        String userid = one.getId().toString();
+
+        QueryWrapper<SysUserRole> sysUserRoleQueryWrapper = new QueryWrapper<>();
+        sysUserRoleQueryWrapper.eq("user_id", userid);
+        SysUserRole sysUserRole = sysUserRoleMapper.selectOne(sysUserRoleQueryWrapper);
+        String roleId = sysUserRole.getRoleId();
+
+        QueryWrapper<SysRole> sysRoleQueryWrapper = new QueryWrapper<>();
+        sysRoleQueryWrapper.eq("id", roleId);
+        SysRole role = sysRoleService.getOne(sysRoleQueryWrapper);
+        String rolecode = role.getRoleCode();
+
+        if (rolecode.equals("YH")){
+            wrapper.eq("username", username);
+        }
         wrapper.orderByAsc("zh");
         List<JjgFbgcLmgcLmgzsdsgpsfJgfc> data = jjgFbgcLmgcLmgzsdsgpsfJgfcMapper.selectList(wrapper);
         File f = new File(jgfilepath+File.separator+proname+File.separator+htd+File.separator+"20构造深度手工铺沙法.xlsx");
@@ -319,7 +351,7 @@ public class JjgFbgcLmgcLmgzsdsgpsfJgfcServiceImpl extends ServiceImpl<JjgFbgcLm
     }
 
     @Override
-    public void importlmgzsdsgpsf(MultipartFile file, String proname) {
+    public void importlmgzsdsgpsf(MultipartFile file, String proname, String username) {
         try {
             EasyExcel.read(file.getInputStream())
                     .sheet(0)
@@ -375,6 +407,7 @@ public class JjgFbgcLmgcLmgzsdsgpsfJgfcServiceImpl extends ServiceImpl<JjgFbgcLm
                                         JjgFbgcLmgcLmgzsdsgpsfJgfc fbgcLmgcLmgzsdsgpsf = new JjgFbgcLmgcLmgzsdsgpsfJgfc();
                                         BeanUtils.copyProperties(lmgzsdsgpsfVo,fbgcLmgcLmgzsdsgpsf);
                                         fbgcLmgcLmgzsdsgpsf.setCreatetime(new Date());
+                                        fbgcLmgcLmgzsdsgpsf.setUsername(username);
                                         fbgcLmgcLmgzsdsgpsf.setProname(proname);
                                         fbgcLmgcLmgzsdsgpsf.setFbgc("路面工程");
                                         jjgFbgcLmgcLmgzsdsgpsfJgfcMapper.insert(fbgcLmgcLmgzsdsgpsf);

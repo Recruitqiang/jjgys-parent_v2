@@ -22,9 +22,9 @@ public interface JjgFbgcLmgcTlmxlbgcJgfcService extends IService<JjgFbgcLmgcTlmx
 
     void exportxlbgs(HttpServletResponse response);
 
-    void importxlbgs(MultipartFile file, String proname);
+    void importxlbgs(MultipartFile file, String proname, String username);
 
-    void generateJdb(String proname) throws IOException, ParseException;
+    void generateJdb(String proname, String username) throws IOException, ParseException;
 
     List<Map<String, Object>> selecthtd(String proname);
 }

@@ -80,6 +80,9 @@ public class JjgFbgcLjgcLjcj implements Serializable {
     @TableField("xh")
     private String xh;
 
+    @TableField("username")
+    private String username;
+
     @ApiModelProperty(value = "创建时间")
     @TableField("createTime")
     private Date createtime;

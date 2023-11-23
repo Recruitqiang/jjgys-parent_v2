@@ -149,6 +149,10 @@ public class JjgFbgcLjgcHdgqd implements Serializable {
     @TableField("proname")
     private String proname;
 
+    @ApiModelProperty(value = "项目名称")
+    @TableField("username")
+    private String username;
+
     @ApiModelProperty(value = "分部工程")
     @TableField("fbgc")
     private String fbgc;

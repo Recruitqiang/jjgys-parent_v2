@@ -16,10 +16,22 @@
         ON hp.proname=sd.proname
     </select>
 
+    <select id="selectSdZfDatayh" resultType="java.util.Map" parameterType="java.lang.String">
+        SELECT hp.*,sd.* from (SELECT * from jjg_fbgc_lmgc_lmhp where proname = #{proname} and htd = #{htd} and fbgc= #{fbgc} and wz='左幅' and lxlx='主线' and username = #{username} and zh >= #{zhq} and zh &lt;= #{zhz}) hp
+                                  LEFT JOIN (SELECT * FROM jjg_lqs_sd where proname = #{proname} and zhq = #{zhq} and zhz = #{zhz} and lf = '左幅' and wz='主线') sd
+                                            ON hp.proname=sd.proname
+    </select>
+
     <select id="selectSdYfData" resultType="java.util.Map" parameterType="java.lang.String">
         SELECT hp.*,sd.name from (SELECT * from jjg_fbgc_lmgc_lmhp where proname = #{proname} and htd = #{htd} and fbgc= #{fbgc} and wz='右幅' and lxlx='主线' and zh >= #{zhq} and zh &lt;= #{zhz}) hp
         LEFT JOIN (SELECT * FROM jjg_lqs_sd where proname = #{proname} and zhq = #{zhq} and zhz = #{zhz}  and lf = '右幅' and wz='主线') sd
         ON hp.proname=sd.proname
+    </select>
+
+    <select id="selectSdYfDatayh" resultType="java.util.Map" parameterType="java.lang.String">
+        SELECT hp.*,sd.name from (SELECT * from jjg_fbgc_lmgc_lmhp where proname = #{proname} and htd = #{htd} and fbgc= #{fbgc} and wz='右幅' and lxlx='主线' and username = #{username} and zh >= #{zhq} and zh &lt;= #{zhz}) hp
+                                     LEFT JOIN (SELECT * FROM jjg_lqs_sd where proname = #{proname} and zhq = #{zhq} and zhz = #{zhz}  and lf = '右幅' and wz='主线') sd
+                                               ON hp.proname=sd.proname
     </select>
 
     <select id="selectQlZfData" resultType="java.util.Map" parameterType="java.lang.String">
@@ -28,14 +40,30 @@
         ON hp.proname=ql.proname
     </select>
 
+    <select id="selectQlZfDatayh" resultType="java.util.Map" parameterType="java.lang.String">
+        SELECT hp.*,ql.qlname name from (SELECT * from jjg_fbgc_lmgc_lmhp where proname = #{proname} and htd = #{htd} and fbgc= #{fbgc} and wz='左幅' and lxlx='主线' and username = #{username} and zh >= #{zhq} and zh &lt;= #{zhz}) hp
+                                            LEFT JOIN (SELECT * FROM jjg_lqs_ql where proname = #{proname} and zhq = #{zhq} and zhz = #{zhz} and lf = '左幅' and wz='主线') ql
+                                                      ON hp.proname=ql.proname
+    </select>
+
     <select id="selectQlYfData" resultType="java.util.Map" parameterType="java.lang.String">
         SELECT hp.*,ql.qlname name from (SELECT * from jjg_fbgc_lmgc_lmhp where proname = #{proname} and htd = #{htd} and fbgc= #{fbgc} and wz='右幅' and lxlx='主线' and zh >= #{zhq} and zh &lt;= #{zhz}) hp
         LEFT JOIN (SELECT * FROM jjg_lqs_ql where proname = #{proname} and zhq = #{zhq} and zhz = #{zhz}  and lf = '右幅' and wz='主线') ql
         ON hp.proname=ql.proname
     </select>
 
+    <select id="selectQlYfDatayh" resultType="java.util.Map" parameterType="java.lang.String">
+        SELECT hp.*,ql.qlname name from (SELECT * from jjg_fbgc_lmgc_lmhp where proname = #{proname} and htd = #{htd} and fbgc= #{fbgc} and wz='右幅' and lxlx='主线' and username = #{username}  and zh >= #{zhq} and zh &lt;= #{zhz}) hp
+                                            LEFT JOIN (SELECT * FROM jjg_lqs_ql where proname = #{proname} and zhq = #{zhq} and zhz = #{zhz}  and lf = '右幅' and wz='主线') ql
+                                                      ON hp.proname=ql.proname
+    </select>
+
     <select id="selectAllList" resultType="java.util.Map" parameterType="java.lang.String">
         SELECT * from jjg_fbgc_lmgc_lmhp where proname = #{proname} and htd = #{htd} and fbgc= #{fbgc} and lxlx = '主线'
+    </select>
+
+    <select id="selectAllListyh" resultType="java.util.Map" parameterType="java.lang.String">
+        SELECT * from jjg_fbgc_lmgc_lmhp where proname = #{proname} and htd = #{htd} and fbgc= #{fbgc} and lxlx = '主线' and username = #{username}
     </select>
 
 

@@ -7,11 +7,16 @@ import glgc.jjgys.model.base.MultipleLists;
 import glgc.jjgys.model.project.*;
 import glgc.jjgys.model.projectvo.ljgc.CommonInfoVo;
 import glgc.jjgys.model.projectvo.lmgc.JjgFbgcLmgcLmhpVo;
+import glgc.jjgys.model.system.SysRole;
+import glgc.jjgys.model.system.SysUser;
+import glgc.jjgys.model.system.SysUserRole;
 import glgc.jjgys.system.easyexcel.ExcelHandler;
 import glgc.jjgys.system.exception.JjgysException;
 import glgc.jjgys.system.mapper.*;
 import glgc.jjgys.system.service.JjgFbgcLmgcLmhpService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import glgc.jjgys.system.service.SysRoleService;
+import glgc.jjgys.system.service.SysUserService;
 import glgc.jjgys.system.utils.JjgFbgcCommonUtils;
 import glgc.jjgys.system.utils.RowCopy;
 import org.apache.commons.lang3.StringUtils;
@@ -65,6 +70,14 @@ public class JjgFbgcLmgcLmhpServiceImpl extends ServiceImpl<JjgFbgcLmgcLmhpMappe
     @Autowired
     private JjgLqsSdMapper jjgLqsSdMapper;
 
+    @Autowired
+    private SysUserService sysUserService;
+
+    @Autowired
+    private SysUserRoleMapper sysUserRoleMapper;
+
+    @Autowired
+    private SysRoleService sysRoleService;
 
     @Value(value = "${jjgys.path.filepath}")
     private String filepath;
@@ -74,12 +87,13 @@ public class JjgFbgcLmgcLmhpServiceImpl extends ServiceImpl<JjgFbgcLmgcLmhpMappe
         String proname = commonInfoVo.getProname();
         String htd = commonInfoVo.getHtd();
         String fbgc = commonInfoVo.getFbgc();
+        String username = commonInfoVo.getUsername();
         //先查询需要生成几个鉴定表 根据lmlx
         List<Map<String,String>> lmlx = jjgFbgcLmgcLmhpMapper.selectlx(proname,htd); //[{lxlx=主线}, {lxlx=岳口枢纽立交}, {lxlx=延壶路小桥连接线}, {lxlx=延长互通式立交}]
         if (lmlx.size()>0){
             for (Map<String, String> map : lmlx) {
                 String lxlx = map.get("lxlx");
-                DBtoExcelData(proname,htd,fbgc,lxlx);
+                DBtoExcelData(proname,htd,fbgc,lxlx,username);
             }
         }
 
@@ -90,8 +104,9 @@ public class JjgFbgcLmgcLmhpServiceImpl extends ServiceImpl<JjgFbgcLmgcLmhpMappe
      * @param htd
      * @param fbgc
      * @param lxlx
+     * @param username
      */
-    private void DBtoExcelData(String proname, String htd, String fbgc, String lxlx) throws Exception {
+    private void DBtoExcelData(String proname, String htd, String fbgc, String lxlx, String username) throws Exception {
         /**
          * 为什么合同段都是路基的？
          *
@@ -151,45 +166,89 @@ public class JjgFbgcLmgcLmhpServiceImpl extends ServiceImpl<JjgFbgcLmgcLmhpMappe
                  * 把基础表中所以有隧道的数据查询出来，然后根据起止桩号去在横坡实测数据匹配，是的话就是哪个隧道
                  */
 
+                QueryWrapper<SysUser> sysUserQueryWrapper = new QueryWrapper<>();
+                sysUserQueryWrapper.eq("username", username);
+                SysUser one = sysUserService.getOne(sysUserQueryWrapper);
+                String userid = one.getId().toString();
+
+                QueryWrapper<SysUserRole> sysUserRoleQueryWrapper = new QueryWrapper<>();
+                sysUserRoleQueryWrapper.eq("user_id", userid);
+                SysUserRole sysUserRole = sysUserRoleMapper.selectOne(sysUserRoleQueryWrapper);
+                String roleId = sysUserRole.getRoleId();
+
+                QueryWrapper<SysRole> sysRoleQueryWrapper = new QueryWrapper<>();
+                sysRoleQueryWrapper.eq("id", roleId);
+                SysRole role = sysRoleService.getOne(sysRoleQueryWrapper);
+                String rolecode = role.getRoleCode();
+
                 List<Map<String,String>> allData = new ArrayList<>();
                 //隧道左幅
                 List<Map<String,String>> hpsdzfdata = new ArrayList<>();
-                if (jjgLqsSdzf.size()>0){
-                    for (JjgLqsSd jjgLqsSd : jjgLqsSdzf) {
-                        hpsdzfdata.addAll(jjgFbgcLmgcLmhpMapper.selectSdZfData(proname,htd,fbgc,String.valueOf(jjgLqsSd.getZhq()),String.valueOf(jjgLqsSd.getZhz())));
-                        allData.addAll(jjgFbgcLmgcLmhpMapper.selectSdZfData(proname,htd,fbgc,String.valueOf(jjgLqsSd.getZhq()),String.valueOf(jjgLqsSd.getZhz())));
-                    }
-                }
-
                 //隧道右幅
                 List<Map<String,String>> hpsdyfdata = new ArrayList<>();
-                if (jjgLqsSdyf.size()>0){
-                    for (JjgLqsSd jjgLqsSd : jjgLqsSdyf) {
-                        hpsdyfdata.addAll(jjgFbgcLmgcLmhpMapper.selectSdYfData(proname,htd,fbgc,String.valueOf(jjgLqsSd.getZhq()),String.valueOf(jjgLqsSd.getZhz())));
-                        allData.addAll(jjgFbgcLmgcLmhpMapper.selectSdYfData(proname,htd,fbgc,String.valueOf(jjgLqsSd.getZhq()),String.valueOf(jjgLqsSd.getZhz())));
-                    }
-                }
-
                 //桥梁左幅
                 List<Map<String,String>> hpqlzfdata = new ArrayList<>();
-                if (jjgLqsQlzf.size()>0){
-                    for (JjgLqsQl jjgLqsQl : jjgLqsQlzf) {
-                        hpqlzfdata.addAll(jjgFbgcLmgcLmhpMapper.selectQlZfData(proname,htd,fbgc,String.valueOf(jjgLqsQl.getZhq()),String.valueOf(jjgLqsQl.getZhz())));
-                        allData.addAll(jjgFbgcLmgcLmhpMapper.selectQlZfData(proname,htd,fbgc,String.valueOf(jjgLqsQl.getZhq()),String.valueOf(jjgLqsQl.getZhz())));
-                    }
-                }
-
                 //桥梁右幅
                 List<Map<String,String>> hpqlyfdata = new ArrayList<>();
-                if (jjgLqsQlyf.size()>0){
-                    for (JjgLqsQl jjgLqsQl : jjgLqsQlyf) {
-                        hpqlyfdata.addAll(jjgFbgcLmgcLmhpMapper.selectQlYfData(proname,htd,fbgc,String.valueOf(jjgLqsQl.getZhq()),String.valueOf(jjgLqsQl.getZhz())));
-                        allData.addAll(jjgFbgcLmgcLmhpMapper.selectQlYfData(proname,htd,fbgc,String.valueOf(jjgLqsQl.getZhq()),String.valueOf(jjgLqsQl.getZhz())));
+
+                List<Map<String,String>> hpalldata = new ArrayList<>();
+
+                if (rolecode.equals("YH")){
+                    if (jjgLqsSdzf.size()>0){
+                        for (JjgLqsSd jjgLqsSd : jjgLqsSdzf) {
+                            hpsdzfdata.addAll(jjgFbgcLmgcLmhpMapper.selectSdZfDatayh(proname,htd,fbgc,String.valueOf(jjgLqsSd.getZhq()),String.valueOf(jjgLqsSd.getZhz()),username));
+                            allData.addAll(jjgFbgcLmgcLmhpMapper.selectSdZfDatayh(proname,htd,fbgc,String.valueOf(jjgLqsSd.getZhq()),String.valueOf(jjgLqsSd.getZhz()),username));
+                        }
                     }
+                    if (jjgLqsSdyf.size()>0){
+                        for (JjgLqsSd jjgLqsSd : jjgLqsSdyf) {
+                            hpsdyfdata.addAll(jjgFbgcLmgcLmhpMapper.selectSdYfDatayh(proname,htd,fbgc,String.valueOf(jjgLqsSd.getZhq()),String.valueOf(jjgLqsSd.getZhz()),username));
+                            allData.addAll(jjgFbgcLmgcLmhpMapper.selectSdYfDatayh(proname,htd,fbgc,String.valueOf(jjgLqsSd.getZhq()),String.valueOf(jjgLqsSd.getZhz()),username));
+                        }
+                    }
+                    if (jjgLqsQlzf.size()>0){
+                        for (JjgLqsQl jjgLqsQl : jjgLqsQlzf) {
+                            hpqlzfdata.addAll(jjgFbgcLmgcLmhpMapper.selectQlZfDatayh(proname,htd,fbgc,String.valueOf(jjgLqsQl.getZhq()),String.valueOf(jjgLqsQl.getZhz()),username));
+                            allData.addAll(jjgFbgcLmgcLmhpMapper.selectQlZfDatayh(proname,htd,fbgc,String.valueOf(jjgLqsQl.getZhq()),String.valueOf(jjgLqsQl.getZhz()),username));
+                        }
+                    }
+                    if (jjgLqsQlyf.size()>0){
+                        for (JjgLqsQl jjgLqsQl : jjgLqsQlyf) {
+                            hpqlyfdata.addAll(jjgFbgcLmgcLmhpMapper.selectQlYfDatayh(proname,htd,fbgc,String.valueOf(jjgLqsQl.getZhq()),String.valueOf(jjgLqsQl.getZhz()),username));
+                            allData.addAll(jjgFbgcLmgcLmhpMapper.selectQlYfDatayh(proname,htd,fbgc,String.valueOf(jjgLqsQl.getZhq()),String.valueOf(jjgLqsQl.getZhz()),username));
+                        }
+                    }
+                    hpalldata = jjgFbgcLmgcLmhpMapper.selectAllListyh(proname,htd,fbgc,username);
+
+                }else {
+                    if (jjgLqsSdzf.size()>0){
+                        for (JjgLqsSd jjgLqsSd : jjgLqsSdzf) {
+                            hpsdzfdata.addAll(jjgFbgcLmgcLmhpMapper.selectSdZfData(proname,htd,fbgc,String.valueOf(jjgLqsSd.getZhq()),String.valueOf(jjgLqsSd.getZhz())));
+                            allData.addAll(jjgFbgcLmgcLmhpMapper.selectSdZfData(proname,htd,fbgc,String.valueOf(jjgLqsSd.getZhq()),String.valueOf(jjgLqsSd.getZhz())));
+                        }
+                    }
+                    if (jjgLqsSdyf.size()>0){
+                        for (JjgLqsSd jjgLqsSd : jjgLqsSdyf) {
+                            hpsdyfdata.addAll(jjgFbgcLmgcLmhpMapper.selectSdYfData(proname,htd,fbgc,String.valueOf(jjgLqsSd.getZhq()),String.valueOf(jjgLqsSd.getZhz())));
+                            allData.addAll(jjgFbgcLmgcLmhpMapper.selectSdYfData(proname,htd,fbgc,String.valueOf(jjgLqsSd.getZhq()),String.valueOf(jjgLqsSd.getZhz())));
+                        }
+                    }
+                    if (jjgLqsQlzf.size()>0){
+                        for (JjgLqsQl jjgLqsQl : jjgLqsQlzf) {
+                            hpqlzfdata.addAll(jjgFbgcLmgcLmhpMapper.selectQlZfData(proname,htd,fbgc,String.valueOf(jjgLqsQl.getZhq()),String.valueOf(jjgLqsQl.getZhz())));
+                            allData.addAll(jjgFbgcLmgcLmhpMapper.selectQlZfData(proname,htd,fbgc,String.valueOf(jjgLqsQl.getZhq()),String.valueOf(jjgLqsQl.getZhz())));
+                        }
+                    }
+                    if (jjgLqsQlyf.size()>0){
+                        for (JjgLqsQl jjgLqsQl : jjgLqsQlyf) {
+                            hpqlyfdata.addAll(jjgFbgcLmgcLmhpMapper.selectQlYfData(proname,htd,fbgc,String.valueOf(jjgLqsQl.getZhq()),String.valueOf(jjgLqsQl.getZhz())));
+                            allData.addAll(jjgFbgcLmgcLmhpMapper.selectQlYfData(proname,htd,fbgc,String.valueOf(jjgLqsQl.getZhq()),String.valueOf(jjgLqsQl.getZhz())));
+                        }
+                    }
+                    hpalldata = jjgFbgcLmgcLmhpMapper.selectAllList(proname,htd,fbgc);
                 }
 
 
-                List<Map<String,String>> hpalldata = jjgFbgcLmgcLmhpMapper.selectAllList(proname,htd,fbgc);
                 //路面
                 List<Map<String, String>> lmdata = diff(allData, hpalldata);
                 for (Map<String, String> lmdatum : lmdata) {
@@ -278,6 +337,25 @@ public class JjgFbgcLmgcLmhpServiceImpl extends ServiceImpl<JjgFbgcLmgcLmhpMappe
             QueryWrapper<JjgFbgcLmgcLmhp> wrapperhphnt = new QueryWrapper<>();
             wrapperhphnt.like("proname",proname);
             wrapperhphnt.like("lxlx",lxlx);
+
+            QueryWrapper<SysUser> sysUserQueryWrapper = new QueryWrapper<>();
+            sysUserQueryWrapper.eq("username", username);
+            SysUser one = sysUserService.getOne(sysUserQueryWrapper);
+            String userid = one.getId().toString();
+
+            QueryWrapper<SysUserRole> sysUserRoleQueryWrapper = new QueryWrapper<>();
+            sysUserRoleQueryWrapper.eq("user_id", userid);
+            SysUserRole sysUserRole = sysUserRoleMapper.selectOne(sysUserRoleQueryWrapper);
+            String roleId = sysUserRole.getRoleId();
+
+            QueryWrapper<SysRole> sysRoleQueryWrapper = new QueryWrapper<>();
+            sysRoleQueryWrapper.eq("id", roleId);
+            SysRole role = sysRoleService.getOne(sysRoleQueryWrapper);
+            String rolecode = role.getRoleCode();
+
+            if (rolecode.equals("YH")){
+                wrapperhphnt.eq("username", username);
+            }
             List<JjgFbgcLmgcLmhp> hplxlxhnt = jjgFbgcLmgcLmhpMapper.selectList(wrapperhphnt);
             if (hplxlxhnt.size()>0){
                 separateHpAllData(hplxlxhnt,lxlx);
@@ -1302,6 +1380,7 @@ public class JjgFbgcLmgcLmhpServiceImpl extends ServiceImpl<JjgFbgcLmgcLmhpMappe
                                         lmhp.setZh(zh);
                                         lmhp.setCreatetime(new Date());
                                         lmhp.setProname(commonInfoVo.getProname());
+                                        lmhp.setUsername(commonInfoVo.getUsername());
                                         lmhp.setHtd(commonInfoVo.getHtd());
                                         lmhp.setFbgc(commonInfoVo.getFbgc());
                                         jjgFbgcLmgcLmhpMapper.insert(lmhp);
