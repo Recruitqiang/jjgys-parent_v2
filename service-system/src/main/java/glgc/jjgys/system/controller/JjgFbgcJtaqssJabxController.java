@@ -241,12 +241,7 @@ public class JjgFbgcJtaqssJabxController {
     @DeleteMapping("removeBatch")
     public Result removeBeatch(@RequestBody List<String> idList){
         boolean hd = jjgFbgcJtaqssJabxService.removeByIds(idList);
-        if(hd){
-            return Result.ok();
-        } else {
-            return Result.fail().message("删除失败！");
-        }
-
+        return hd ? Result.ok():Result.fail().message("删除失败！");
     }
 
     @ApiOperation("全部删除")
@@ -277,11 +272,8 @@ public class JjgFbgcJtaqssJabxController {
             queryWrapper.eq("username", username);
         }
         boolean remove = jjgFbgcJtaqssJabxService.remove(queryWrapper);
-        if(remove){
-            return Result.ok();
-        } else {
-            return Result.fail().message("删除失败！");
-        }
+
+        return remove ? Result.ok() : Result.fail().message("删除失败！");
 
     }
 

@@ -62,6 +62,9 @@ public class JjgWgjc implements Serializable {
     @TableField("gjmc")
     private String gjmc;
 
+    @TableField("gjmc2")
+    private String gjmc2;
+
     /**
      * 构件编号
      */

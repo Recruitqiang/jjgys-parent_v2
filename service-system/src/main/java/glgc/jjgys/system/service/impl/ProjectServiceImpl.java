@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import glgc.jjgys.model.project.*;
 import glgc.jjgys.model.system.Project;
 import glgc.jjgys.model.system.SysMenu;
+import glgc.jjgys.model.system.SysRoleMenu;
 import glgc.jjgys.system.mapper.*;
 import glgc.jjgys.system.service.*;
 import lombok.extern.slf4j.Slf4j;
@@ -82,11 +83,29 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
         dpSysMenu.setName("数据可视化");
         dpSysMenu.setSortValue(5);
 
+        SysMenu wgSysMenu = new SysMenu();
+        wgSysMenu.setParentId(gsid);
+        wgSysMenu.setType(1);
+        wgSysMenu.setPath("dp");
+        wgSysMenu.setComponent("sysproject/projectInfo/wgjc");
+        wgSysMenu.setName("外观检查");
+        wgSysMenu.setSortValue(6);
+
+        SysMenu nySysMenu = new SysMenu();
+        nySysMenu.setParentId(gsid);
+        nySysMenu.setType(1);
+        nySysMenu.setPath("dp");
+        nySysMenu.setComponent("sysproject/projectInfo/neyzl");
+        nySysMenu.setName("内页资料检查");
+        nySysMenu.setSortValue(7);
+
 
         sysMenuService.save(htdSysMenu);
         sysMenuService.save(lqsSysMenu);
         sysMenuService.save(xmjdSysMenu);
         sysMenuService.save(dpSysMenu);
+        sysMenuService.save(wgSysMenu);
+        sysMenuService.save(nySysMenu);
 
     }
 
@@ -266,6 +285,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
     @Autowired
     private JjgLookProjectPlanService jjgLookProjectPlanService;
 
+    @Autowired
+    private SysRoleMenuMapper sysRoleMenuMapper;
+
 
 
     @Override
@@ -279,6 +301,26 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
             String proName = project.getProName();
             SysMenu sysMenu = sysMenuService.selectcdinfo(proName);
             Long proid = sysMenu.getId();
+
+            //删除sys_role_menu表中的信息，得拿到proid下面所有得信息
+            List<SysMenu> allHtd = sysMenuService.getAllHtd(proid);
+            Long parentId = sysMenu.getParentId();
+            List<Long> ids = new ArrayList<>();
+            ids.add(proid);
+            ids.add(parentId);
+            if (allHtd != null){
+                for (SysMenu menu : allHtd) {
+                    Long id1 = menu.getId();
+                    ids.add(id1);
+                }
+            }
+            if (ids!=null){
+                for (Long aLong : ids) {
+                    QueryWrapper<SysRoleMenu> sysRoleMenuQueryWrapper = new QueryWrapper<>();
+                    sysRoleMenuQueryWrapper.eq("menu_id",aLong);
+                    sysRoleMenuMapper.delete(sysRoleMenuQueryWrapper);
+                }
+            }
             //实测数据，合同段信息，路桥隧信息
 
             //先删实测数据下面的  name=实测数据，parent_id=proid
@@ -290,6 +332,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
                 log.info("删除{}的分部工程和合同段菜单",project.getProName());
                 sysMenuService.removeFbgc(htdlist);//至此，分部工程和合同段的数据删除了
             }
+
 
             //然后删除 实测数据，合同段信息，路桥隧信息
             log.info("删除{}的实测数据，合同段信息和路桥隧信息菜单",project.getProName());

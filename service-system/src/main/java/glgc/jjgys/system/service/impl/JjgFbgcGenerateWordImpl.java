@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.spire.doc.*;
 import com.spire.doc.documents.*;
+import com.spire.xls.Workbook;
 import com.spire.xls.collections.WorksheetsCollection;
 import glgc.jjgys.model.project.*;
 import glgc.jjgys.model.system.Project;
@@ -18,7 +19,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.spire.doc.fields.TextRange;
 import com.spire.xls.CellRange;
-import com.spire.xls.Workbook;
 import com.spire.xls.Worksheet;
 
 
@@ -152,17 +152,21 @@ public class JjgFbgcGenerateWordImpl extends ServiceImpl<JjgFbgcGenerateWordMapp
             List<JjgWgjc> ljgc = new ArrayList<>();
             List<JjgWgjc> sdgc = new ArrayList<>();
             List<JjgWgjc> qlgc = new ArrayList<>();
+            List<JjgWgjc> lmgc = new ArrayList<>();
+            List<JjgWgjc> ja = new ArrayList<>();
 
             for (JjgWgjc jjgWgjc : list) {
                 String dwgc = jjgWgjc.getDwgc();
                 if (dwgc.contains("路基工程")){
                     ljgc.add(jjgWgjc);
-
                 }else if (dwgc.contains("隧道工程")){
                     sdgc.add(jjgWgjc);
-
                 }else if (dwgc.contains("桥梁工程")){
                     qlgc.add(jjgWgjc);
+                }else if (dwgc.contains("路面工程")){
+                    lmgc.add(jjgWgjc);
+                }else if (dwgc.contains("交通安全设施")){
+                    ja.add(jjgWgjc);
                 }
             }
             //按分部工程分类
@@ -199,7 +203,102 @@ public class JjgFbgcGenerateWordImpl extends ServiceImpl<JjgFbgcGenerateWordMapp
                     }
                 });
             }
+
+            Map<String, List<JjgWgjc>> groupedDataql = qlgc.stream()
+                    .collect(Collectors.groupingBy(j -> {
+                        String gjmc2 = j.getGjmc2();
+                        return gjmc2 != null ? gjmc2 : j.getGjmc();
+                    }));
+            if (groupedDataql!=null){
+                groupedDataql.forEach((gjmc, qllist) -> {
+                    System.out.println("Key: " + gjmc);//路基土石方
+                    int i = 1;
+                    String ql = extractedql(gjmc, qllist,i);
+                    xw.replace("${桥梁工程}", ql, false, true);
+                    xw.saveToFile(f.getPath(), FileFormat.Docx_2013);
+                    i++;
+
+                });
+            }
+            Map<String, List<JjgWgjc>> groupedDatasd = sdgc.stream()
+                    .collect(Collectors.groupingBy(j -> {
+                        String gjmc2 = j.getGjmc2();
+                        String gjmc = j.getGjmc();
+                        return gjmc != null ? gjmc : gjmc2;
+                    }));
+            if (groupedDatasd!=null){
+                groupedDatasd.forEach((gjmc, qllist) -> {
+                    System.out.println("Key: " + gjmc);//路基土石方
+                    int i = 1;
+                    String ql = extractedql(gjmc, qllist,i);
+                    xw.replace("${隧道工程}", ql, false, true);
+                    xw.saveToFile(f.getPath(), FileFormat.Docx_2013);
+                    i++;
+
+                });
+            }
+
+            Map<String, List<JjgWgjc>> groupedDataja = ljgc.stream()
+                    .collect(Collectors.groupingBy(JjgWgjc::getFbgc));
+            if (groupedDataja!=null){
+                groupedDataja.forEach((gjmc, qllist) -> {
+                    System.out.println("Key: " + gjmc);//路基土石方
+                    int i = 1;
+                    String jass = extractedql(gjmc, qllist,i);
+                    xw.replace("${交通安全设施}", jass, false, true);
+                    xw.saveToFile(f.getPath(), FileFormat.Docx_2013);
+                    i++;
+
+                });
+            }
+
+            Map<String, List<JjgWgjc>> groupedDatalm = sdgc.stream()
+                    .collect(Collectors.groupingBy(j -> {
+                        String gjmc2 = j.getGjmc2();
+                        String gjmc = j.getGjmc();
+                        return gjmc != null ? gjmc : gjmc2;
+                    }));
+            if (groupedDatalm!=null){
+                groupedDatalm.forEach((gjmc, qllist) -> {
+                    System.out.println("Key: " + gjmc);//路基土石方
+                    int i = 1;
+                    String lm = extractedql(gjmc, qllist,i);
+                    xw.replace("${路面工程}", lm, false, true);
+                    xw.saveToFile(f.getPath(), FileFormat.Docx_2013);
+                    i++;
+
+                });
+            }
         }
+    }
+
+    /**
+     *
+     * @param gjmc
+     * @param qllist
+     * @param i
+     * @return
+     */
+    private String extractedql(String gjmc, List<JjgWgjc> qllist, int i) {
+        StringBuilder ljtsfBuilder = new StringBuilder();
+        if (qllist!=null){
+            ljtsfBuilder.append("("+i+")个别").append(gjmc).append("存在");
+            String bhlxms = "";
+            for (JjgWgjc jjgWgjc : qllist) {
+                bhlxms += jjgWgjc.getBhlx()+"、";
+            }
+            ljtsfBuilder.append(bhlxms).append("等");
+            Set<String> htd = new HashSet<>();
+            for (JjgWgjc jjgWgjc : qllist) {
+                htd.add(jjgWgjc.getHtd());
+            }
+            ljtsfBuilder.append(",共计").append(htd.size()).append("个合同段");
+            ljtsfBuilder.append("。如").append(qllist.get(0).getHtd()).append("标").append(qllist.get(0).getGjbh()).
+                    append(qllist.get(0).getBhlx()).append(qllist.get(0).getBhsl()).append("处，").append(qllist.get(0).getBhdl()).append("。");
+
+        }
+        String ql = ljtsfBuilder.toString();
+        return ql;
     }
 
     /**
@@ -220,9 +319,9 @@ public class JjgFbgcGenerateWordImpl extends ServiceImpl<JjgFbgcGenerateWordMapp
                 ljtsfBuilder.append(i+")个别").append(gjmc);
                 String bhlxms = "";
                 for (JjgWgjc jjgWgjc : list1) {
-                    bhlxms = jjgWgjc.getBhlx()+"、";
+                    bhlxms += jjgWgjc.getBhlx()+"、";
                 }
-                ljtsfBuilder.append(",有").append(bhlxms).append("现象");
+                ljtsfBuilder.append("有").append(bhlxms).append("现象");
                 //查询一下一共有几个合同段
                 Set<String> htd = new HashSet<>();
                 for (JjgWgjc jjgWgjc : list) {
@@ -235,7 +334,7 @@ public class JjgFbgcGenerateWordImpl extends ServiceImpl<JjgFbgcGenerateWordMapp
                 ljtsfBuilder.append(",共计").append(htd.size()).append("个合同段");
 
                 ljtsfBuilder.append("。如").append(list1.get(0).getHtd()).append("标").append(list1.get(0).getGjbh()).
-                        append(list1.get(0).getBhlx()).append(list1.get(0).getBhsl()).append("条，").append(list1.get(0).getBhdl()).append("。");
+                        append(list1.get(0).getBhlx()).append(list1.get(0).getBhsl()).append("处，").append(list1.get(0).getBhdl()).append("。");
                 i++;
             });
         }
@@ -324,37 +423,16 @@ public class JjgFbgcGenerateWordImpl extends ServiceImpl<JjgFbgcGenerateWordMapp
                             txtRange.getCharacterFormat().setBold(true);
                         }
                         //添加数据
-                        for (int rowIdx = 0; rowIdx < ljgc.size(); rowIdx++) {
-                            TableRow row1 = table.getRows().get(rowIdx + 1); // 第一行已经是表头，所以从第二行开始添加数据
-                            row1.setHeightType(TableRowHeightType.Exactly);
-
-                            JjgWgjc rowData = ljgc.get(rowIdx);
-
-                            for (int colIdx = 0; colIdx < header.length; colIdx++) {
-                                row1.getCells().get(colIdx).getCellFormat().setVerticalAlignment(VerticalAlignment.Middle);
-                                Paragraph p = row1.getCells().get(colIdx).addParagraph();
-                                p.getFormat().setHorizontalAlignment(HorizontalAlignment.Center);
-                                // 根据表头的不同，设置相应的数据
-                                switch (colIdx) {
-                                    case 0:
-                                        p.appendText(rowData.getHtd());
-                                        break;
-                                    case 1:
-                                        p.appendText(rowData.getDwgc());
-                                        break;
-                                    case 2:
-                                        p.appendText(rowData.getFbgc());
-                                        break;
-                                    case 3:
-                                        p.appendText(rowData.getBhms());
-                                        break;
-                                    case 4:
-                                        p.appendText(rowData.getBz());
-                                        break;
-                                    default:
-                                        break;
-                                }
-                            }
+                        if (selection.equals("textSelectionlj")){
+                            wgff(ljgc, header, table);
+                        }else if (selection.equals("textSelectionlm")){
+                            wgff(lmgc, header, table);
+                        }else if (selection.equals("textSelectionql")){
+                            wgff(qlgc, header, table);
+                        }else if (selection.equals("textSelectionsd")){
+                            wgff(sdgc, header, table);
+                        }else if (selection.equals("textSelectionja")){
+                            wgff(jagc, header, table);
                         }
 
                         body.getChildObjects().remove(paragraph);
@@ -371,6 +449,41 @@ public class JjgFbgcGenerateWordImpl extends ServiceImpl<JjgFbgcGenerateWordMapp
         }
 
 
+    }
+
+    private void wgff(List<JjgWgjc> ljgc, String[] header, Table table) {
+        for (int rowIdx = 0; rowIdx < ljgc.size(); rowIdx++) {
+            TableRow row1 = table.getRows().get(rowIdx + 1); // 第一行已经是表头，所以从第二行开始添加数据
+            row1.setHeightType(TableRowHeightType.Exactly);
+
+            JjgWgjc rowData = ljgc.get(rowIdx);
+
+            for (int colIdx = 0; colIdx < header.length; colIdx++) {
+                row1.getCells().get(colIdx).getCellFormat().setVerticalAlignment(VerticalAlignment.Middle);
+                Paragraph p = row1.getCells().get(colIdx).addParagraph();
+                p.getFormat().setHorizontalAlignment(HorizontalAlignment.Center);
+                // 根据表头的不同，设置相应的数据
+                switch (colIdx) {
+                    case 0:
+                        p.appendText(rowData.getHtd());
+                        break;
+                    case 1:
+                        p.appendText(rowData.getDwgc());
+                        break;
+                    case 2:
+                        p.appendText(rowData.getFbgc());
+                        break;
+                    case 3:
+                        p.appendText(rowData.getGjbh()+"等"+rowData.getGjmc()+"有"+rowData.getBhlx()+"现象");
+                        break;
+                    case 4:
+                        p.appendText(rowData.getBz());
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
     }
 
     /**

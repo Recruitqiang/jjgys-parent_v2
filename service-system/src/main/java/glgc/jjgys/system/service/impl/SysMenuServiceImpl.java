@@ -3,11 +3,13 @@ package glgc.jjgys.system.service.impl;
 import glgc.jjgys.model.project.JjgHtd;
 import glgc.jjgys.model.system.SysMenu;
 import glgc.jjgys.model.system.SysRoleMenu;
+import glgc.jjgys.model.system.SysUserRole;
 import glgc.jjgys.model.vo.AssginMenuVo;
 import glgc.jjgys.model.vo.RouterVo;
 import glgc.jjgys.system.exception.JjgysException;
 import glgc.jjgys.system.mapper.SysMenuMapper;
 import glgc.jjgys.system.mapper.SysRoleMenuMapper;
+import glgc.jjgys.system.mapper.SysUserRoleMapper;
 import glgc.jjgys.system.service.SysMenuService;
 import glgc.jjgys.system.utils.MenuHelper;
 import glgc.jjgys.system.utils.RouterHelper;
@@ -240,10 +242,27 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
             wrapper.eq("parent_id", htdid);
             List<SysMenu> menuList = sysMenuMapper.selectList(wrapper);//所有分部工程的信息
             removefbgcInfo(menuList);
+            removeuserrolrInfo(menuList);
         }
-        //
         for (SysMenu sysMenu : htdlist) {
             sysMenuMapper.deleteById(sysMenu.getId());
+            //删除SysRoleMenu表中的数据
+            QueryWrapper<SysRoleMenu> wrapper = new QueryWrapper<>();
+            wrapper.eq("menu_id",sysMenu.getId());
+            sysRoleMenuMapper.delete(wrapper);
+        }
+    }
+
+    /**
+     * 删除sys_role_menu表中的数据
+     * @param menuList
+     */
+    private void removeuserrolrInfo(List<SysMenu> menuList) {
+        for (SysMenu sysMenu : menuList) {
+            Long id = sysMenu.getId();
+            QueryWrapper<SysRoleMenu> wrapper = new QueryWrapper<>();
+            wrapper.eq("menu_id",id);
+            sysRoleMenuMapper.delete(wrapper);
         }
     }
 
@@ -255,7 +274,6 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
         for (SysMenu sysMenu : menuList) {
             sysMenuMapper.deleteById(sysMenu.getId());
         }
-
     }
 
     private void removefbgcInfo(List<SysMenu> menuList) {
