@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import glgc.jjgys.common.result.Result;
 import glgc.jjgys.model.project.JjgHtd;
 import glgc.jjgys.model.projectvo.ljgc.CommonInfoVo;
+import glgc.jjgys.model.system.Project;
 import glgc.jjgys.system.service.JjgHtdService;
 import glgc.jjgys.system.utils.JjgFbgcUtils;
 import io.swagger.annotations.Api;
@@ -55,6 +56,22 @@ public class JjgHtdController {
     public Result save(@RequestBody JjgHtd jjgHtd) {
         boolean res = jjgHtdService.addhtd(jjgHtd);
         return Result.ok();
+    }
+
+    @ApiOperation("校验合同段")
+    @GetMapping("checkHtd")
+    public Result checkProname(@RequestBody CommonInfoVo commonInfoVo) {
+        String proname = commonInfoVo.getProname();
+        String htd = commonInfoVo.getHtd();
+        QueryWrapper<JjgHtd> wrapper = new QueryWrapper<>();
+        wrapper.eq("proname",proname);
+        wrapper.eq("htd",htd);
+        List<JjgHtd> list = jjgHtdService.list(wrapper);
+        if (list!=null && !list.isEmpty()){
+            return Result.ok().message("校验成功");
+        }else {
+            return Result.fail().message("校验失败");
+        }
     }
 
 

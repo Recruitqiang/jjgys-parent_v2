@@ -1,11 +1,16 @@
 package glgc.jjgys.system.controller;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import glgc.jjgys.common.result.Result;
 import glgc.jjgys.common.utils.MD5;
 import glgc.jjgys.model.system.SysDept;
+import glgc.jjgys.model.system.SysRoleMenu;
 import glgc.jjgys.model.system.SysUser;
+import glgc.jjgys.model.system.SysUserRole;
 import glgc.jjgys.model.vo.SysUserQueryVo;
+import glgc.jjgys.system.mapper.SysRoleMenuMapper;
+import glgc.jjgys.system.mapper.SysUserRoleMapper;
 import glgc.jjgys.system.service.SysDepartService;
 import glgc.jjgys.system.service.SysUserService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -16,7 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -79,7 +86,14 @@ public class SysUserController {
         //创建page对象
         Page<SysUser> pageParam = new Page<>(page,limit);
         //调用service方法
+
         IPage<SysUser> pageModel = sysUserService.selectPage(pageParam,sysUserQueryVo);
+        // 在查询结果中过滤用户名为 "admin" 的用户
+        List<SysUser> filteredUsers = pageModel.getRecords().stream()
+                .filter(user -> !"admin".equals(user.getUsername()))
+                .collect(Collectors.toList());
+        pageModel.setRecords(filteredUsers);
+
         return Result.ok(pageModel);
     }
 
@@ -110,22 +124,39 @@ public class SysUserController {
     @PostMapping("update")
     public Result update(@RequestBody SysUser user) {
         boolean is_Success = sysUserService.updateById(user);
-        if(is_Success) {
-            return Result.ok();
-        } else {
-            return Result.fail();
-        }
+
+        return is_Success ? Result.ok(): Result.fail();
     }
+
+    @Autowired
+    private SysUserRoleMapper sysUserRoleMapper;
+
+    @Autowired
+    private SysRoleMenuMapper sysRoleMenuMapper;
 
     @ApiOperation("删除用户")
     @DeleteMapping("remove/{id}")
     public Result remove(@PathVariable String id) {
-        boolean is_Success = sysUserService.removeById(id);
-        if(is_Success) {
-            return Result.ok();
-        } else {
-            return Result.fail();
-        }
+        //删除菜单权限信息 sys_user_role sys_role_menu
+
+        /*QueryWrapper<SysUserRole> userrolewrapper1 = new QueryWrapper<>();
+        userrolewrapper1.eq("user_id",id);
+        List<SysUserRole> sysUserRoles = sysUserRoleMapper.selectList(userrolewrapper1);
+        if (sysUserRoles != null){
+            for (SysUserRole sysUserRole : sysUserRoles) {
+                String roleId = sysUserRole.getRoleId();
+                QueryWrapper<SysRoleMenu> wrapper = new QueryWrapper<>();
+                wrapper.eq("role_id",roleId);
+                sysRoleMenuMapper.delete(wrapper);
+            }
+        }*/
+        QueryWrapper<SysUserRole> userrolewrapper = new QueryWrapper<>();
+        userrolewrapper.eq("user_id",id);
+        sysUserRoleMapper.delete(userrolewrapper);
+
+        boolean b = sysUserService.removeById(id);
+
+        return b ? Result.ok(): Result.fail();
     }
 }
 

@@ -97,7 +97,7 @@ public class ProjectController {
     //传json数组[1,2,3]，用List接收
     public Result removeBeatch(@RequestBody List<String> idList){
         projectService.deleteOtherInfo(idList);
-        //boolean isSuccess = projectService.removeByIds(idList);
+        boolean isSuccess = projectService.removeByIds(idList);
         return Result.ok();
     }
 
@@ -127,8 +127,8 @@ public class ProjectController {
             //获取条件值，进行非空判断，条件封装
             String proName = project.getProName();
             QueryWrapper<Project> wrapper=new QueryWrapper<>();
-            //String username = project.getUsername();
-            String username = "wqq";
+            String username = project.getUsername();
+            //String username = "wqq";
 
             QueryWrapper<SysUser> sysUserQueryWrapper = new QueryWrapper<>();
             sysUserQueryWrapper.eq("username", username);
@@ -138,15 +138,17 @@ public class ProjectController {
             QueryWrapper<SysUserRole> sysUserRoleQueryWrapper = new QueryWrapper<>();
             sysUserRoleQueryWrapper.eq("user_id", userid);
             SysUserRole sysUserRole = sysUserRoleMapper.selectOne(sysUserRoleQueryWrapper);
-            String roleId = sysUserRole.getRoleId();
+            if (sysUserRole!=null){
+                String roleId = sysUserRole.getRoleId();
+                QueryWrapper<SysRole> sysRoleQueryWrapper = new QueryWrapper<>();
+                sysRoleQueryWrapper.eq("id", roleId);
+                SysRole role = sysRoleService.getOne(sysRoleQueryWrapper);
+                String rolecode = role.getRoleCode();
 
-            QueryWrapper<SysRole> sysRoleQueryWrapper = new QueryWrapper<>();
-            sysRoleQueryWrapper.eq("id", roleId);
-            SysRole role = sysRoleService.getOne(sysRoleQueryWrapper);
-            String rolecode = role.getRoleCode();
-
-            if (rolecode.equals("YH")){
-                wrapper.like("participant",username);
+                if (rolecode.equals("YH")){
+                    wrapper.like("participant",username);
+                }
+                //其实leader就可以分配权限了
             }
 
             if (!StringUtils.isEmpty(proName)){

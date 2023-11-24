@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import glgc.jjgys.model.project.*;
 import glgc.jjgys.model.system.Project;
 import glgc.jjgys.model.system.SysMenu;
+import glgc.jjgys.model.system.SysRoleMenu;
 import glgc.jjgys.system.mapper.*;
 import glgc.jjgys.system.service.*;
 import lombok.extern.slf4j.Slf4j;
@@ -82,6 +83,41 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
         dpSysMenu.setName("数据可视化");
         dpSysMenu.setSortValue(5);
 
+        SysMenu wgSysMenu = new SysMenu();
+        wgSysMenu.setParentId(gsid);
+        wgSysMenu.setType(1);
+        wgSysMenu.setPath("dp");
+        wgSysMenu.setComponent("sysproject/projectInfo/wgjc");
+        wgSysMenu.setName("外观检查");
+        wgSysMenu.setSortValue(6);
+
+        SysMenu nySysMenu = new SysMenu();
+        nySysMenu.setParentId(gsid);
+        nySysMenu.setType(1);
+        nySysMenu.setPath("dp");
+        nySysMenu.setComponent("sysproject/projectInfo/neyzl");
+        nySysMenu.setName("内页资料检查");
+        nySysMenu.setSortValue(7);
+
+        /*List<String> list1 = new ArrayList<>();
+        list1.add("bnt.project.bg");
+        list1.add("bnt.project.pdb");
+        list1.add("bnt.project.word");
+        for (String s : list1) {
+            SysMenu bgSysMenu = new SysMenu();
+            bgSysMenu.setParentId(gsid);
+            bgSysMenu.setType(2);
+            if (s.equals("bnt.project.bg")){
+                bgSysMenu.setName("生成报告中表格");
+            }else if (s.equals("bnt.project.pdb")){
+                bgSysMenu.setName("生成建设项目质量评定表");
+            }else if (s.equals("bnt.project.word")){
+                bgSysMenu.setName("生成报告");
+            }
+            bgSysMenu.setPerms(s);
+            bgSysMenu.setSortValue(1);
+            sysMenuService.save(bgSysMenu);
+        }*/
 
         sysMenuService.save(htdSysMenu);
         sysMenuService.save(lqsSysMenu);
@@ -266,6 +302,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
     @Autowired
     private JjgLookProjectPlanService jjgLookProjectPlanService;
 
+    @Autowired
+    private SysRoleMenuMapper sysRoleMenuMapper;
+
 
 
     @Override
@@ -279,6 +318,26 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
             String proName = project.getProName();
             SysMenu sysMenu = sysMenuService.selectcdinfo(proName);
             Long proid = sysMenu.getId();
+
+            //删除sys_role_menu表中的信息，得拿到proid下面所有得信息
+            List<SysMenu> allHtd = sysMenuService.getAllHtd(proid);
+            Long parentId = sysMenu.getParentId();
+            List<Long> ids = new ArrayList<>();
+            ids.add(proid);
+            ids.add(parentId);
+            if (allHtd != null){
+                for (SysMenu menu : allHtd) {
+                    Long id1 = menu.getId();
+                    ids.add(id1);
+                }
+            }
+            if (ids!=null){
+                for (Long aLong : ids) {
+                    QueryWrapper<SysRoleMenu> sysRoleMenuQueryWrapper = new QueryWrapper<>();
+                    sysRoleMenuQueryWrapper.eq("menu_id",aLong);
+                    sysRoleMenuMapper.delete(sysRoleMenuQueryWrapper);
+                }
+            }
             //实测数据，合同段信息，路桥隧信息
 
             //先删实测数据下面的  name=实测数据，parent_id=proid
@@ -290,6 +349,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
                 log.info("删除{}的分部工程和合同段菜单",project.getProName());
                 sysMenuService.removeFbgc(htdlist);//至此，分部工程和合同段的数据删除了
             }
+
 
             //然后删除 实测数据，合同段信息，路桥隧信息
             log.info("删除{}的实测数据，合同段信息和路桥隧信息菜单",project.getProName());
